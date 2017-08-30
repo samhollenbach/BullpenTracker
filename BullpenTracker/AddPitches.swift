@@ -138,14 +138,7 @@ class AddPitches: UIViewController {
             }
 
         }
-        
-//        if (self.add_success){
-//            totalPitches += 1
-//            pitchCountLabel.text = "Pitches Recorded: " + String(totalPitches)
-//            statusLabel.text = "Last pitch: " + pitch + ", " + strike
-//        }else{
-//            statusLabel.text = "Trouble connecting to database, try again"
-//        }
+    
         
     }
     
@@ -222,15 +215,18 @@ class AddPitches: UIViewController {
         }
     }
     
-    @IBAction func donePressed(_ sender: AnyObject) {
+    @IBAction func donePressed(_ sender: UIButton!) {
+        sender.isEnabled = false
+        makeData(){ success in
+            print("Success: \(success)")
+            self.sendToSummaryVC(bullpen_id: self.bullpenID)
+        }
         
-//        DispatchQueue.main.async(execute: {
-//            self.performSegue(withIdentifier: "unwindToBullpens", sender: self)
-//        })
-        sendToBullpens()
         
         
-        
+    }
+    
+    func makeData(completion: @escaping (Bool) -> ()){
         let url: NSURL = NSURL(string: "http://52.55.212.19/get_stats.php")!
         let request:NSMutableURLRequest = NSMutableURLRequest(url:url as URL)
         request.httpMethod = "POST"
@@ -239,25 +235,35 @@ class AddPitches: UIViewController {
         let task = URLSession.shared.dataTask(with: request as URLRequest!, completionHandler: { data, response, error in
             guard let data = data, error == nil else {                                                 // check for fundamental networking error
                 print("error=\(error)")
+                completion(false)
                 return
             }
             
             if let httpStatus = response as? HTTPURLResponse, httpStatus.statusCode != 200 {           // check for http errors
                 print("statusCode should be 200, but is \(httpStatus.statusCode)")
                 print("response = \(response)")
+                completion(false)
                 return
             }
             
             let responseString = String(data: data, encoding: .utf8)!
             print("responseString = \(responseString)")
-            
+            completion(true)
             return
             
         })
         task.resume()
-        
-        
-        
+
+    }
+    
+    func sendToSummaryVC(bullpen_id: Int) {
+        let storyboard = UIStoryboard(name: "SummaryView", bundle: nil)
+        let vc = storyboard.instantiateViewController(withIdentifier: "SummaryVC") as! SummaryViewController
+        vc.currentBullpenID = bullpen_id
+        DispatchQueue.main.async {
+            self.present(vc, animated: true, completion: nil)
+        }
+        vc.refreshImage()
     }
     
    

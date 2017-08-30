@@ -19,7 +19,10 @@ class BullpenViewController: UITableViewController {
     }
     
     func update(){
-        get_data_from_url("http://52.55.212.19/get_bullpens.php")
+        DispatchQueue.main.async {
+            self.get_data_from_url("http://52.55.212.19/get_bullpens.php")
+        }
+        
     }
     
     
@@ -42,9 +45,6 @@ class BullpenViewController: UITableViewController {
     @IBAction func sendToPitchersVC(_ sender: UIBarButtonItem) {
         self.performSegue(withIdentifier: "unwindToPitchers", sender: self)
         
-        //let storyboard = UIStoryboard(name: "Main", bundle: nil)
-        //let vc = storyboard.instantiateViewController(withIdentifier: "PitchersVC") as! PitcherViewController
-        //present(vc, animated: true, completion: nil)
     }
     
     func sendToAddPitchesVC(bullpen_id: Int) {
@@ -89,18 +89,27 @@ class BullpenViewController: UITableViewController {
         
     }
     
-    @IBAction func unwindToBullpens(segue: UIStoryboardSegue) {}
+    @IBAction func unwindToBullpens(segue: UIStoryboardSegue) {
+        self.update()
+        
+        
+    }
     
     
     override func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
-        //let str = TableData[indexPath.row]
-        //let pen_id = str.components(separatedBy: ". ")[0]
-//        print(TableData[indexPath.row])
-//
-//        let storyboard = UIStoryboard(name: "Bullpens", bundle: nil)
-//        let vc = storyboard.instantiateViewController(withIdentifier: "BullpensVC") as UIViewController
-//        present(vc, animated: true, completion: nil)
+        let str = TableData[indexPath.row]
+        let pen_id: Int = Int(str.components(separatedBy: ". ")[0])!
+        sendToSummaryVC(bullpen_id: pen_id)
     }
+    
+    
+    func sendToSummaryVC(bullpen_id: Int) {
+        let storyboard = UIStoryboard(name: "SummaryView", bundle: nil)
+        let vc = storyboard.instantiateViewController(withIdentifier: "SummaryVC") as! SummaryViewController
+        vc.currentBullpenID = bullpen_id
+        present(vc, animated: true, completion: nil)
+    }
+
     
     func get_data_from_url(_ link:String) {
         let url:URL = URL(string: link)!
@@ -132,6 +141,7 @@ class BullpenViewController: UITableViewController {
             return
         }
         if let bullpen_list = json as? NSArray{
+            TableData = Array < String >()
             for i in 0 ..< data_list.count {
                 if let bullpen_obj = bullpen_list[i] as? NSDictionary {
                     if let id = bullpen_obj["id"] as? String {
@@ -148,11 +158,15 @@ class BullpenViewController: UITableViewController {
                 }
             }
         }
-        DispatchQueue.main.async(execute: {self.do_table_refresh()})
+        DispatchQueue.main.async{
+            self.do_table_refresh()
+        }
     }
     
     func do_table_refresh() {
+        print(TableData)
         self.tableView.reloadData()
+       
         
     }
     
