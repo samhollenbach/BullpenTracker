@@ -8,6 +8,7 @@ import Foundation
 
 class PitcherViewController: UITableViewController {
     
+    @IBOutlet weak var navBar: UINavigationBar!
     static var PitcherNames = [Int:String]()
     static var TableData:Array< String > = Array < String >()
     static private var currentPitcher:Int = -1
@@ -20,8 +21,10 @@ class PitcherViewController: UITableViewController {
         PitcherViewController.PitcherNames = [Int:String]()
         PitcherViewController.TableData = Array < String >()
         self.tableView.rowHeight = 80.0
+        navBar.frame = CGRect(x: 0, y: 0, width: (navBar.frame.size.width), height: (navBar.frame.size.height)+UIApplication.shared.statusBarFrame.height)
         get_data_from_url("http://52.55.212.19/get_pitchers.php")
     }
+    
     
     static func getCurrentPitcher() -> Int{
         return currentPitcher

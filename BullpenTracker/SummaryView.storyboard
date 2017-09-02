@@ -28,27 +28,27 @@
                                 </textAttributes>
                                 <items>
                                     <navigationItem title="Bullpen Summary" id="mU2-ce-bY6">
-                                        <barButtonItem key="leftBarButtonItem" systemItem="done" id="pch-dS-x2P">
+                                        <barButtonItem key="leftBarButtonItem" systemItem="trash" id="re6-H8-N0y">
+                                            <color key="tintColor" red="1" green="1" blue="1" alpha="1" colorSpace="calibratedRGB"/>
+                                            <connections>
+                                                <action selector="trashPressed:" destination="bHn-uu-e42" id="wly-dt-jiS"/>
+                                            </connections>
+                                        </barButtonItem>
+                                        <barButtonItem key="rightBarButtonItem" systemItem="done" id="pch-dS-x2P">
                                             <color key="tintColor" red="1" green="1" blue="1" alpha="1" colorSpace="calibratedRGB"/>
                                             <connections>
                                                 <action selector="doneButtonPressed:" destination="bHn-uu-e42" id="3Fd-U6-z3h"/>
-                                            </connections>
-                                        </barButtonItem>
-                                        <barButtonItem key="rightBarButtonItem" systemItem="trash" id="re6-H8-N0y">
-                                            <color key="tintColor" red="1" green="0.0" blue="0.0" alpha="1" colorSpace="calibratedRGB"/>
-                                            <connections>
-                                                <action selector="trashPressed:" destination="bHn-uu-e42" id="wly-dt-jiS"/>
                                             </connections>
                                         </barButtonItem>
                                     </navigationItem>
                                 </items>
                             </navigationBar>
                             <imageView userInteractionEnabled="NO" contentMode="scaleToFill" horizontalHuggingPriority="251" verticalHuggingPriority="251" fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="zR1-NZ-9JH">
-                                <frame key="frameInset" minY="53" width="375" height="457"/>
+                                <frame key="frameInset" minY="44" width="375" height="481"/>
                                 <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
                             </imageView>
-                            <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" fixedFrame="YES" text="Enter your email" textAlignment="center" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="5A3-Xg-xMX">
-                                <frame key="frameInset" minX="125" minY="638" width="124" height="21"/>
+                            <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" fixedFrame="YES" text="" textAlignment="center" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="5A3-Xg-xMX">
+                                <frame key="frameInset" minY="636" width="375" height="21"/>
                                 <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
                                 <fontDescription key="fontDescription" type="system" pointSize="17"/>
                                 <nil key="textColor"/>
@@ -60,7 +60,8 @@
                     <connections>
                         <outlet property="emailStatusLabel" destination="5A3-Xg-xMX" id="S8O-cF-Uot"/>
                         <outlet property="imageView" destination="zR1-NZ-9JH" id="2i6-CE-dA6"/>
-                        <segue destination="shT-Jr-KwJ" kind="unwind" identifier="unwindToBullpens" unwindAction="unwindToBullpensWithSegue:" id="d9I-3d-Bwg"/>
+                        <outlet property="navBar" destination="WQC-BA-xgX" id="Ckq-Y4-moa"/>
+                        <segue destination="shT-Jr-KwJ" kind="unwind" identifier="unwindToBullpens" unwindAction="unwindToBullpensWithSegue:" id="w6x-KA-y4b"/>
                     </connections>
                 </viewController>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="v06-HA-qRV" userLabel="First Responder" sceneMemberID="firstResponder"/>

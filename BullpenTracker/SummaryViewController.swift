@@ -11,6 +11,7 @@ import UIKit
 class SummaryViewController: UIViewController {
 
     
+    @IBOutlet weak var navBar: UINavigationBar!
     @IBOutlet weak var imageView: UIImageView!
     @IBOutlet weak var emailStatusLabel: UILabel!
     public var currentBullpenID = -1
@@ -18,8 +19,9 @@ class SummaryViewController: UIViewController {
     override func viewDidLoad() {
         super.viewDidLoad()
         addButtons()
-        
-        let tap: UITapGestureRecognizer = UITapGestureRecognizer(target: self, action: #selector(AddPitcherViewController.dismissKeyboard))
+        imageView.contentMode = .scaleAspectFit
+        navBar.frame = CGRect(x: 0, y: 0, width: (navBar.frame.size.width), height: (navBar.frame.size.height)+UIApplication.shared.statusBarFrame.height)
+        let tap: UITapGestureRecognizer = UITapGestureRecognizer(target: self, action: #selector(dismissKeyboard))
         
         //Uncomment the line below if you want the tap not not interfere and cancel other interactions.
         //tap.cancelsTouchesInView = false
@@ -29,7 +31,6 @@ class SummaryViewController: UIViewController {
         refreshImage()
         
     }
-    
     
     
     @IBAction func trashPressed(_ sender: AnyObject) {
@@ -82,10 +83,17 @@ class SummaryViewController: UIViewController {
         
     }
     
+    @IBAction func unwindToSummary(segue: UIStoryboardSegue) {
+        DispatchQueue.main.async() { () -> Void in
+            self.refreshImage()
+        }
+    }
+    
+    
     func refreshImage(){
         if let checkedUrl = URL(string: "http://52.55.212.19/plots/plot_\(currentBullpenID).png") {
             print(checkedUrl)
-            imageView.contentMode = .scaleAspectFit
+            
             downloadImage(url: checkedUrl)
         }
     }
@@ -102,6 +110,7 @@ class SummaryViewController: UIViewController {
         print("Download Started")
         getDataFromUrl(url: url) { (data, response, error)  in
             guard let data = data, error == nil else { return }
+            //self.imageView.image = nil
             print(response?.suggestedFilename ?? url.lastPathComponent)
             print("Download Finished")
             DispatchQueue.main.async() { () -> Void in
@@ -113,6 +122,7 @@ class SummaryViewController: UIViewController {
     func dismissKeyboard() {
         //Causes the view (or one of its embedded text fields) to resign the first responder status.
         view.endEditing(true)
+        //refreshImage()
     }
     
     
@@ -120,7 +130,6 @@ class SummaryViewController: UIViewController {
     
     @IBAction func doneButtonPressed(_ sender: AnyObject) {
         self.performSegue(withIdentifier: "unwindToBullpens", sender: self)
-        
     }
     
     func addButtons(){
@@ -169,11 +178,11 @@ class SummaryViewController: UIViewController {
         alert.addAction(UIAlertAction(title: "Send", style: .default, handler: { [weak alert] (_) in
             
             let textField = alert?.textFields![0] // Force unwrapping because we know it exists.
-            
-            self.emailBullpen(email: (textField?.text)!){ success in
+            let emailAddress: String = (textField?.text)!
+            self.emailBullpen(email: emailAddress){ success in
                 DispatchQueue.main.async {
                     if success{
-                        self.emailStatusLabel.text = "Email Sent!"
+                        self.emailStatusLabel.text = "Email sent to \(emailAddress)"
                     }else{
                         self.emailStatusLabel.text = "Something went wrong, try again"
                     }
@@ -249,6 +258,7 @@ class SummaryViewController: UIViewController {
         let storyboard = UIStoryboard(name: "AddPitches", bundle: nil)
         let vc = storyboard.instantiateViewController(withIdentifier: "AddPitches") as! AddPitches
         vc.bullpenID = bullpen_id
+        vc.new = false
         present(vc, animated: true, completion: nil)
     }
     

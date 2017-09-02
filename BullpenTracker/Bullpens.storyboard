@@ -6,57 +6,64 @@
         <capability name="documents saved in the Xcode 8 format" minToolsVersion="8.0"/>
     </dependencies>
     <scenes>
-        <!--BullpensVC-->
-        <scene sceneID="BTC-bN-qeW">
+        <!--Bullpen View Controller-->
+        <scene sceneID="uOb-Qh-ugV">
             <objects>
-                <tableViewController storyboardIdentifier="BullpensVC" title="BullpensVC" id="VIH-cc-wbC" customClass="BullpenViewController" customModule="BullpenTracker" customModuleProvider="target" sceneMemberID="viewController">
-                    <tableView key="view" clipsSubviews="YES" contentMode="scaleToFill" alwaysBounceVertical="YES" dataMode="prototypes" style="plain" separatorStyle="default" rowHeight="44" sectionHeaderHeight="28" sectionFooterHeight="28" id="QLe-zx-r1m">
+                <tableViewController storyboardIdentifier="BullpensVC" id="aPa-SQ-njq" customClass="BullpenViewController" customModule="BullpenTracker" customModuleProvider="target" sceneMemberID="viewController">
+                    <tableView key="view" clipsSubviews="YES" contentMode="scaleToFill" alwaysBounceVertical="YES" dataMode="prototypes" style="plain" separatorStyle="default" rowHeight="44" sectionHeaderHeight="28" sectionFooterHeight="28" id="ZMB-LJ-Tpx">
                         <rect key="frame" x="0.0" y="0.0" width="375" height="667"/>
                         <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
-                        <color key="backgroundColor" white="1" alpha="1" colorSpace="calibratedWhite"/>
-                        <navigationBar key="tableHeaderView" contentMode="scaleToFill" barStyle="black" id="omA-5j-fjL">
+                        <color key="backgroundColor" red="1" green="1" blue="1" alpha="1" colorSpace="calibratedRGB"/>
+                        <color key="separatorColor" red="1" green="1" blue="1" alpha="1" colorSpace="calibratedRGB"/>
+                        <navigationBar key="tableHeaderView" contentMode="scaleToFill" barStyle="black" id="zc6-l4-sZ3">
                             <rect key="frame" x="0.0" y="0.0" width="375" height="44"/>
                             <autoresizingMask key="autoresizingMask" widthSizable="YES" flexibleMaxY="YES"/>
+                            <color key="backgroundColor" red="0.062745098039215685" green="0.10980392156862745" blue="0.2627450980392157" alpha="1" colorSpace="calibratedRGB"/>
                             <items>
-                                <navigationItem title="Bullpens" id="Zzj-V8-8ZN">
-                                    <barButtonItem key="leftBarButtonItem" systemItem="done" id="yf0-e1-AGs">
-                                        <color key="tintColor" red="0.97978689871435742" green="1" blue="0.97758878094405843" alpha="1" colorSpace="calibratedRGB"/>
+                                <navigationItem title="Bullpens" id="BCf-mG-vJQ">
+                                    <barButtonItem key="leftBarButtonItem" systemItem="done" id="vEr-of-KL7">
+                                        <color key="tintColor" red="0.97978689870000002" green="1" blue="0.97758878090000001" alpha="1" colorSpace="calibratedRGB"/>
                                         <connections>
-                                            <action selector="sendToPitchersVC:" destination="VIH-cc-wbC" id="j7V-fy-c5V"/>
+                                            <action selector="sendToPitchersVC:" destination="aPa-SQ-njq" id="DA5-Ia-PaW"/>
                                         </connections>
                                     </barButtonItem>
-                                    <barButtonItem key="rightBarButtonItem" style="plain" systemItem="add" id="z1X-FC-YZf">
+                                    <barButtonItem key="rightBarButtonItem" style="plain" systemItem="add" id="naK-mb-cTr">
                                         <color key="tintColor" red="1" green="1" blue="1" alpha="1" colorSpace="calibratedRGB"/>
                                         <connections>
-                                            <action selector="addBullpen:" destination="VIH-cc-wbC" id="FXU-qK-kJM"/>
+                                            <action selector="addBullpen:" destination="aPa-SQ-njq" id="Fg1-TL-sVY"/>
                                         </connections>
                                     </barButtonItem>
                                 </navigationItem>
                             </items>
                         </navigationBar>
                         <prototypes>
-                            <tableViewCell clipsSubviews="YES" contentMode="scaleToFill" selectionStyle="default" indentationWidth="10" reuseIdentifier="bullpen_cell" id="jBz-Sg-hln">
+                            <tableViewCell clipsSubviews="YES" contentMode="scaleToFill" selectionStyle="default" indentationWidth="10" reuseIdentifier="bullpen_cell" id="iWu-C2-cSQ">
                                 <rect key="frame" x="0.0" y="72" width="375" height="44"/>
                                 <autoresizingMask key="autoresizingMask"/>
-                                <tableViewCellContentView key="contentView" opaque="NO" clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="center" tableViewCell="jBz-Sg-hln" id="r9a-f9-eF3">
-                                    <frame key="frameInset" width="375" height="43"/>
+                                <tableViewCellContentView key="contentView" opaque="NO" clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="center" tableViewCell="iWu-C2-cSQ" id="tN8-fh-ULR">
+                                    <frame key="frameInset" width="375" height="44"/>
                                     <autoresizingMask key="autoresizingMask"/>
+                                    <color key="backgroundColor" white="0.0" alpha="0.0" colorSpace="calibratedWhite"/>
                                 </tableViewCellContentView>
+                                <color key="backgroundColor" white="0.0" alpha="0.0" colorSpace="calibratedWhite"/>
                             </tableViewCell>
                         </prototypes>
                         <connections>
-                            <outlet property="dataSource" destination="VIH-cc-wbC" id="NeE-u9-yed"/>
-                            <outlet property="delegate" destination="VIH-cc-wbC" id="8wO-yO-Qgf"/>
+                            <outlet property="dataSource" destination="aPa-SQ-njq" id="b0E-Fs-YxC"/>
+                            <outlet property="delegate" destination="aPa-SQ-njq" id="dVQ-GW-CnG"/>
                         </connections>
                     </tableView>
+                    <navigationItem key="navigationItem" id="OoC-hx-iIP"/>
                     <connections>
-                        <segue destination="yAF-Eu-U6S" kind="unwind" identifier="unwindToPitchers" unwindAction="unwindToPitchersWithSegue:" id="LZb-ii-mLG"/>
+                        <outlet property="navBar" destination="zc6-l4-sZ3" id="fde-Bi-sKh"/>
+                        <outlet property="titleView" destination="BCf-mG-vJQ" id="qay-hi-p7w"/>
+                        <segue destination="1nJ-Af-HXV" kind="unwind" identifier="unwindToPitchers" unwindAction="unwindToPitchersWithSegue:" id="fL8-Xp-amj"/>
                     </connections>
                 </tableViewController>
-                <placeholder placeholderIdentifier="IBFirstResponder" id="dMe-eh-ii3" userLabel="First Responder" sceneMemberID="firstResponder"/>
-                <exit id="yAF-Eu-U6S" userLabel="Exit" sceneMemberID="exit"/>
+                <placeholder placeholderIdentifier="IBFirstResponder" id="YfC-ZR-lSc" userLabel="First Responder" sceneMemberID="firstResponder"/>
+                <exit id="1nJ-Af-HXV" userLabel="Exit" sceneMemberID="exit"/>
             </objects>
-            <point key="canvasLocation" x="430" y="126"/>
+            <point key="canvasLocation" x="-31.199999999999999" y="249.62518740629687"/>
         </scene>
     </scenes>
 </document>

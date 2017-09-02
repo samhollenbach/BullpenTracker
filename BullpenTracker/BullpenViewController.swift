@@ -7,21 +7,30 @@ import UIKit
 
 class BullpenViewController: UITableViewController {
     
+    @IBOutlet weak var navBar: UINavigationBar!
+    @IBOutlet weak var titleView: UINavigationItem!
     var TableData:Array< String > = Array < String >()
     let currentPitcherName = PitcherViewController.getPitcherName(id: PitcherViewController.getCurrentPitcher())
+    let noBullpenString = "You have no saved bullpens"
     
     override func viewDidLoad() {
         super.viewDidLoad()
         // TODO: Setvartle of VC to pitcher name
         //self.parent?.title = currentPitcherName
         self.tableView.rowHeight = 80.0
+        navBar.frame = CGRect(x: 0, y: 0, width: (navBar.frame.size.width), height: (navBar.frame.size.height)+UIApplication.shared.statusBarFrame.height)
+        
+        //self.tableView.contentInset = UIEdgeInsets(top: UIApplication.shared.statusBarFrame.size.height, left: 0, bottom: 0, right: 0)
+        UIApplication.shared.statusBarStyle = .default
+        titleView.title = "\(currentPitcherName)\'s Bullpens"
         get_data_from_url("http://52.55.212.19/get_bullpens.php")
+        
     }
     
     func update(){
-        DispatchQueue.main.async {
-            self.get_data_from_url("http://52.55.212.19/get_bullpens.php")
-        }
+        
+        self.get_data_from_url("http://52.55.212.19/get_bullpens.php")
+        
         
     }
     
@@ -39,6 +48,7 @@ class BullpenViewController: UITableViewController {
         let cell = tableView.dequeueReusableCell(withIdentifier: "bullpen_cell", for: indexPath)
         cell.textLabel?.font = UIFont(name: "Helvetica Neue", size: 24)
         cell.textLabel?.text = TableData[indexPath.row]
+        cell.textLabel?.textColor = UIColor(red:0.06, green:0.11, blue:0.26, alpha:1.0)
         return cell
     }
     
@@ -90,16 +100,29 @@ class BullpenViewController: UITableViewController {
     }
     
     @IBAction func unwindToBullpens(segue: UIStoryboardSegue) {
-        self.update()
-        
-        
+        DispatchQueue.main.async {
+            sleep(1)
+            self.update()
+        }
     }
     
     
     override func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
         let str = TableData[indexPath.row]
-        let pen_id: Int = Int(str.components(separatedBy: ". ")[0])!
+        if str == noBullpenString{
+            print("Not a valid bullpen")
+            return
+        }
+        
+        let pen_id:Int = Int(str.components(separatedBy: ". ")[0])!
+       
         sendToSummaryVC(bullpen_id: pen_id)
+        
+        
+        
+        
+        
+        
     }
     
     
@@ -107,7 +130,13 @@ class BullpenViewController: UITableViewController {
         let storyboard = UIStoryboard(name: "SummaryView", bundle: nil)
         let vc = storyboard.instantiateViewController(withIdentifier: "SummaryVC") as! SummaryViewController
         vc.currentBullpenID = bullpen_id
+        
         present(vc, animated: true, completion: nil)
+        
+        DispatchQueue.main.async {
+            vc.refreshImage()
+        }
+        
     }
 
     
@@ -149,14 +178,17 @@ class BullpenViewController: UITableViewController {
                             if Int(pitcher_id)! != PitcherViewController.getCurrentPitcher(){
                                  continue
                             }
-                            let pitcher_name = PitcherViewController.getPitcherName(id: Int(pitcher_id)!)
+                            //let pitcher_name = PitcherViewController.getPitcherName(id: Int(pitcher_id)!)
                             if let date = bullpen_obj["date"] as? String {
-                                TableData.append(id + ". " + pitcher_name + " on " + date)
+                                TableData.append("\(id). \(date)")
                             }
                         }
                     }
                 }
             }
+        }
+        if TableData.isEmpty{
+            TableData.append(noBullpenString)
         }
         DispatchQueue.main.async{
             self.do_table_refresh()
@@ -164,7 +196,6 @@ class BullpenViewController: UITableViewController {
     }
     
     func do_table_refresh() {
-        print(TableData)
         self.tableView.reloadData()
        
         

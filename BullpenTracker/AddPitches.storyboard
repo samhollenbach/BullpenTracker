@@ -26,7 +26,7 @@
                                         <barButtonItem key="rightBarButtonItem" title="Done" id="iod-am-fvI">
                                             <color key="tintColor" red="0.0" green="0.0" blue="0.0" alpha="1" colorSpace="calibratedRGB"/>
                                             <connections>
-                                                <action selector="donePressed:" destination="HDI-pl-EMy" id="Kk8-AO-pcE"/>
+                                                <action selector="donePressed:" destination="HDI-pl-EMy" id="am8-hP-Eii"/>
                                             </connections>
                                         </barButtonItem>
                                     </navigationItem>
@@ -36,7 +36,9 @@
                         <color key="backgroundColor" red="0.68345058900523559" green="0.68345058900523559" blue="0.68345058900523559" alpha="1" colorSpace="calibratedRGB"/>
                     </view>
                     <connections>
+                        <outlet property="navBar" destination="TLe-zh-Pgc" id="D5N-cM-RZB"/>
                         <segue destination="Nbx-2q-4Uv" kind="unwind" identifier="unwindToBullpens" unwindAction="unwindToBullpensWithSegue:" id="86w-LW-hz0"/>
+                        <segue destination="Nbx-2q-4Uv" kind="unwind" identifier="unwindToSummary" unwindAction="unwindToSummaryWithSegue:" id="LBd-tS-e7d"/>
                     </connections>
                 </viewController>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="APs-5T-vO5" userLabel="First Responder" sceneMemberID="firstResponder"/>

@@ -11,7 +11,10 @@ import UIKit
 class AddPitches: UIViewController {
     
     var totalPitches = 0
+    var new: Bool = true
+    var lastPitchID = -1
     
+    @IBOutlet weak var navBar: UINavigationBar!
     var pitchButtons: [UIButton] = []
     var strikeButtons: [UIButton] = []
     let statusLabel: UILabel = UILabel()
@@ -21,6 +24,7 @@ class AddPitches: UIViewController {
     
     override func viewDidLoad() {
         super.viewDidLoad()
+        navBar.frame = CGRect(x: 0, y: 0, width: (navBar.frame.size.width), height: (navBar.frame.size.height)+UIApplication.shared.statusBarFrame.height)
         addButtons()
         // Do any additional setup after loading the view.
     }
@@ -91,6 +95,18 @@ class AddPitches: UIViewController {
         enterButton.addTarget(self, action: #selector(enterPitch), for: .touchUpInside)
         view.addSubview(enterButton)
         
+        
+        
+        let undoButton = UIButton(type: .custom)
+        undoButton.frame = CGRect(x: 50, y: h-175, width: 50, height: 50)
+        undoButton.layer.cornerRadius = 0.5 * undoButton.bounds.size.width
+        undoButton.clipsToBounds = true
+        undoButton.setTitle("Undo", for: .normal)
+        undoButton.backgroundColor = UIColor.red
+        undoButton.setTitleColor(UIColor.white, for: .normal)
+        undoButton.addTarget(self, action: #selector(pressUndoPitch), for: .touchUpInside)
+        view.addSubview(undoButton)
+        
         statusLabel.frame = CGRect(x: 0, y: h-60, width: w, height: 30)
         statusLabel.text = "Enter a pitch"
         statusLabel.textAlignment = .center
@@ -98,6 +114,64 @@ class AddPitches: UIViewController {
 
         
     }
+    
+    func pressUndoPitch(){
+        self.statusLabel.text = "Removing last pitch"
+        if totalPitches == 0{
+            self.statusLabel.text = "No pitches to remove"
+            return
+        }
+        
+        undoPitch(){ success in
+            DispatchQueue.main.async {
+                if success{
+                    self.statusLabel.text = "Sucessfully removed last pitch"
+                    self.totalPitches -= 1
+                    self.pitchCountLabel.text = "Pitches Recorded: " + String(self.totalPitches)
+
+                }else{
+                    self.statusLabel.text = "Failed to remove previous pitch"
+                }
+            }
+        }
+    }
+    
+    
+    func undoPitch(completion: @escaping (Bool) -> ()){
+        let url: NSURL = NSURL(string: "http://52.55.212.19/remove_pitch.php")!
+        let request:NSMutableURLRequest = NSMutableURLRequest(url:url as URL)
+        request.httpMethod = "POST"
+        //let name = nameField.text!.trimmingCharacters(in: .whitespacesAndNewlines)
+        let data = "id=\(lastPitchID)"
+        request.httpBody = data.data(using: String.Encoding.utf8);
+        let task = URLSession.shared.dataTask(with: request as URLRequest!, completionHandler: { data, response, error in
+            guard let data = data, error == nil else {                                                 // check for fundamental networking error
+                print("error=\(error)")
+                //                DispatchQueue.main.async {
+                //                    self.add_success = false
+                //                }
+                completion(false)
+                return
+            }
+            
+            if let httpStatus = response as? HTTPURLResponse, httpStatus.statusCode != 200 {           // check for http errors
+                print("statusCode should be 200, but is \(httpStatus.statusCode)")
+                print("response = \(response)")
+                completion(false)
+                return
+            }
+            
+            let responseString:String = String(data: data, encoding: .utf8)!
+            print("responseString = \(responseString)")
+            completion(true)
+            return
+            
+        })
+        task.resume()
+    }
+    
+    
+    
     
     func enterPitch(sender:UIButton){
         var pitch = ""
@@ -115,6 +189,7 @@ class AddPitches: UIViewController {
                 strike = b.title(for: .normal)!
                 b.isSelected = false
                 b.backgroundColor = UIColor.white
+                b.setTitleColor(UIColor.black, for: .normal)
                 print(strike)
             }
         }
@@ -177,9 +252,14 @@ class AddPitches: UIViewController {
                 return
             }
             
-            let responseString = String(data: data, encoding: .utf8)
-            print("responseString = \(responseString)")
+            let responseString:String = String(data: data, encoding: .utf8)!
+            print(responseString)
             completion(true)
+            if responseString.hasPrefix("Pitch ID"){
+                self.lastPitchID = Int(responseString.components(separatedBy: ":").last!)!
+            }
+            print("responseString = \(responseString)")
+            
             return
             
         })
@@ -207,22 +287,37 @@ class AddPitches: UIViewController {
         for b in strikeButtons{
             if b.tag == sender.tag{
                 b.backgroundColor = UIColor.blue
+                b.setTitleColor(UIColor.white, for: .normal)
+
                 b.isSelected = true
             }else{
                 b.backgroundColor = UIColor.white
+                b.setTitleColor(UIColor.black, for: .normal)
                 b.isSelected = false
             }
         }
     }
     
-    @IBAction func donePressed(_ sender: UIButton!) {
+    @IBAction func donePressed(_ sender: UIBarButtonItem) {
         sender.isEnabled = false
-        makeData(){ success in
-            print("Success: \(success)")
-            self.sendToSummaryVC(bullpen_id: self.bullpenID)
+        if totalPitches > 0 {
+            makeData(){ success in
+                DispatchQueue.main.async {
+                    print("Success: \(success)")
+                    //idk y
+                    sleep(1)
+                    self.sendToSummaryVC(bullpen_id: self.bullpenID)
+
+                }
+            }
+        }else{
+            if new{
+                performSegue(withIdentifier: "unwindToBullpens", sender: self)
+            }else{
+                performSegue(withIdentifier: "unwindToSummary", sender: self)
+            }
+            
         }
-        
-        
         
     }
     
@@ -260,10 +355,9 @@ class AddPitches: UIViewController {
         let storyboard = UIStoryboard(name: "SummaryView", bundle: nil)
         let vc = storyboard.instantiateViewController(withIdentifier: "SummaryVC") as! SummaryViewController
         vc.currentBullpenID = bullpen_id
-        DispatchQueue.main.async {
-            self.present(vc, animated: true, completion: nil)
-        }
-        vc.refreshImage()
+        self.present(vc, animated: true, completion: nil)
+        sleep(1)
+        //vc.refreshImage()
     }
     
    
