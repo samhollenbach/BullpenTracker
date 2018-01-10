@@ -20,6 +20,7 @@
 		E99E41D81EF8752D00B7B14B /* BullpenViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = E99E41D71EF8752D00B7B14B /* BullpenViewController.swift */; };
 		E99E41DA1EF8864700B7B14B /* AddPitcherViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = E99E41D91EF8864700B7B14B /* AddPitcherViewController.swift */; };
 		E9B36EDD1F536D7B00E674AA /* AddPitches.swift in Sources */ = {isa = PBXBuildFile; fileRef = E9B36EDB1F536D7B00E674AA /* AddPitches.swift */; };
+		E9F9E0C72005ECA700F515AB /* ServerConnector.swift in Sources */ = {isa = PBXBuildFile; fileRef = E9F9E0C62005ECA700F515AB /* ServerConnector.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -38,6 +39,7 @@
 		E99E41D71EF8752D00B7B14B /* BullpenViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = BullpenViewController.swift; sourceTree = "<group>"; };
 		E99E41D91EF8864700B7B14B /* AddPitcherViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = AddPitcherViewController.swift; sourceTree = "<group>"; };
 		E9B36EDB1F536D7B00E674AA /* AddPitches.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = AddPitches.swift; sourceTree = "<group>"; };
+		E9F9E0C62005ECA700F515AB /* ServerConnector.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ServerConnector.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -84,6 +86,7 @@
 				E92D27001EEE889100075468 /* Assets.xcassets */,
 				E92D27021EEE889100075468 /* LaunchScreen.storyboard */,
 				E92D27051EEE889100075468 /* Info.plist */,
+				E9F9E0C62005ECA700F515AB /* ServerConnector.swift */,
 			);
 			path = BullpenTracker;
 			sourceTree = "<group>";
@@ -165,6 +168,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				E99E41DA1EF8864700B7B14B /* AddPitcherViewController.swift in Sources */,
+				E9F9E0C72005ECA700F515AB /* ServerConnector.swift in Sources */,
 				E99E41D41EF85C9E00B7B14B /* PitcherViewController.swift in Sources */,
 				E9B36EDD1F536D7B00E674AA /* AddPitches.swift in Sources */,
 				E9084A3C1EF88C5000EB4514 /* RemovePitcherViewController.swift in Sources */,

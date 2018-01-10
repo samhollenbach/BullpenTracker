@@ -19,6 +19,9 @@
                             <rect key="frame" x="0.0" y="0.0" width="375" height="44"/>
                             <autoresizingMask key="autoresizingMask" widthSizable="YES" flexibleMaxY="YES"/>
                             <color key="backgroundColor" red="0.062745098039215685" green="0.10980392156862745" blue="0.2627450980392157" alpha="1" colorSpace="calibratedRGB"/>
+                            <textAttributes key="titleTextAttributes">
+                                <fontDescription key="fontDescription" name="HelveticaNeue" family="Helvetica Neue" pointSize="17"/>
+                            </textAttributes>
                             <items>
                                 <navigationItem title="Bullpens" id="BCf-mG-vJQ">
                                     <barButtonItem key="leftBarButtonItem" systemItem="done" id="vEr-of-KL7">
@@ -36,18 +39,7 @@
                                 </navigationItem>
                             </items>
                         </navigationBar>
-                        <prototypes>
-                            <tableViewCell clipsSubviews="YES" contentMode="scaleToFill" selectionStyle="default" indentationWidth="10" reuseIdentifier="bullpen_cell" id="iWu-C2-cSQ">
-                                <rect key="frame" x="0.0" y="72" width="375" height="44"/>
-                                <autoresizingMask key="autoresizingMask"/>
-                                <tableViewCellContentView key="contentView" opaque="NO" clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="center" tableViewCell="iWu-C2-cSQ" id="tN8-fh-ULR">
-                                    <frame key="frameInset" width="375" height="44"/>
-                                    <autoresizingMask key="autoresizingMask"/>
-                                    <color key="backgroundColor" white="0.0" alpha="0.0" colorSpace="calibratedWhite"/>
-                                </tableViewCellContentView>
-                                <color key="backgroundColor" white="0.0" alpha="0.0" colorSpace="calibratedWhite"/>
-                            </tableViewCell>
-                        </prototypes>
+                        <sections/>
                         <connections>
                             <outlet property="dataSource" destination="aPa-SQ-njq" id="b0E-Fs-YxC"/>
                             <outlet property="delegate" destination="aPa-SQ-njq" id="dVQ-GW-CnG"/>

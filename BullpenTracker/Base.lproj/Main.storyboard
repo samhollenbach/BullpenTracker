@@ -25,6 +25,7 @@
                             <color key="tintColor" red="1" green="0.0" blue="0.061523099774187351" alpha="1" colorSpace="calibratedRGB"/>
                             <color key="barTintColor" red="1" green="0.28127107694518649" blue="0.0" alpha="1" colorSpace="calibratedRGB"/>
                             <textAttributes key="titleTextAttributes">
+                                <fontDescription key="fontDescription" type="system" pointSize="28"/>
                                 <offsetWrapper key="textShadowOffset" horizontal="0.0" vertical="0.0"/>
                             </textAttributes>
                             <items>

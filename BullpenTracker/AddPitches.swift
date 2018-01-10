@@ -8,7 +8,7 @@
 
 import UIKit
 
-class AddPitches: UIViewController {
+class AddPitches: UIViewController, UITextFieldDelegate {
     
     var totalPitches = 0
     var new: Bool = true
@@ -21,13 +21,27 @@ class AddPitches: UIViewController {
     let pitchCountLabel: UILabel = UILabel()
     var bullpenID = -1
     var add_success = false
+    let velField = UITextField()
     
     override func viewDidLoad() {
         super.viewDidLoad()
         navBar.frame = CGRect(x: 0, y: 0, width: (navBar.frame.size.width), height: (navBar.frame.size.height)+UIApplication.shared.statusBarFrame.height)
         addButtons()
         // Do any additional setup after loading the view.
+        
+        let tap: UITapGestureRecognizer = UITapGestureRecognizer(target: self, action: #selector(AddPitcherViewController.dismissKeyboard))
+        
+        //Uncomment the line below if you want the tap not not interfere and cancel other interactions.
+        //tap.cancelsTouchesInView = false
+        view.addGestureRecognizer(tap)
     }
+    
+    func dismissKeyboard() {
+        //Causes the view (or one of its embedded text fields) to resign the first responder status.
+        view.endEditing(true)
+    }
+    
+
     
     func addButtons(){
         let w = self.view.frame.size.width
@@ -71,7 +85,7 @@ class AddPitches: UIViewController {
             let w1 = (w-150)/2.0 - 10
             
             let button = UIButton(type: .custom)
-            button.frame = CGRect(x: t, y: 300, width: w1, height: w1)
+            button.frame = CGRect(x: t, y: 270, width: w1, height: w1)
             button.layer.cornerRadius = 0.5 * button.bounds.size.width
             button.clipsToBounds = true
             button.setTitle(pitch, for: .normal)
@@ -85,8 +99,23 @@ class AddPitches: UIViewController {
         }
         
         
+        
+        velField.frame = CGRect(x: w/2-40, y: h-250, width: 80, height: 30)
+        velField.keyboardType = .numberPad
+        velField.placeholder = "velo"
+        velField.backgroundColor = UIColor.white
+        velField.textAlignment = .center
+        velField.layer.cornerRadius = 7
+        view.addSubview(velField)
+        
+        let mphLabel = UILabel()
+        mphLabel.frame = CGRect(x: w/2+50, y: h-250, width: 50, height: 30)
+        mphLabel.text = "mph"
+        view.addSubview(mphLabel)
+        
+        
         let enterButton = UIButton(type: .custom)
-        enterButton.frame = CGRect(x: w/2-50, y: h-200, width: 100, height: 100)
+        enterButton.frame = CGRect(x: w/2-50, y: h-180, width: 100, height: 100)
         enterButton.layer.cornerRadius = 0.5 * enterButton.bounds.size.width
         enterButton.clipsToBounds = true
         enterButton.setTitle("Enter", for: .normal)
@@ -98,7 +127,7 @@ class AddPitches: UIViewController {
         
         
         let undoButton = UIButton(type: .custom)
-        undoButton.frame = CGRect(x: 50, y: h-175, width: 50, height: 50)
+        undoButton.frame = CGRect(x: 50, y: h-155, width: 50, height: 50)
         undoButton.layer.cornerRadius = 0.5 * undoButton.bounds.size.width
         undoButton.clipsToBounds = true
         undoButton.setTitle("Undo", for: .normal)
@@ -138,38 +167,11 @@ class AddPitches: UIViewController {
     
     
     func undoPitch(completion: @escaping (Bool) -> ()){
-        let url: NSURL = NSURL(string: "http://52.55.212.19/remove_pitch.php")!
-        let request:NSMutableURLRequest = NSMutableURLRequest(url:url as URL)
-        request.httpMethod = "POST"
-        //let name = nameField.text!.trimmingCharacters(in: .whitespacesAndNewlines)
-        let data = "id=\(lastPitchID)"
-        request.httpBody = data.data(using: String.Encoding.utf8);
-        let task = URLSession.shared.dataTask(with: request as URLRequest!, completionHandler: { data, response, error in
-            guard let data = data, error == nil else {                                                 // check for fundamental networking error
-                print("error=\(error)")
-                //                DispatchQueue.main.async {
-                //                    self.add_success = false
-                //                }
-                completion(false)
-                return
-            }
-            
-            if let httpStatus = response as? HTTPURLResponse, httpStatus.statusCode != 200 {           // check for http errors
-                print("statusCode should be 200, but is \(httpStatus.statusCode)")
-                print("response = \(response)")
-                completion(false)
-                return
-            }
-            
-            let responseString:String = String(data: data, encoding: .utf8)!
-            print("responseString = \(responseString)")
-            completion(true)
-            return
-            
-        })
-        task.resume()
+        let data = "id=\(lastPitchID)&bullpen_id=\(bullpenID)"
+        ServerConnector.runScript(scriptName: "remove_pitch.php", data: data){ response in
+            completion(response != nil)
+        }
     }
-    
     
     
     
@@ -201,7 +203,10 @@ class AddPitches: UIViewController {
         
         self.statusLabel.text = "Sending..."
         
-        addPitch(pitch: pitch, strike: strike){ success in
+        let vel = velField.text
+        velField.text = ""
+        
+        addPitch(pitch: pitch, strike: strike, vel: vel!){ success in
             DispatchQueue.main.async {
                 if success{
                     self.totalPitches += 1
@@ -218,54 +223,21 @@ class AddPitches: UIViewController {
     }
     
     
-    func addPitch(pitch: String, strike: String, completion: @escaping (Bool) -> ()){
+    func addPitch(pitch: String, strike: String, vel: String, completion: @escaping (Bool) -> ()){
         var s = strike
         if s=="Strike"{
             s = "S"
         }else if s=="Ball"{
             s = "B"
         }
+        let data = "bullpen_id=\(bullpenID)&pitch_type=\(pitch)&ball_strike=\(s)&vel=\(vel)"
         
-        let url: NSURL = NSURL(string: "http://52.55.212.19/add_pitch.php")!
-        let request:NSMutableURLRequest = NSMutableURLRequest(url:url as URL)
-        request.httpMethod = "POST"
-        //let name = nameField.text!.trimmingCharacters(in: .whitespacesAndNewlines)
-        let data = "bullpen_id=\(bullpenID)&pitch_type=\(pitch)&ball_strike=\(s)"
-        request.httpBody = data.data(using: String.Encoding.utf8);
-        let task = URLSession.shared.dataTask(with: request as URLRequest!, completionHandler: { data, response, error in
-            guard let data = data, error == nil else {                                                 // check for fundamental networking error
-                print("error=\(error)")
-//                DispatchQueue.main.async {
-//                    self.add_success = false
-//                }
-                completion(false)
-                return
+        ServerConnector.runScript(scriptName: "add_pitch.php", data: data){ response in
+            completion(response != nil)
+            if response!.hasPrefix("Pitch ID"){
+                self.lastPitchID = Int(response!.components(separatedBy: ":").last!)!
             }
-            
-            if let httpStatus = response as? HTTPURLResponse, httpStatus.statusCode != 200 {           // check for http errors
-                print("statusCode should be 200, but is \(httpStatus.statusCode)")
-                print("response = \(response)")
-//                DispatchQueue.main.async {
-//                    self.add_success = false
-//                }
-                completion(false)
-                return
-            }
-            
-            let responseString:String = String(data: data, encoding: .utf8)!
-            print(responseString)
-            completion(true)
-            if responseString.hasPrefix("Pitch ID"){
-                self.lastPitchID = Int(responseString.components(separatedBy: ":").last!)!
-            }
-            print("responseString = \(responseString)")
-            
-            return
-            
-        })
-        task.resume()
-    
-        
+        }
     }
     
     
@@ -277,10 +249,8 @@ class AddPitches: UIViewController {
             }else{
                 pitchB.backgroundColor = UIColor.white
                 pitchB.isSelected = false
-
             }
         }
-        
     }
     
     func strikeButtonPressed(sender:UIButton){
@@ -288,7 +258,6 @@ class AddPitches: UIViewController {
             if b.tag == sender.tag{
                 b.backgroundColor = UIColor.blue
                 b.setTitleColor(UIColor.white, for: .normal)
-
                 b.isSelected = true
             }else{
                 b.backgroundColor = UIColor.white
@@ -307,7 +276,6 @@ class AddPitches: UIViewController {
                     //idk y
                     sleep(1)
                     self.sendToSummaryVC(bullpen_id: self.bullpenID)
-
                 }
             }
         }else{
@@ -322,32 +290,11 @@ class AddPitches: UIViewController {
     }
     
     func makeData(completion: @escaping (Bool) -> ()){
-        let url: NSURL = NSURL(string: "http://52.55.212.19/get_stats.php")!
-        let request:NSMutableURLRequest = NSMutableURLRequest(url:url as URL)
-        request.httpMethod = "POST"
         let data = "bullpen_id=\(bullpenID)"
-        request.httpBody = data.data(using: String.Encoding.utf8);
-        let task = URLSession.shared.dataTask(with: request as URLRequest!, completionHandler: { data, response, error in
-            guard let data = data, error == nil else {                                                 // check for fundamental networking error
-                print("error=\(error)")
-                completion(false)
-                return
-            }
-            
-            if let httpStatus = response as? HTTPURLResponse, httpStatus.statusCode != 200 {           // check for http errors
-                print("statusCode should be 200, but is \(httpStatus.statusCode)")
-                print("response = \(response)")
-                completion(false)
-                return
-            }
-            
-            let responseString = String(data: data, encoding: .utf8)!
-            print("responseString = \(responseString)")
-            completion(true)
-            return
-            
-        })
-        task.resume()
+        ServerConnector.runScript(scriptName: "get_stats.php", data: data){ response in
+            completion(response != nil)
+        }
+
 
     }
     

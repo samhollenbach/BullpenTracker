@@ -21,6 +21,9 @@
                             <navigationBar contentMode="scaleToFill" fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="TLe-zh-Pgc">
                                 <frame key="frameInset" height="44"/>
                                 <autoresizingMask key="autoresizingMask" widthSizable="YES" flexibleMaxY="YES"/>
+                                <textAttributes key="titleTextAttributes">
+                                    <fontDescription key="fontDescription" type="system" pointSize="24"/>
+                                </textAttributes>
                                 <items>
                                     <navigationItem title="Add Pitches" id="2Zi-Fr-fuA">
                                         <barButtonItem key="rightBarButtonItem" title="Done" id="iod-am-fvI">

@@ -76,21 +76,9 @@ class PitcherViewController: UITableViewController {
     }
     
     func get_data_from_url(_ link:String) {
-        let url:URL = URL(string: link)!
-        let session = URLSession.shared
-        
-        let request = NSMutableURLRequest(url: url)
-        request.httpMethod = "GET"
-        request.cachePolicy = NSURLRequest.CachePolicy.reloadIgnoringCacheData
-        
-        let task = session.dataTask(with: request as URLRequest, completionHandler: { (data, response, error) in
-            
-            guard let _:Data = data, let _:URLResponse = response  , error == nil else {
-                return
-            }
+        ServerConnector.getURLData(urlString: link, verbose: false) { (success, data, response) in
             self.extract_json(data!)
-        })
-        task.resume()
+        }
     }
     
     
@@ -101,11 +89,8 @@ class PitcherViewController: UITableViewController {
             json = try JSONSerialization.jsonObject(with: data, options: [])
         } catch { return }
         
-        guard let data_list = json as? NSArray else {
-            return
-        }
         if let pitcher_list = json as? NSArray{
-            for i in 0 ..< data_list.count {
+            for i in 0 ..< pitcher_list.count {
                 if let pitcher_obj = pitcher_list[i] as? NSDictionary {
                     if let name = pitcher_obj["name"] as? String {
                         if let pitcher_id = pitcher_obj["number"] as? String {

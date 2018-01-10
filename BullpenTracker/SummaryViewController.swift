@@ -19,7 +19,7 @@ class SummaryViewController: UIViewController {
     override func viewDidLoad() {
         super.viewDidLoad()
         addButtons()
-        imageView.contentMode = .scaleAspectFit
+        
         navBar.frame = CGRect(x: 0, y: 0, width: (navBar.frame.size.width), height: (navBar.frame.size.height)+UIApplication.shared.statusBarFrame.height)
         let tap: UITapGestureRecognizer = UITapGestureRecognizer(target: self, action: #selector(dismissKeyboard))
         
@@ -30,6 +30,11 @@ class SummaryViewController: UIViewController {
         
         refreshImage()
         
+    }
+    
+    struct defaultsKeys {
+        static let lastEmail = "lastEmail"
+        static let keyTwo = "secondStringKey"
     }
     
     
@@ -45,42 +50,11 @@ class SummaryViewController: UIViewController {
     }
     
     func deleteBullpen(){
-        let url: NSURL = NSURL(string: "http://52.55.212.19/remove_bullpen.php")!
-        let request:NSMutableURLRequest = NSMutableURLRequest(url:url as URL)
-        request.httpMethod = "POST"
         let data = "bullpen_id=\(currentBullpenID)"
-        request.httpBody = data.data(using: String.Encoding.utf8);
-        let task = URLSession.shared.dataTask(with: request as URLRequest!, completionHandler: { data, response, error in
-            guard let data = data, error == nil else {                                                 // check for fundamental networking error
-                print("error=\(error)")
-                //completion(false)
-                return
-            }
-            
-            if let httpStatus = response as? HTTPURLResponse, httpStatus.statusCode != 200 {           // check for http errors
-                print("statusCode should be 200, but is \(httpStatus.statusCode)")
-                print("response = \(response)")
-                //completion(false)
-                return
-            }
-            
-            let responseString = String(data: data, encoding: .utf8)!
-            print("responseString = \(responseString)")
-            //completion(true)
-            return
-            
-        })
-        task.resume()
-        
-        
+        ServerConnector.runScript(scriptName: "remove_bullpen.php", data: data)
         DispatchQueue.main.async {
             self.doneButtonPressed(self)
-            
-            
         }
-        
-        
-        
     }
     
     @IBAction func unwindToSummary(segue: UIStoryboardSegue) {
@@ -100,10 +74,13 @@ class SummaryViewController: UIViewController {
     
     
     func getDataFromUrl(url: URL, completion: @escaping (_ data: Data?, _  response: URLResponse?, _ error: Error?) -> Void) {
-        URLSession.shared.dataTask(with: url) {
-            (data, response, error) in
-            completion(data, response, error)
-            }.resume()
+        URLSession.shared.reset{
+            let urlTask = URLSession.shared.dataTask(with: url) {
+                (data, response, error) in
+                completion(data, response, error)
+            }
+            urlTask.resume()
+        }
     }
     
     func downloadImage(url: URL) {
@@ -111,9 +88,13 @@ class SummaryViewController: UIViewController {
         getDataFromUrl(url: url) { (data, response, error)  in
             guard let data = data, error == nil else { return }
             //self.imageView.image = nil
-            print(response?.suggestedFilename ?? url.lastPathComponent)
+            //print(response?.suggestedFilename ?? url.lastPathComponent)
             print("Download Finished")
             DispatchQueue.main.async() { () -> Void in
+                self.imageView.image = nil
+                self.imageView.layer.masksToBounds = true
+                self.imageView.contentMode = .scaleAspectFit
+
                 self.imageView.image = UIImage(data: data)
             }
         }
@@ -122,14 +103,13 @@ class SummaryViewController: UIViewController {
     func dismissKeyboard() {
         //Causes the view (or one of its embedded text fields) to resign the first responder status.
         view.endEditing(true)
-        //refreshImage()
+        refreshImage()
     }
-    
-    
-    
+  
     
     @IBAction func doneButtonPressed(_ sender: AnyObject) {
         self.performSegue(withIdentifier: "unwindToBullpens", sender: self)
+        
     }
     
     func addButtons(){
@@ -147,7 +127,6 @@ class SummaryViewController: UIViewController {
         emailButton.setTitleColor(UIColor.white, for: .normal)
         emailButton.addTarget(self, action: #selector(pressEmailBullpen), for: .touchUpInside)
         view.addSubview(emailButton)
-        
         
         let addPitchesButton = UIButton(type: .custom)
         addPitchesButton.frame = CGRect(x: w/2+25, y: h-150, width: 100, height: 100)
@@ -172,81 +151,43 @@ class SummaryViewController: UIViewController {
         alert.addTextField { (textField) in
             textField.placeholder = "Email Adress"
             textField.keyboardType = .emailAddress
+            let defaults = UserDefaults.standard
+            if let emailPlaceholder: String = defaults.string(forKey: defaultsKeys.lastEmail) {
+                textField.text = emailPlaceholder
+            }
         }
         
         // 3. Grab the value from the text field, and print it when the user clicks OK.
         alert.addAction(UIAlertAction(title: "Send", style: .default, handler: { [weak alert] (_) in
-            
-            let textField = alert?.textFields![0] // Force unwrapping because we know it exists.
+            let textField = alert?.textFields![0]
+            // Force unwrapping because we know it exists.
             let emailAddress: String = (textField?.text)!
             self.emailBullpen(email: emailAddress){ success in
                 DispatchQueue.main.async {
                     if success{
                         self.emailStatusLabel.text = "Email sent to \(emailAddress)"
+                        let defaults = UserDefaults.standard
+                        defaults.set(emailAddress, forKey: defaultsKeys.lastEmail)
                     }else{
                         self.emailStatusLabel.text = "Something went wrong, try again"
                     }
-                    
                 }
-                
             }
         }))
-        
         alert.addAction(UIAlertAction(title: "Cancel", style: .cancel, handler: nil))
-
-    
         
         // 4. Present the alert.
         self.present(alert, animated: true, completion: nil)
         
-//        emailBullpen(){ success in
-//            DispatchQueue.main.async {
-//                if success{
-//                    self.emailStatusLabel.text = "Email Sent!"
-//                }else{
-//                    self.emailStatusLabel.text = "Something went wrong, try again"
-//                }
-//                
-//            }
-//            
-//        }
     }
     
     
     func emailBullpen(email: String,completion: @escaping (Bool) -> ()){
-        
-        //let email:String = (emailField.text?.trimmingCharacters(in: .whitespacesAndNewlines))!
         emailStatusLabel.text = "Sending email..."
-        
-        
-        let url: NSURL = NSURL(string: "http://52.55.212.19/send_email.php")!
-        let request:NSMutableURLRequest = NSMutableURLRequest(url:url as URL)
-        request.httpMethod = "POST"
         let data = "bullpen_id=\(currentBullpenID)&email=\(email)"
-        request.httpBody = data.data(using: String.Encoding.utf8);
-        let task = URLSession.shared.dataTask(with: request as URLRequest!, completionHandler: { data, response, error in
-            guard let data = data, error == nil else {                                                 // check for fundamental networking error
-                print("error=\(error)")
-                completion(false)
-                return
-            }
-            
-            if let httpStatus = response as? HTTPURLResponse, httpStatus.statusCode != 200 {           // check for http errors
-                print("statusCode should be 200, but is \(httpStatus.statusCode)")
-                print("response = \(response)")
-                completion(false)
-                return
-            }
-            
-            let responseString = String(data: data, encoding: .utf8)!
-            print("responseString = \(responseString)")
-            completion(true)
-            return
-            
-        })
-        task.resume()
-        
-        
+        ServerConnector.runScript(scriptName: "send_email.php", data: data){ response in
+            completion(response != nil)
+        }
     }
     
     
