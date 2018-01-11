@@ -27,7 +27,7 @@ class AddPitcherViewController: UIViewController {
 
     }
     
-    func dismissKeyboard() {
+    @objc func dismissKeyboard() {
         //Causes the view (or one of its embedded text fields) to resign the first responder status.
         view.endEditing(true)
     }
@@ -44,7 +44,7 @@ class AddPitcherViewController: UIViewController {
         let number = numberField.text!
         let data = "name=\(name)&number=\(number)"
         
-        ServerConnector.runScript(scriptName: "add_pitcher.php", data: data)
+        ServerConnector.runScript(scriptName: "AddPitcher.php", data: data)
         
         let storyboard = UIStoryboard(name: "Main", bundle: nil)
         let vc = storyboard.instantiateViewController(withIdentifier: "PitchersVC") as UIViewController

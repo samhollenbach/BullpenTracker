@@ -21,8 +21,9 @@ class PitcherViewController: UITableViewController {
         PitcherViewController.PitcherNames = [Int:String]()
         PitcherViewController.TableData = Array < String >()
         self.tableView.rowHeight = 80.0
+        
         navBar.frame = CGRect(x: 0, y: 0, width: (navBar.frame.size.width), height: (navBar.frame.size.height)+UIApplication.shared.statusBarFrame.height)
-        get_data_from_url("http://52.55.212.19/get_pitchers.php")
+        getPitcherDataFromURL("http://52.55.212.19/GetPitchers.php")
     }
     
     
@@ -75,29 +76,27 @@ class PitcherViewController: UITableViewController {
         present(vc, animated: true, completion: nil)
     }
     
-    func get_data_from_url(_ link:String) {
-        ServerConnector.getURLData(urlString: link, verbose: false) { (success, data, response) in
-            self.extract_json(data!)
+    func getPitcherDataFromURL(_ link:String) {
+        ServerConnector.getURLData(urlString: link) { (success, data, response) in
+            if data != nil{
+                self.fillPitcherData(data!)
+            }else{
+                print("Something went wrong")
+            }
+            
         }
     }
     
     
-    func extract_json(_ data: Data) {
-        let json: Any?
+    func fillPitcherData(_ data: Data) {
+        let pitcher_list = ServerConnector.extractJSON(data)
         
-        do {
-            json = try JSONSerialization.jsonObject(with: data, options: [])
-        } catch { return }
-        
-        if let pitcher_list = json as? NSArray{
-            for i in 0 ..< pitcher_list.count {
-                if let pitcher_obj = pitcher_list[i] as? NSDictionary {
-                    if let name = pitcher_obj["name"] as? String {
-                        if let pitcher_id = pitcher_obj["number"] as? String {
-                            PitcherViewController.PitcherNames[Int(pitcher_id)!] = name
-                            PitcherViewController.TableData.append(pitcher_id + ". " + name)
-                        }
-                    }
+        for i in 0 ..< pitcher_list.count {
+            if let pitcher_obj = pitcher_list[i] as? NSDictionary {
+                if let name = pitcher_obj["name"] as? String, let pitcher_id = pitcher_obj["number"] as? String {
+                    PitcherViewController.PitcherNames[Int(pitcher_id)!] = name
+                    PitcherViewController.TableData.append(pitcher_id + ". " + name)
+            
                 }
             }
         }

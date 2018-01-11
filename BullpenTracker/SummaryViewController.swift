@@ -100,7 +100,7 @@ class SummaryViewController: UIViewController {
         }
     }
     
-    func dismissKeyboard() {
+    @objc func dismissKeyboard() {
         //Causes the view (or one of its embedded text fields) to resign the first responder status.
         view.endEditing(true)
         refreshImage()
@@ -142,7 +142,7 @@ class SummaryViewController: UIViewController {
                 
     }
     
-    func pressEmailBullpen(){
+    @objc func pressEmailBullpen(){
         
         //1. Create the alert controller.
         let alert = UIAlertController(title: "Enter your email", message: "Your stats will be sent to this email", preferredStyle: .alert)
@@ -191,7 +191,7 @@ class SummaryViewController: UIViewController {
     }
     
     
-    func addPitches(){
+    @objc func addPitches(){
         sendToAddPitchesVC(bullpen_id: currentBullpenID)
     }
     

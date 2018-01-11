@@ -144,7 +144,7 @@ class AddPitches: UIViewController, UITextFieldDelegate {
         
     }
     
-    func pressUndoPitch(){
+    @objc func pressUndoPitch(){
         self.statusLabel.text = "Removing last pitch"
         if totalPitches == 0{
             self.statusLabel.text = "No pitches to remove"
@@ -168,14 +168,14 @@ class AddPitches: UIViewController, UITextFieldDelegate {
     
     func undoPitch(completion: @escaping (Bool) -> ()){
         let data = "id=\(lastPitchID)&bullpen_id=\(bullpenID)"
-        ServerConnector.runScript(scriptName: "remove_pitch.php", data: data){ response in
+        ServerConnector.runScript(scriptName: "RemovePitch.php", data: data){ response in
             completion(response != nil)
         }
     }
     
     
     
-    func enterPitch(sender:UIButton){
+    @objc func enterPitch(sender:UIButton){
         var pitch = ""
         for p in pitchButtons{
             if p.isSelected{
@@ -204,7 +204,7 @@ class AddPitches: UIViewController, UITextFieldDelegate {
         self.statusLabel.text = "Sending..."
         
         let vel = velField.text
-        velField.text = ""
+        
         
         addPitch(pitch: pitch, strike: strike, vel: vel!){ success in
             DispatchQueue.main.async {
@@ -218,6 +218,7 @@ class AddPitches: UIViewController, UITextFieldDelegate {
             }
 
         }
+        velField.text = ""
     
         
     }
@@ -232,16 +233,17 @@ class AddPitches: UIViewController, UITextFieldDelegate {
         }
         let data = "bullpen_id=\(bullpenID)&pitch_type=\(pitch)&ball_strike=\(s)&vel=\(vel)"
         
-        ServerConnector.runScript(scriptName: "add_pitch.php", data: data){ response in
+        ServerConnector.runScript(scriptName: "AddPitch.php", data: data){ response in
             completion(response != nil)
-            if response!.hasPrefix("Pitch ID"){
-                self.lastPitchID = Int(response!.components(separatedBy: ":").last!)!
-            }
+            let pitch_list = ServerConnector.extractJSON((response?.data(using: .utf8))!)
+            let pitch = pitch_list[0] as? NSDictionary
+            let last_pitch = pitch!["last_id"] as! String
+            self.lastPitchID = Int(last_pitch)!
         }
     }
     
     
-    func pitchesButtonPressed(sender:UIButton){
+    @objc func pitchesButtonPressed(sender:UIButton){
         for pitchB in pitchButtons{
             if pitchB.tag == sender.tag{
                 pitchB.backgroundColor = UIColor.orange
@@ -253,7 +255,7 @@ class AddPitches: UIViewController, UITextFieldDelegate {
         }
     }
     
-    func strikeButtonPressed(sender:UIButton){
+    @objc func strikeButtonPressed(sender:UIButton){
         for b in strikeButtons{
             if b.tag == sender.tag{
                 b.backgroundColor = UIColor.blue

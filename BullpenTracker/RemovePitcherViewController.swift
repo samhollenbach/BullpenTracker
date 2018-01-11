@@ -29,7 +29,7 @@ class RemovePitcherViewController: UIViewController {
         // Dispose of any resources that can be recreated.
     }
     
-    func dismissKeyboard() {
+    @objc func dismissKeyboard() {
         //Causes the view (or one of its embedded text fields) to resign the first responder status.
         view.endEditing(true)
     }
@@ -40,7 +40,7 @@ class RemovePitcherViewController: UIViewController {
         
         
         let data = "name=\(pitcher_name)"
-        ServerConnector.runScript(scriptName: "remove_pitcher.php", data: data)
+        ServerConnector.runScript(scriptName: "RemovePitcher.php", data: data)
         
         let storyboard = UIStoryboard(name: "Main", bundle: nil)
         let vc = storyboard.instantiateViewController(withIdentifier: "PitchersVC") as UIViewController

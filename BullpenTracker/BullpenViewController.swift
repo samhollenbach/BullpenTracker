@@ -29,7 +29,7 @@ class BullpenViewController: UITableViewController {
     
     func update(){
         
-        ServerConnector.getURLData(urlString: "http://52.55.212.19/get_bullpens.php", verbose: false) { (success, data, response) in
+        ServerConnector.getURLData(urlString: "http://52.55.212.19/GetBullpens.php", verbose: false) { (success, data, response) in
             self.fillBullpenList(data!)
         }
         
@@ -132,10 +132,12 @@ class BullpenViewController: UITableViewController {
         let pitcher_id = PitcherViewController.getCurrentPitcher()
         let data = "pitcher_id=\(pitcher_id)&type=\(type)"
         
-        ServerConnector.runScript(scriptName: "add_bullpen.php", data: data, verbose: false) { (responseString) in
-            let id: Int = Int(responseString!.components(separatedBy: "~")[1])!
+        ServerConnector.runScript(scriptName: "AddBullpen.php", data: data) { (responseString) in
+            let list = ServerConnector.extractJSON((responseString?.data(using: .utf8))!)
+            let pitcher = list[0] as? NSDictionary
+            let id = pitcher!["bid"] as? String
             DispatchQueue.main.async {
-                self.sendToAddPitchesVC(bullpen_id: id)
+                self.sendToAddPitchesVC(bullpen_id: Int(id!)!)
             }
         }
        
@@ -180,42 +182,35 @@ class BullpenViewController: UITableViewController {
     
     
     func fillBullpenList(_ data: Data) {
-        let json: Any?
-        do {
-            json = try JSONSerialization.jsonObject(with: data, options: [])
-        } catch { return }
+        let bullpen_list = ServerConnector.extractJSON(data)
         
-        if let bullpen_list = json as? NSArray{
-            TableData = Array < String >()
-            for i in 0 ..< bullpen_list.count {
+        TableData = Array < String >()
+        for i in 0 ..< bullpen_list.count {
                 
-                if let bullpen_obj = bullpen_list[i] as? NSDictionary , let id = bullpen_obj["id"] as? String , let pitcher_id = bullpen_obj["pitcher_id"] as? String , let date = bullpen_obj["date"] as? String {
+            if let bullpen_obj = bullpen_list[i] as? NSDictionary , let id = bullpen_obj["id"] as? String , let pitcher_id = bullpen_obj["pitcher_id"] as? String , let date = bullpen_obj["date"] as? String {
                     
-                    if Int(pitcher_id)! != PitcherViewController.getCurrentPitcher(){
-                        continue
-                    }
-                    var pen_type_display = "Bullpen"
-                    if let pen_type = bullpen_obj["type"] as? String {
-                        switch pen_type {
-                            case "COMP":
-                                pen_type_display = "Competitive Bullpen"
-                            case "FLAT":
-                                pen_type_display = "Flatground"
-                            case "GAME":
-                                pen_type_display = "Game Appearance"
-                            default:
-                                break
-                        }
-                    }
-                        
-                    if let pitch_count = bullpen_obj["pitch_count"] as? String {
-                        TableData.append("\(id)~\(pen_type_display) (\(pitch_count) pitches)~\(date)")
-                    }else{
-                        TableData.append("\(id)~\(pen_type_display) (NA)~\(date)")
-                    }
-                      
+                if Int(pitcher_id)! != PitcherViewController.getCurrentPitcher(){
+                    continue
                 }
-                
+                var pen_type_display = "Bullpen"
+                if let pen_type = bullpen_obj["type"] as? String {
+                    switch pen_type {
+                        case "COMP":
+                            pen_type_display = "Competitive Bullpen"
+                        case "FLAT":
+                            pen_type_display = "Flatground"
+                        case "GAME":
+                            pen_type_display = "Game Appearance"
+                        default:
+                            break
+                    }
+                }
+                        
+                if let pitch_count = bullpen_obj["pitch_count"] as? String {
+                    TableData.append("\(id)~\(pen_type_display) (\(pitch_count) pitches)~\(date)")
+                }else{
+                    TableData.append("\(id)~\(pen_type_display) (NA)~\(date)")
+                }
             }
         }
         if TableData.isEmpty{
