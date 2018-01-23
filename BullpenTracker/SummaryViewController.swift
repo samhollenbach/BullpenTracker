@@ -18,9 +18,13 @@ class SummaryViewController: UIViewController {
     
     override func viewDidLoad() {
         super.viewDidLoad()
+        if #available(iOS 11.0, *) {
+            self.additionalSafeAreaInsets.top = 20
+        }
+        navBar.frame = CGRect(x: 0, y: 20, width: (navBar.frame.size.width), height: (navBar.frame.size.height))
         addButtons()
         
-        navBar.frame = CGRect(x: 0, y: 0, width: (navBar.frame.size.width), height: (navBar.frame.size.height)+UIApplication.shared.statusBarFrame.height)
+        
         let tap: UITapGestureRecognizer = UITapGestureRecognizer(target: self, action: #selector(dismissKeyboard))
         
         //Uncomment the line below if you want the tap not not interfere and cancel other interactions.
@@ -51,7 +55,8 @@ class SummaryViewController: UIViewController {
     
     func deleteBullpen(){
         let data = "bullpen_id=\(currentBullpenID)"
-        ServerConnector.runScript(scriptName: "remove_bullpen.php", data: data)
+        print(data)
+        ServerConnector.runScript(scriptName: "RemoveBullpen.php", data: data)
         DispatchQueue.main.async {
             self.doneButtonPressed(self)
         }
@@ -123,8 +128,10 @@ class SummaryViewController: UIViewController {
         emailButton.layer.cornerRadius = 0.5 * emailButton.bounds.size.width
         emailButton.clipsToBounds = true
         emailButton.setTitle("Email Stats", for: .normal)
-        emailButton.backgroundColor = UIColor.blue
-        emailButton.setTitleColor(UIColor.white, for: .normal)
+        emailButton.layer.borderWidth = 1
+        emailButton.layer.borderColor = UIColor.black.cgColor
+        emailButton.backgroundColor = UIColor.white
+        emailButton.setTitleColor(UIColor.black, for: .normal)
         emailButton.addTarget(self, action: #selector(pressEmailBullpen), for: .touchUpInside)
         view.addSubview(emailButton)
         
@@ -132,8 +139,10 @@ class SummaryViewController: UIViewController {
         addPitchesButton.frame = CGRect(x: w/2+25, y: h-150, width: 100, height: 100)
         addPitchesButton.layer.cornerRadius = 0.5 * addPitchesButton.bounds.size.width
         addPitchesButton.clipsToBounds = true
+        addPitchesButton.layer.borderWidth = 1
+        addPitchesButton.layer.borderColor = UIColor.black.cgColor
         addPitchesButton.setTitle("Add Pitches", for: .normal)
-        addPitchesButton.backgroundColor = UIColor.orange
+        addPitchesButton.backgroundColor = UIColor.white
         addPitchesButton.setTitleColor(UIColor.black, for: .normal)
         addPitchesButton.addTarget(self, action: #selector(addPitches), for: .touchUpInside)
         view.addSubview(addPitchesButton)

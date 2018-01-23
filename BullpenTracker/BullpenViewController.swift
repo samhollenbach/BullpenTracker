@@ -18,10 +18,9 @@ class BullpenViewController: UITableViewController {
         // TODO: Setvartle of VC to pitcher name
         //self.parent?.title = currentPitcherName
         self.tableView.rowHeight = 80.0
-        navBar.frame = CGRect(x: 0, y: 0, width: (navBar.frame.size.width), height: (navBar.frame.size.height)+UIApplication.shared.statusBarFrame.height)
+        navBar.frame = CGRect(x: 0, y: 0, width: (navBar.frame.size.width), height: (navBar.frame.size.height))
         
         //self.tableView.contentInset = UIEdgeInsets(top: UIApplication.shared.statusBarFrame.size.height, left: 0, bottom: 0, right: 0)
-        UIApplication.shared.statusBarStyle = .default
         titleView.title = "\(currentPitcherName)\'s Bullpens"
         update()
         
@@ -98,7 +97,7 @@ class BullpenViewController: UITableViewController {
         let bullpenTypeSelector = UIAlertController(title: "Bullpen Type", message: "Pick the type of bullpen to add", preferredStyle: .alert)
         
         let standardAction = UIAlertAction(title: "Standard", style: .default) { _ in
-            self.createNewBullpen(type: "NULL")
+            self.createNewBullpen(type: "NORM")
         }
         let compAction = UIAlertAction(title: "Competitive", style: .default) { _ in
             self.createNewBullpen(type: "COMP")

@@ -15,7 +15,7 @@ class RemovePitcherViewController: UIViewController {
     
     override func viewDidLoad() {
         super.viewDidLoad()
-        navBar.frame = CGRect(x: 0, y: 0, width: (navBar.frame.size.width), height: (navBar.frame.size.height)+UIApplication.shared.statusBarFrame.height)
+        navBar.frame = CGRect(x: 0, y: 20, width: (navBar.frame.size.width), height: (navBar.frame.size.height))
         
         let tap: UITapGestureRecognizer = UITapGestureRecognizer(target: self, action: #selector(RemovePitcherViewController.dismissKeyboard))
         

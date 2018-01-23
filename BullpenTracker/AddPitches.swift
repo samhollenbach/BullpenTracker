@@ -25,7 +25,9 @@ class AddPitches: UIViewController, UITextFieldDelegate {
     
     override func viewDidLoad() {
         super.viewDidLoad()
-        navBar.frame = CGRect(x: 0, y: 0, width: (navBar.frame.size.width), height: (navBar.frame.size.height)+UIApplication.shared.statusBarFrame.height)
+        
+        
+        navBar.frame = CGRect(x: 0, y: 20, width: (navBar.frame.size.width), height: (navBar.frame.size.height)+UIApplication.shared.statusBarFrame.height)
         addButtons()
         // Do any additional setup after loading the view.
         
@@ -36,7 +38,7 @@ class AddPitches: UIViewController, UITextFieldDelegate {
         view.addGestureRecognizer(tap)
     }
     
-    func dismissKeyboard() {
+    @objc func dismissKeyboard() {
         //Causes the view (or one of its embedded text fields) to resign the first responder status.
         view.endEditing(true)
     }
@@ -253,6 +255,7 @@ class AddPitches: UIViewController, UITextFieldDelegate {
                 pitchB.isSelected = false
             }
         }
+        dismissKeyboard()
     }
     
     @objc func strikeButtonPressed(sender:UIButton){
@@ -267,9 +270,11 @@ class AddPitches: UIViewController, UITextFieldDelegate {
                 b.isSelected = false
             }
         }
+        dismissKeyboard()
     }
     
     @IBAction func donePressed(_ sender: UIBarButtonItem) {
+        dismissKeyboard()
         sender.isEnabled = false
         if totalPitches > 0 {
             makeData(){ success in
