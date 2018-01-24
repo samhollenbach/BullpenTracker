@@ -8,8 +8,11 @@
 
 import UIKit
 
-class AddPitches: UIViewController, UITextFieldDelegate {
+class AddPitches: UIViewController, UITextFieldDelegate, UIPickerViewDelegate, UIPickerViewDataSource{
     
+    
+    
+    @IBOutlet weak var pitchPicker: UIPickerView!
     var totalPitches = 0
     var new: Bool = true
     var lastPitchID = -1
@@ -20,12 +23,30 @@ class AddPitches: UIViewController, UITextFieldDelegate {
     let statusLabel: UILabel = UILabel()
     let pitchCountLabel: UILabel = UILabel()
     var bullpenID = -1
+    var pitches: [[String]] = [[String]]()
+    
     var add_success = false
     let velField = UITextField()
+    let enterButton = UIButton(type: .custom)
+    let undoButton = UIButton(type: .custom)
+    let pitchTypeHighlight = UIColor.white
+    let pitchTypeColor = UIColor(red:0.13, green:0.22, blue:0.46, alpha:1.0)
+    let ballStrikeHighlight = UIColor.white
+    let ballStrikeColor = UIColor(red:0.13, green:0.22, blue:0.46, alpha:1.0)
+    let enterButtonsColorPressed = UIColor(red:0.00, green:0.16, blue:1.00, alpha:1.0)
+    let enterButtonsColor = UIColor(red:0.23, green:0.32, blue:0.56, alpha:1.0)
+    
+    var selectedPitch: String = ""
+    var selectedResult: String = ""
     
     override func viewDidLoad() {
         super.viewDidLoad()
         
+        self.pitchPicker.delegate = self
+        self.pitchPicker.dataSource = self
+        pitches = [["FB", "CH", "CR", "SL", "X"], ["None", "Swing and miss", "Strike taken", "Swinging strikout", "Looking strikeout"]]
+        selectedPitch = pitches[0][0]
+        selectedResult = pitches[1][0]
         
         navBar.frame = CGRect(x: 0, y: 20, width: (navBar.frame.size.width), height: (navBar.frame.size.height)+UIApplication.shared.statusBarFrame.height)
         addButtons()
@@ -49,51 +70,56 @@ class AddPitches: UIViewController, UITextFieldDelegate {
         let w = self.view.frame.size.width
         let h = self.view.frame.size.height
         
-        pitchCountLabel.frame = CGRect(x: 50, y: 70, width: w-50, height: 30)
+        pitchCountLabel.frame = CGRect(x: 50, y: 70, width: w-100, height: 30)
         pitchCountLabel.text = "Pitches Recorded: " + String(totalPitches)
-        pitchCountLabel.textAlignment = .left
+        pitchCountLabel.textAlignment = .center
         view.addSubview(pitchCountLabel)
         
         
-        let pitches: [String] = ["FB", "CH", "CR", "SL", "X"]
         
         
         
         
-        for (index, pitch) in pitches.enumerated(){
+        // pitch buttons
+//        for (index, pitch) in pitches.enumerated(){
+//
+//            let t = 25 + (w - 50) * (CGFloat(index)/CGFloat(pitches.count))
+//            let w1 = (w-50)/CGFloat(pitches.count) - 10
+//
+//            let button = UIButton(type: .custom)
+//            button.frame = CGRect(x: t, y: 150, width: w1, height: w1)
+//            button.layer.cornerRadius = 0.5 * button.bounds.size.width
+//            button.clipsToBounds = true
+//            //button.setImage(UIImage(named:"thumbsUp.png"), for: .normal)
+//            button.setTitle(pitch, for: .normal)
+//            button.tag = index
+//            button.backgroundColor = pitchTypeHighlight
+//            button.layer.borderWidth = 1
+//            button.layer.borderColor = pitchTypeColor.cgColor
+//            button.setTitleColor(pitchTypeColor, for: .normal)
+//            button.addTarget(self, action: #selector(pitchesButtonPressed), for: .touchUpInside)
+//            pitchButtons.append(button)
+//            view.addSubview(button)
+//
+//        }
+        
+        
+        
+        for (index, pitch) in ["N", "Y"].enumerated(){
             
-            let t = 25 + (w - 50) * (CGFloat(index)/CGFloat(pitches.count))
-            let w1 = (w-50)/CGFloat(pitches.count) - 10
+            let size: CGFloat = 75
+            let t = w - (size + 10) * (CGFloat(index+1))
             
             let button = UIButton(type: .custom)
-            button.frame = CGRect(x: t, y: 150, width: w1, height: w1)
-            button.layer.cornerRadius = 0.5 * button.bounds.size.width
-            button.clipsToBounds = true
-            //button.setImage(UIImage(named:"thumbsUp.png"), for: .normal)
-            button.setTitle(pitch, for: .normal)
-            button.tag = index
-            button.backgroundColor = UIColor.white
-            button.setTitleColor(UIColor.black, for: .normal)
-            button.addTarget(self, action: #selector(pitchesButtonPressed), for: .touchUpInside)
-            pitchButtons.append(button)
-            view.addSubview(button)
-
-        }
-        
-        
-        for (index, pitch) in ["Ball", "Strike"].enumerated(){
-            
-            let t = 75 + (w - 150) * (CGFloat(index)/2.0)
-            let w1 = (w-150)/2.0 - 10
-            
-            let button = UIButton(type: .custom)
-            button.frame = CGRect(x: t, y: 270, width: w1, height: w1)
+            button.frame = CGRect(x: t, y: 275, width: size, height: size)
             button.layer.cornerRadius = 0.5 * button.bounds.size.width
             button.clipsToBounds = true
             button.setTitle(pitch, for: .normal)
             button.tag = index
-            button.backgroundColor = UIColor.white
-            button.setTitleColor(UIColor.black, for: .normal)
+            button.backgroundColor = ballStrikeHighlight
+            button.layer.borderWidth = 1
+            button.layer.borderColor = ballStrikeColor.cgColor
+            button.setTitleColor(ballStrikeColor, for: .normal)
             button.addTarget(self, action: #selector(strikeButtonPressed), for: .touchUpInside)
             strikeButtons.append(button)
             view.addSubview(button)
@@ -106,6 +132,8 @@ class AddPitches: UIViewController, UITextFieldDelegate {
         velField.keyboardType = .numberPad
         velField.placeholder = "velo"
         velField.backgroundColor = UIColor.white
+        velField.layer.borderWidth = 1
+        velField.layer.borderColor = enterButtonsColor.cgColor
         velField.textAlignment = .center
         velField.layer.cornerRadius = 7
         view.addSubview(velField)
@@ -116,24 +144,24 @@ class AddPitches: UIViewController, UITextFieldDelegate {
         view.addSubview(mphLabel)
         
         
-        let enterButton = UIButton(type: .custom)
+        
         enterButton.frame = CGRect(x: w/2-50, y: h-180, width: 100, height: 100)
         enterButton.layer.cornerRadius = 0.5 * enterButton.bounds.size.width
         enterButton.clipsToBounds = true
         enterButton.setTitle("Enter", for: .normal)
-        enterButton.backgroundColor = UIColor.green
-        enterButton.setTitleColor(UIColor.black, for: .normal)
+        enterButton.backgroundColor = enterButtonsColor
+        enterButton.setTitleColor(UIColor.white, for: .normal)
         enterButton.addTarget(self, action: #selector(enterPitch), for: .touchUpInside)
         view.addSubview(enterButton)
         
         
         
-        let undoButton = UIButton(type: .custom)
+        
         undoButton.frame = CGRect(x: 50, y: h-155, width: 50, height: 50)
         undoButton.layer.cornerRadius = 0.5 * undoButton.bounds.size.width
         undoButton.clipsToBounds = true
         undoButton.setTitle("Undo", for: .normal)
-        undoButton.backgroundColor = UIColor.red
+        undoButton.backgroundColor = enterButtonsColor
         undoButton.setTitleColor(UIColor.white, for: .normal)
         undoButton.addTarget(self, action: #selector(pressUndoPitch), for: .touchUpInside)
         view.addSubview(undoButton)
@@ -147,6 +175,7 @@ class AddPitches: UIViewController, UITextFieldDelegate {
     }
     
     @objc func pressUndoPitch(){
+        undoButton.backgroundColor = enterButtonsColorPressed
         self.statusLabel.text = "Removing last pitch"
         if totalPitches == 0{
             self.statusLabel.text = "No pitches to remove"
@@ -165,6 +194,7 @@ class AddPitches: UIViewController, UITextFieldDelegate {
                 }
             }
         }
+        undoButton.backgroundColor = enterButtonsColor
     }
     
     
@@ -178,28 +208,32 @@ class AddPitches: UIViewController, UITextFieldDelegate {
     
     
     @objc func enterPitch(sender:UIButton){
+        enterButton.backgroundColor = enterButtonsColorPressed
         var pitch = ""
-        for p in pitchButtons{
-            if p.isSelected{
-                pitch = p.title(for: .normal)!
-                p.isSelected = false
-                p.backgroundColor = UIColor.white
-                print(pitch)
-            }
-        }
+//        for p in pitchButtons{
+//            if p.isSelected{
+//                pitch = p.title(for: .normal)!
+//                p.isSelected = false
+//                p.backgroundColor = pitchTypeHighlight
+//                p.setTitleColor(pitchTypeColor, for: .normal)
+//                print(pitch)
+//            }
+//        }
+        pitch = selectedPitch
         var strike = ""
         for b in strikeButtons{
             if b.isSelected{
                 strike = b.title(for: .normal)!
                 b.isSelected = false
-                b.backgroundColor = UIColor.white
-                b.setTitleColor(UIColor.black, for: .normal)
+                b.backgroundColor = ballStrikeHighlight
+                b.setTitleColor(ballStrikeColor, for: .normal)
                 print(strike)
             }
         }
         
         if (pitch == "" || strike == ""){
             statusLabel.text = "Invalid entry, try again"
+            enterButton.backgroundColor = enterButtonsColor
             return
         }
         
@@ -217,11 +251,14 @@ class AddPitches: UIViewController, UITextFieldDelegate {
                 }else{
                     self.statusLabel.text = "Trouble connecting to database, try again"
                 }
+                self.enterButton.backgroundColor = self.enterButtonsColor
             }
-
+            
+            
         }
         velField.text = ""
-    
+        
+
         
     }
     
@@ -248,10 +285,12 @@ class AddPitches: UIViewController, UITextFieldDelegate {
     @objc func pitchesButtonPressed(sender:UIButton){
         for pitchB in pitchButtons{
             if pitchB.tag == sender.tag{
-                pitchB.backgroundColor = UIColor.orange
+                pitchB.backgroundColor = pitchTypeColor
+                pitchB.setTitleColor(pitchTypeHighlight, for: .normal)
                 pitchB.isSelected = true
             }else{
-                pitchB.backgroundColor = UIColor.white
+                pitchB.backgroundColor = pitchTypeHighlight
+                pitchB.setTitleColor(pitchTypeColor, for: .normal)
                 pitchB.isSelected = false
             }
         }
@@ -261,12 +300,12 @@ class AddPitches: UIViewController, UITextFieldDelegate {
     @objc func strikeButtonPressed(sender:UIButton){
         for b in strikeButtons{
             if b.tag == sender.tag{
-                b.backgroundColor = UIColor.blue
-                b.setTitleColor(UIColor.white, for: .normal)
+                b.backgroundColor = ballStrikeColor
+                b.setTitleColor(ballStrikeHighlight, for: .normal)
                 b.isSelected = true
             }else{
-                b.backgroundColor = UIColor.white
-                b.setTitleColor(UIColor.black, for: .normal)
+                b.backgroundColor = ballStrikeHighlight
+                b.setTitleColor(ballStrikeColor, for: .normal)
                 b.isSelected = false
             }
         }
@@ -331,7 +370,31 @@ class AddPitches: UIViewController, UITextFieldDelegate {
         // Dispose of any resources that can be recreated.
     }
     
-
+    // The number of columns of data
+    func numberOfComponents(in pickerView: UIPickerView) -> Int {
+        return pitches.count
+    }
+    
+    // The number of rows of data
+    func pickerView(_ pickerView: UIPickerView, numberOfRowsInComponent component: Int) -> Int {
+        return pitches[component].count
+    }
+    
+    // The data to return for the row and component (column) that's being passed in
+    func pickerView(_ pickerView: UIPickerView, titleForRow row: Int, forComponent component: Int) -> String? {
+        return pitches[component][row]
+    }
+    
+    // Catpure the picker view selection
+    func pickerView(_ pickerView: UIPickerView, didSelectRow row: Int, inComponent component: Int) {
+        if component == 0{
+             selectedPitch = pitches[component][row]
+        }else{
+            selectedResult = pitches[1][row]
+        }
+       
+        
+    }
     /*
     // MARK: - Navigation
 
