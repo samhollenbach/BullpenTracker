@@ -10,11 +10,16 @@ import UIKit
 
 class SummaryViewController: UIViewController {
 
-    
+    var bullpenData: [Any] = []
     @IBOutlet weak var navBar: UINavigationBar!
     @IBOutlet weak var imageView: UIImageView!
     @IBOutlet weak var emailStatusLabel: UILabel!
-    public var currentBullpenID = -1
+    var graph: UIImage? = nil
+    
+    struct defaultsKeys {
+        static let lastEmail = "lastEmail"
+        static let keyTwo = "secondStringKey"
+    }
     
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -30,99 +35,17 @@ class SummaryViewController: UIViewController {
         //Uncomment the line below if you want the tap not not interfere and cancel other interactions.
         //tap.cancelsTouchesInView = false
         view.addGestureRecognizer(tap)
-        // Do any additional setup after loading the view.
+        
+        
         
         refreshImage()
-        
-    }
-    
-    struct defaultsKeys {
-        static let lastEmail = "lastEmail"
-        static let keyTwo = "secondStringKey"
-    }
-    
-    
-    @IBAction func trashPressed(_ sender: AnyObject) {
-        
-        let alert = UIAlertController(title: "Are you sure you want to delete this bullpen?", message: "This cannot be undone", preferredStyle: UIAlertControllerStyle.alert)
-        alert.addAction(UIAlertAction(title: "Delete", style: UIAlertActionStyle.destructive, handler: { action in
-            self.deleteBullpen()
-        }))
-        alert.addAction(UIAlertAction(title: "Cancel", style: UIAlertActionStyle.cancel, handler: nil ))
-        self.present(alert, animated: true, completion: nil)
-        
-    }
-    
-    func deleteBullpen(){
-        let data = "bullpen_id=\(currentBullpenID)"
-        print(data)
-        ServerConnector.runScript(scriptName: "RemoveBullpen.php", data: data)
-        DispatchQueue.main.async {
-            self.doneButtonPressed(self)
-        }
-    }
-    
-    @IBAction func unwindToSummary(segue: UIStoryboardSegue) {
-        DispatchQueue.main.async() { () -> Void in
-            self.refreshImage()
-        }
-    }
-    
-    
-    func refreshImage(){
-        if let checkedUrl = URL(string: "http://52.55.212.19/plots/plot_\(currentBullpenID).png") {
-            print(checkedUrl)
-            
-            downloadImage(url: checkedUrl)
-        }
-    }
-    
-    
-    func getDataFromUrl(url: URL, completion: @escaping (_ data: Data?, _  response: URLResponse?, _ error: Error?) -> Void) {
-        URLSession.shared.reset{
-            let urlTask = URLSession.shared.dataTask(with: url) {
-                (data, response, error) in
-                completion(data, response, error)
-            }
-            urlTask.resume()
-        }
-    }
-    
-    func downloadImage(url: URL) {
-        print("Download Started")
-        getDataFromUrl(url: url) { (data, response, error)  in
-            guard let data = data, error == nil else { return }
-            //self.imageView.image = nil
-            //print(response?.suggestedFilename ?? url.lastPathComponent)
-            print("Download Finished")
-            DispatchQueue.main.async() { () -> Void in
-                self.imageView.image = nil
-                self.imageView.layer.masksToBounds = true
-                self.imageView.contentMode = .scaleAspectFit
-
-                self.imageView.image = UIImage(data: data)
-            }
-        }
-    }
-    
-    @objc func dismissKeyboard() {
-        //Causes the view (or one of its embedded text fields) to resign the first responder status.
-        view.endEditing(true)
-        refreshImage()
-    }
-  
-    
-    @IBAction func doneButtonPressed(_ sender: AnyObject) {
-        self.performSegue(withIdentifier: "unwindToBullpens", sender: self)
         
     }
     
     func addButtons(){
-        
         let w = self.view.frame.size.width
         let h = self.view.frame.size.height
-        
-        
+
         let emailButton = UIButton(type: .custom)
         emailButton.frame = CGRect(x: w/2-125, y: h-150, width: 100, height: 100)
         emailButton.layer.cornerRadius = 0.5 * emailButton.bounds.size.width
@@ -146,10 +69,90 @@ class SummaryViewController: UIViewController {
         addPitchesButton.setTitleColor(UIColor.black, for: .normal)
         addPitchesButton.addTarget(self, action: #selector(addPitches), for: .touchUpInside)
         view.addSubview(addPitchesButton)
-
-
-                
+        
+        
+        
     }
+    
+    
+    
+    @IBAction func trashPressed(_ sender: AnyObject) {
+        
+        let alert = UIAlertController(title: "Are you sure you want to delete this bullpen?", message: "This cannot be undone", preferredStyle: UIAlertControllerStyle.alert)
+        alert.addAction(UIAlertAction(title: "Delete", style: UIAlertActionStyle.destructive, handler: { action in
+            self.deleteBullpen()
+        }))
+        alert.addAction(UIAlertAction(title: "Cancel", style: UIAlertActionStyle.cancel, handler: nil ))
+        self.present(alert, animated: true, completion: nil)
+        
+    }
+    
+    func deleteBullpen(){
+        let data = "bullpen_id=\(bullpenData[0])"
+        ServerConnector.runScript(scriptName: "RemoveBullpen.php", data: data)
+        DispatchQueue.main.async {
+            self.doneButtonPressed(self)
+        }
+    }
+    
+    @IBAction func unwindToSummary(segue: UIStoryboardSegue) {
+        DispatchQueue.main.async() { () -> Void in
+            self.refreshImage()
+        }
+    }
+    
+    func refreshImage(){
+        if let checkedUrl = URL(string: "http://52.55.212.19/plots/plot_\(bullpenData[0]).png") {
+            print(checkedUrl)
+            downloadImage(url: checkedUrl)
+            setImage()
+        }
+    }
+    
+    func downloadImage(url: URL) {
+        print("Download Started")
+        getDataFromUrl(url: url) { (data, response, error)  in
+            guard let data = data, error == nil else { return }
+            //self.imageView.image = nil
+            //print(response?.suggestedFilename ?? url.lastPathComponent)
+            print("Download Finished")
+            DispatchQueue.main.async() { () -> Void in
+                self.graph = UIImage(data: data)
+            }
+        }
+    }
+    
+    func setImage(){
+        self.imageView.image = nil
+        self.imageView.layer.masksToBounds = true
+        self.imageView.contentMode = .scaleAspectFit
+        self.imageView.image = graph
+    }
+  
+    
+    func getDataFromUrl(url: URL, completion: @escaping (_ data: Data?, _  response: URLResponse?, _ error: Error?) -> Void) {
+        URLSession.shared.reset{
+            let urlTask = URLSession.shared.dataTask(with: url) {
+                (data, response, error) in
+                completion(data, response, error)
+            }
+            urlTask.resume()
+        }
+    }
+    
+    
+    
+    @objc func dismissKeyboard() {
+        //Causes the view (or one of its embedded text fields) to resign the first responder status.
+        view.endEditing(true)
+    }
+  
+    
+    @IBAction func doneButtonPressed(_ sender: AnyObject) {
+        self.performSegue(withIdentifier: "unwindToBullpens", sender: self)
+        
+    }
+    
     
     @objc func pressEmailBullpen(){
         
@@ -193,7 +196,7 @@ class SummaryViewController: UIViewController {
     
     func emailBullpen(email: String,completion: @escaping (Bool) -> ()){
         emailStatusLabel.text = "Sending email..."
-        let data = "bullpen_id=\(currentBullpenID)&email=\(email)"
+        let data = "bullpen_id=\(bullpenData[0])&email=\(email)"
         ServerConnector.runScript(scriptName: "send_email.php", data: data){ response in
             completion(response != nil)
         }
@@ -201,13 +204,13 @@ class SummaryViewController: UIViewController {
     
     
     @objc func addPitches(){
-        sendToAddPitchesVC(bullpen_id: currentBullpenID)
+        sendToAddPitchesVC(bullpenData: bullpenData, comp: false)
     }
     
-    func sendToAddPitchesVC(bullpen_id: Int) {
+    func sendToAddPitchesVC(bullpenData: [Any], comp: Bool) {
         let storyboard = UIStoryboard(name: "AddPitches", bundle: nil)
         let vc = storyboard.instantiateViewController(withIdentifier: "AddPitches") as! AddPitches
-        vc.bullpenID = bullpen_id
+        vc.bullpenData = bullpenData
         vc.new = false
         present(vc, animated: true, completion: nil)
     }
