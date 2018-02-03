@@ -54,10 +54,6 @@ class BullpenViewController: UITableViewController {
         cell?.textLabel?.font = UIFont(name: "Helvetica Neue", size: 24)
         cell?.textLabel?.textColor = UIColor(red:0.06, green:0.11, blue:0.26, alpha:1.0)
         cell?.textLabel?.adjustsFontSizeToFitWidth = true
-        print(BullpenData)
-        //let t = TableData[indexPath.row]
-        //let data = t.components(separatedBy: "~")
-        
         
         if !BullpenData.isEmpty {
             let data = BullpenData[indexPath.row]
@@ -168,7 +164,8 @@ class BullpenViewController: UITableViewController {
             print("Not a valid bullpen")
             return
         }
-       
+        
+        tableView.deselectRow(at: indexPath, animated: false)
         sendToSummaryVC(bullpenData: BullpenData[indexPath.row])
         
     }
@@ -179,10 +176,6 @@ class BullpenViewController: UITableViewController {
         let vc = storyboard.instantiateViewController(withIdentifier: "SummaryVC") as! SummaryViewController
         vc.bullpenData = bullpenData
         present(vc, animated: true, completion: nil)
-        
-        DispatchQueue.main.async {
-            vc.refreshImage()
-        }
         
     }
     

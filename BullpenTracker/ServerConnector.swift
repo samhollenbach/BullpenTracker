@@ -9,7 +9,7 @@
 import Foundation
 
 let publicIP = "http://52.55.212.19/"
-let debug = true
+let debug = false
 
 class ServerConnector {
     

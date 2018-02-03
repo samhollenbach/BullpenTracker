@@ -107,7 +107,6 @@ class PitcherViewController: UITableViewController {
             }
         }
         PitcherViewController.PitcherData = PitcherViewController.PitcherData.sorted(by: {Int($0[2])! < Int($1[2])!})
-        print(PitcherViewController.PitcherData)
         
         DispatchQueue.main.async(execute: {self.do_table_refresh()})
     }

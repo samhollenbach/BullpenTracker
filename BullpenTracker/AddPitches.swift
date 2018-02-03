@@ -35,11 +35,19 @@ class AddPitches: UIViewController, UITextFieldDelegate, UIPickerViewDelegate, U
     
     @IBOutlet weak var executedLabel: UILabel!
     
+    @IBOutlet weak var abLabel: UILabel!
     @IBOutlet weak var StrikeZone: UIImageView!
     var ballImage: UIImageView!
     var strikeZoneImage: UIImageView!
     
+    
+    @IBOutlet weak var strikeButton: UIButton!
+    @IBOutlet weak var ballButton: UIButton!
+    
+    var permanentBalls: [UIImageView] = []
+    
     var bullpenID = -1
+    var abID = 0;
     var pitches: [[String]] = [[String]]()
     
     var add_success = false
@@ -58,13 +66,17 @@ class AddPitches: UIViewController, UITextFieldDelegate, UIPickerViewDelegate, U
     
     var controllingBall = false
     var BallLocation : CGPoint? = nil
-    let ballSize : CGFloat = 8
+    let ballSize : CGFloat = 15
     
     var StrikeViewWidth : CGFloat = 0.0
     var StrikeViewHeight : CGFloat = 0.0
     let strikeZoneRatio : CGFloat = 1.5
     var showPitchHistory = true
     var hardContact = false
+    
+    var currentABPitches = 0
+    
+    var remakeZone = true
     
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -75,70 +87,45 @@ class AddPitches: UIViewController, UITextFieldDelegate, UIPickerViewDelegate, U
         competitivePen = bullpenData[1] as! Bool
         bullpenID = bullpenData[0] as! Int
         
+        let tap: UITapGestureRecognizer = UITapGestureRecognizer(target: self, action: #selector(AddPitcherViewController.dismissKeyboard))
+        view.addGestureRecognizer(tap)
         
-        pitches = [["FB", "CH", "CR", "SL", "X"], ["None", "Swing and miss", "Strike taken", "Swinging strikout", "Looking strikeout"]]
+        initializePitchChoices()
+        
+        
+    }
+    
+    override func viewDidLayoutSubviews() {
+        if remakeZone{
+            addButtons()
+            makeStrikeZone()
+            remakeZone = false
+        }
+    }
+    
+    func initializePitchChoices(){
+        pitches = [["F", "S", "B", "X", "2", "C"], ["None", "Swing and miss", "Strike taken", "Swinging strikout", "Looking strikeout"]]
         selectedPitch = pitches[0][0]
         selectedResult = pitches[1][0]
         totalPitches = bullpenData[5] as! Int
-        
-        navBar.frame = CGRect(x: 0, y: 20, width: (navBar.frame.size.width), height: (navBar.frame.size.height)+UIApplication.shared.statusBarFrame.height)
-        addButtons()
-        // Do any additional setup after loading the view.
-        
-        let tap: UITapGestureRecognizer = UITapGestureRecognizer(target: self, action: #selector(AddPitcherViewController.dismissKeyboard))
-        
-        //Uncomment the line below if you want the tap not not interfere and cancel other interactions.
-        //tap.cancelsTouchesInView = false
-        view.addGestureRecognizer(tap)
-        
-        
-        makeStrikeZone()
     }
     
-    func makeStrikeZone(){
-        
-        
-        StrikeZone.isUserInteractionEnabled = true
-        StrikeViewWidth = StrikeZone.frame.width
-        StrikeViewHeight = StrikeZone.frame.height
-        
-        if !competitivePen{
-            var f = StrikeZone.frame
-            f.origin.x = (self.view.frame.width-StrikeViewWidth)/2
-            StrikeZone.frame = f
-        }
-        
-        let zoneWidth = StrikeViewWidth/(2.2)
-        let zoneHeight = zoneWidth*strikeZoneRatio
-        
-        strikeZoneImage = UIImageView()
-        strikeZoneImage.frame = CGRect(x: StrikeZone.frame.origin.x + (StrikeViewWidth-zoneWidth)/2, y: StrikeZone.frame.origin.y + (StrikeViewHeight-zoneHeight)/2, width: zoneWidth, height: zoneHeight)
-        strikeZoneImage.layer.borderWidth = 2
-        strikeZoneImage.layer.borderColor = UIColor.black.cgColor
-        view.addSubview(strikeZoneImage)
-        
-        ballImage = UIImageView()
-        ballImage.frame = CGRect(x: StrikeZone.frame.origin.x + StrikeViewWidth/2, y: StrikeZone.frame.origin.y + StrikeViewHeight/2, width: ballSize, height: ballSize)
-        ballImage.image = UIImage.circle(diameter: ballSize, color: UIColor.red)
-        view.addSubview(ballImage)
-    }
-    
-    @objc func dismissKeyboard() {
-        //Causes the view (or one of its embedded text fields) to resign the first responder status.
-        view.endEditing(true)
-    }
-    
-
-    
+    // Initialize most of
     func addButtons(){
+        // Main canvas width and height
         let w = self.view.frame.size.width
         let h = self.view.frame.size.height
         
+        // Frame size for Nav Bar (weird iOS 11)
+        navBar.frame = CGRect(x: 0, y: 20, width: w, height: (navBar.frame.size.height)+UIApplication.shared.statusBarFrame.height)
+        
+        
+        // Set top bar labels
         statusLabel.text = "Enter a pitch"
         statusLabel.textAlignment = .left
         statusLabel.font = UIFont.boldSystemFont(ofSize: 18.0)
         view.addSubview(statusLabel)
-        
+            
         pitchCountLabel.text = "Total: " + String(totalPitches)
         pitchCountLabel.textAlignment = .right
         pitchCountLabel.font = UIFont.boldSystemFont(ofSize: 18.0)
@@ -147,17 +134,18 @@ class AddPitches: UIViewController, UITextFieldDelegate, UIPickerViewDelegate, U
     
         var bsButtons: [String]
         
+        // If comp pen initialize At Bat and Hard contact buttons
         if competitivePen{
-            bsButtons = ["N", "Y"]
+            bsButtons = ["Y", "N"]
             pitchResultLabel.isHidden = false
             
             
             let nbwidth : CGFloat = 75
             newABButton.frame = CGRect(x: 10 , y: h-nbwidth-10, width: nbwidth, height: nbwidth)
-            newABButton = makeStandardButton(button: newABButton, title: "Finish At Bat")
+            newABButton = makeStandardButton(button: newABButton, title: "New At Bat")
             newABButton.backgroundColor = enterButtonsColor
             newABButton.setTitleColor(UIColor.white, for: .normal)
-            //newABButton.addTarget(self, action: #selector(enterPitch), for: .touchUpInside)
+            newABButton.addTarget(self, action: #selector(newAB), for: .touchUpInside)
             view.addSubview(newABButton)
             
             hardContactButton = makeStandardButton(button: hardContactButton, title: "Hard Contact?")
@@ -168,33 +156,68 @@ class AddPitches: UIViewController, UITextFieldDelegate, UIPickerViewDelegate, U
             view.addSubview(hardContactButton)
             
         }else{
-            bsButtons = ["Ball", "Strike"]
+            bsButtons = ["Strike", "Ball"]
             executedLabel.isHidden = true
             pitchResultLabel.isHidden = true
             hardContactButton.isHidden = true
-            var frame : CGRect = pitchTypeLabel.frame
-            frame.origin.x = (w-frame.width)/2
-            pitchTypeLabel.frame = frame;
-        }
-        // EXECUTED BUTTONS
-        for (index, pitch) in bsButtons.enumerated(){
-            
-            let size: CGFloat = 65
-            let t = w - (size + 10) * (CGFloat(index+1))
-            
-            var button = UIButton(type: .custom)
-            button.frame = CGRect(x: t, y: (pitchPicker.frame.origin.y + pitchPicker.frame.height - 5), width: size, height: size)
-            button.tag = index
-            button = makeStandardButton(button: button, title: pitch)
-            button.layer.borderColor = ballStrikeColor.cgColor
-            button.backgroundColor = ballStrikeHighlight
-            button.setTitleColor(ballStrikeColor, for: .normal)
-            button.addTarget(self, action: #selector(strikeButtonPressed), for: .touchUpInside)
-            strikeButtons.append(button)
-            view.addSubview(button)
-            
+            abLabel.isHidden = true
+            //var frame : CGRect = pitchTypeLabel.frame
+            //frame.origin.x = (w-frame.width)/2
+            //pitchTypeLabel.frame = frame;
         }
         
+        
+        strikeButton.tag = 1
+        strikeButton.layer.cornerRadius = 0.5 * strikeButton.bounds.size.width
+        strikeButton.clipsToBounds = true
+        strikeButton.setTitle(bsButtons[0], for: .normal)
+        strikeButton.titleLabel?.adjustsFontSizeToFitWidth = true;
+        strikeButton.titleLabel?.textAlignment = .center;
+        strikeButton.titleLabel?.numberOfLines = 0;
+        strikeButton.titleLabel?.minimumScaleFactor = 0.5;
+        strikeButton.layer.borderWidth = 1
+        strikeButton.layer.borderColor = ballStrikeColor.cgColor
+        strikeButton.backgroundColor = ballStrikeHighlight
+        strikeButton.setTitleColor(ballStrikeColor, for: .normal)
+        strikeButton.addTarget(self, action: #selector(strikeButtonPressed), for: .touchUpInside)
+        strikeButtons.append(strikeButton)
+        view.addSubview(strikeButton)
+        
+        ballButton.tag = 0
+        ballButton.layer.cornerRadius = 0.5 * ballButton.bounds.size.width
+        ballButton.clipsToBounds = true
+        ballButton.setTitle(bsButtons[1], for: .normal)
+        ballButton.titleLabel?.adjustsFontSizeToFitWidth = true;
+        ballButton.titleLabel?.textAlignment = .center;
+        ballButton.titleLabel?.numberOfLines = 0;
+        ballButton.titleLabel?.minimumScaleFactor = 0.5;
+        ballButton.layer.borderWidth = 1
+        ballButton.layer.borderColor = ballStrikeColor.cgColor
+        ballButton.backgroundColor = ballStrikeHighlight
+        ballButton.setTitleColor(ballStrikeColor, for: .normal)
+        ballButton.addTarget(self, action: #selector(strikeButtonPressed), for: .touchUpInside)
+        strikeButtons.append(ballButton)
+        view.addSubview(ballButton)
+        
+        // Make Executed/Ball-Strike Buttons
+//        for (index, pitch) in bsButtons.enumerated(){
+//
+//            let size: CGFloat = 65
+//            let t = w - (size + 10) * (CGFloat(index+1))
+//
+//            var button = UIButton(type: .custom)
+//            button.frame = CGRect(x: t, y: (pitchPicker.frame.origin.y + pitchPicker.frame.height - 5), width: size, height: size)
+//            button.tag = index
+//            button = makeStandardButton(button: button, title: pitch)
+//            button.layer.borderColor = ballStrikeColor.cgColor
+//            button.backgroundColor = ballStrikeHighlight
+//            button.setTitleColor(ballStrikeColor, for: .normal)
+//            button.addTarget(self, action: #selector(strikeButtonPressed), for: .touchUpInside)
+//            strikeButtons.append(button)
+//            view.addSubview(button)
+//        }
+        
+        // Velocity Input Field
         velField.keyboardType = .numberPad
         velField.placeholder = "velo"
         velField.backgroundColor = UIColor.white
@@ -204,6 +227,7 @@ class AddPitches: UIViewController, UITextFieldDelegate, UIPickerViewDelegate, U
         velField.layer.cornerRadius = 7
         view.addSubview(velField)
         
+        // Enter Button
         let ebwidth : CGFloat = 75
         enterButton.frame = CGRect(x: w-ebwidth-10 , y: h-ebwidth-10, width: ebwidth, height: ebwidth)
         enterButton = makeStandardButton(button: enterButton, title: "Enter")
@@ -212,23 +236,55 @@ class AddPitches: UIViewController, UITextFieldDelegate, UIPickerViewDelegate, U
         enterButton.addTarget(self, action: #selector(enterPitch), for: .touchUpInside)
         view.addSubview(enterButton)
         
+        // Undo Button
         let ubwidth : CGFloat = 35
         undoButton.frame = CGRect(x: (w-ubwidth)/2, y: h-ubwidth-10, width: ubwidth, height: ubwidth)
         undoButton = makeStandardButton(button: undoButton, title: "undo")
         undoButton.backgroundColor = enterButtonsColor
-        
         let undoImage: UIImage? = UIImage(named: "Undo")?.withRenderingMode(.alwaysTemplate)
-        
-        
-        
         undoButton.setImage(undoImage, for: .normal)
         undoButton.imageView?.tintColor = UIColor.white
-        //undoButton.setTitleColor(UIColor.white, for: .normal)
         undoButton.addTarget(self, action: #selector(pressUndoPitch), for: .touchUpInside)
         view.addSubview(undoButton)
         
-        StrikeZone.layer.borderColor = enterButtonsColor.cgColor
-        StrikeZone.layer.borderWidth = 2
+    }
+    
+    func makeStrikeZone(){
+        DispatchQueue.main.async{
+            // Main Strike Zone layer setup
+            self.StrikeZone.isUserInteractionEnabled = true
+            self.StrikeViewWidth = self.StrikeZone.frame.width
+            self.StrikeViewHeight = self.StrikeZone.frame.height
+            self.StrikeZone.layer.borderColor = self.enterButtonsColor.cgColor
+            self.StrikeZone.layer.borderWidth = 2
+            self.StrikeZone.layer.cornerRadius = 8
+            self.StrikeZone.backgroundColor = UIColor(red: 0.7765, green: 0.7765, blue: 0.7765, alpha: 1.0)
+            
+            // Move position of strike zone area if comp pen
+//            if !self.competitivePen{
+//                var f = self.StrikeZone.frame
+//                f.origin.x = (self.view.frame.width-self.StrikeViewWidth)/2
+//                self.StrikeZone.frame = f
+//            }
+            
+            // Set up real Strike Zone bounds
+            let zoneWidth = self.StrikeViewWidth/(2.2)
+            let zoneHeight = zoneWidth*self.strikeZoneRatio
+            self.strikeZoneImage = UIImageView()
+            self.strikeZoneImage.frame = CGRect(x: self.StrikeZone.frame.origin.x + (self.StrikeViewWidth-zoneWidth)/2, y: self.StrikeZone.frame.origin.y + (self.StrikeViewHeight-zoneHeight)/2, width: zoneWidth, height: zoneHeight)
+            self.strikeZoneImage.layer.borderWidth = 2
+            self.strikeZoneImage.layer.borderColor = UIColor.black.cgColor
+            self.strikeZoneImage.backgroundColor = UIColor.white
+            self.view.addSubview(self.strikeZoneImage)
+            
+            // Initialize ball image
+            self.ballImage = UIImageView()
+            self.ballImage.frame = CGRect(x: self.StrikeZone.frame.origin.x + self.StrikeViewWidth/2, y: self.StrikeZone.frame.origin.y + self.StrikeViewHeight/2, width: self.ballSize, height: self.ballSize)
+            self.ballImage.image = UIImage.circle(hollow: false, diameter: self.ballSize, color: UIColor.black)
+            self.view.addSubview(self.ballImage)
+            self.ballImage.isHidden = true;
+        }
+        
         
     }
     
@@ -244,45 +300,39 @@ class AddPitches: UIViewController, UITextFieldDelegate, UIPickerViewDelegate, U
         return button
     }
     
-    @objc func pressUndoPitch(){
-        undoButton.backgroundColor = enterButtonsColorPressed
-        self.statusLabel.text = "Removing last pitch"
-        if totalPitches == 0{
-            self.statusLabel.text = "No pitches to remove"
-            undoButton.backgroundColor = enterButtonsColor
+    @objc func newAB(sender:UIButton){
+        if currentABPitches == 0{
             return
         }
-        
-        undoPitch(){ success in
-            DispatchQueue.main.async {
-                if success{
-                    self.statusLabel.text = "Sucessfully removed last pitch"
-                    self.totalPitches -= 1
-                    self.pitchCountLabel.text = "Total: " + String(self.totalPitches)
-
-                }else{
-                    self.statusLabel.text = "Failed to remove previous pitch"
-                }
+        let data = "b_id=\(bullpenID)"
+        ServerConnector.runScript(scriptName: "AddAtBat.php", data: data){ response in
+            if response == "null"{
+                self.abID = 0
+            }else{
+                self.abID = Int(response!)!
+            }
+            self.currentABPitches = 0
+            self.updateABLabel()
+        }
+    }
+    
+    func updateABLabel(){
+        DispatchQueue.main.async {
+            if self.currentABPitches == 1{
+                self.abLabel.text = "Current At Bat \(self.currentABPitches) pitch"
+            }else{
+                self.abLabel.text = "Current At Bat \(self.currentABPitches) pitches"
             }
         }
-        undoButton.backgroundColor = enterButtonsColor
+        
+        
     }
-    
-    
-    
-    
-    func undoPitch(completion: @escaping (Bool) -> ()){
-        let data = "id=\(lastPitchID)&bullpen_id=\(bullpenID)"
-        ServerConnector.runScript(scriptName: "RemovePitch.php", data: data){ response in
-            completion(response != nil)
-        }
-    }
-    
-    
     
     @objc func enterPitch(sender:UIButton){
+        DispatchQueue.main.async {
+            self.enterButton.backgroundColor = self.enterButtonsColorPressed
+        }
         
-        enterButton.backgroundColor = enterButtonsColorPressed
         let pitch = selectedPitch
         var strike = ""
         for b in strikeButtons{
@@ -291,7 +341,6 @@ class AddPitches: UIViewController, UITextFieldDelegate, UIPickerViewDelegate, U
                 b.isSelected = false
                 b.backgroundColor = ballStrikeHighlight
                 b.setTitleColor(ballStrikeColor, for: .normal)
-                print(strike)
             }
         }
         
@@ -302,7 +351,6 @@ class AddPitches: UIViewController, UITextFieldDelegate, UIPickerViewDelegate, U
         }
         
         self.statusLabel.text = "Sending..."
-        
         let vel = velField.text
         var resultCode:String
         switch selectedResult{
@@ -326,11 +374,9 @@ class AddPitches: UIViewController, UITextFieldDelegate, UIPickerViewDelegate, U
         }
         if BallLocation != nil{
             createPermanentBall(location: BallLocation!)
-            
         }
         
-        
-        addPitch(pitch: pitch, strike: strike, vel: vel!, result: resultCode){ success in
+        addPitch(pitch: pitch, strike: strike, vel: vel!, result: resultCode, hard_contact: hardContact){ success in
             DispatchQueue.main.async {
                 if success{
                     self.totalPitches += 1
@@ -339,38 +385,44 @@ class AddPitches: UIViewController, UITextFieldDelegate, UIPickerViewDelegate, U
                     if self.competitivePen{
                          self.statusLabel.text?.append(", \(resultCode)")
                     }
-                    
                 }else{
                     self.statusLabel.text = "Trouble connecting to database, try again"
                 }
                 self.enterButton.backgroundColor = self.enterButtonsColor
             }
-            
-            
         }
         velField.text = ""
-        
-        
-        
+        if hardContact{
+            toggleHardContact()
+        }
+        currentABPitches += 1
+        updateABLabel()
     }
     
     
-    func addPitch(pitch: String, strike: String, vel: String, result: String, completion: @escaping (Bool) -> ()){
+    func addPitch(pitch: String, strike: String, vel: String, result: String, hard_contact: Bool, completion: @escaping (Bool) -> ()){
         var s = strike
         if s=="Strike"{
             s = "S"
         }else if s=="Ball"{
             s = "B"
+        }else if s=="Y"{
+            s = "X"
         }
         
         
         var data = "bullpen_id=\(bullpenID)&pitch_type=\(pitch)&ball_strike=\(s)&vel=\(vel)&result=\(result)"
-    
-        if BallLocation != nil{
+        
+        if competitivePen{
+            let hc = hard_contact ? 1 : 0
+            data.append("&hard_contact=\(hc)")
+        }
+        
+        if BallLocation != nil && !ballImage.isHidden{
             let loc : CGPoint = getTranslatedLocation(viewLocation: BallLocation!)
-            print(loc.x, loc.y)
             data.append("&pitchX=\(loc.x)&pitchY=\(loc.y)")
             BallLocation = nil
+            ballImage.isHidden = true;
         }
         
         
@@ -381,6 +433,40 @@ class AddPitches: UIViewController, UITextFieldDelegate, UIPickerViewDelegate, U
             let pitch = pitch_list[0] as? NSDictionary
             let last_pitch = pitch!["last_id"] as! String
             self.lastPitchID = Int(last_pitch)!
+        }
+    }
+    
+    
+    @objc func pressUndoPitch(){
+        undoButton.backgroundColor = enterButtonsColorPressed
+        self.statusLabel.text = "Removing last pitch"
+        if totalPitches == 0{
+            self.statusLabel.text = "No pitches to remove"
+            undoButton.backgroundColor = enterButtonsColor
+            return
+        }
+        
+        undoPitch(){ success in
+            DispatchQueue.main.async {
+                if success{
+                    self.statusLabel.text = "Sucessfully removed last pitch"
+                    self.totalPitches -= 1
+                    self.pitchCountLabel.text = "Total: " + String(self.totalPitches)
+                    self.currentABPitches -= 1
+                    self.updateABLabel()
+                }else{
+                    self.statusLabel.text = "Failed to remove previous pitch"
+                }
+            }
+        }
+        undoButton.backgroundColor = enterButtonsColor
+    }
+    
+    
+    func undoPitch(completion: @escaping (Bool) -> ()){
+        let data = "id=\(lastPitchID)&bullpen_id=\(bullpenID)"
+        ServerConnector.runScript(scriptName: "RemovePitch.php", data: data){ response in
+            completion(response != nil)
         }
     }
     
@@ -419,19 +505,20 @@ class AddPitches: UIViewController, UITextFieldDelegate, UIPickerViewDelegate, U
         dismissKeyboard()
         sender.isEnabled = false
         if totalPitches > 0 {
-            makeData(){ success in
-                DispatchQueue.main.async {
-                    print("Success: \(success)")
-                    //idk y
-                    sleep(1)
-                    self.sendToSummaryVC(bullpenData: self.bullpenData)
-                }
-            }
+            self.sendToSummaryVC(bullpenData: self.bullpenData)
+//            makeData(){ success in
+//                DispatchQueue.main.async {
+//                    print("Success: \(success)")
+//                    //idk y
+//                    //sleep(1)
+//                    self.sendToSummaryVC(bullpenData: self.bullpenData)
+//                }
+//            }
         }else{
             if new{
-                performSegue(withIdentifier: "unwindToBullpens", sender: self)
+                self.performSegue(withIdentifier: "unwindToBullpens", sender: self)
             }else{
-                performSegue(withIdentifier: "unwindToSummary", sender: self)
+                self.performSegue(withIdentifier: "unwindToSummary", sender: self)
             }
             
         }
@@ -443,32 +530,6 @@ class AddPitches: UIViewController, UITextFieldDelegate, UIPickerViewDelegate, U
         ServerConnector.runScript(scriptName: "get_stats.php", data: data){ response in
             completion(response != nil)
         }
-
-
-    }
-    
-    func sendToSummaryVC(bullpenData: [Any]) {
-        let storyboard = UIStoryboard(name: "SummaryView", bundle: nil)
-        let vc = storyboard.instantiateViewController(withIdentifier: "SummaryVC") as! SummaryViewController
-        vc.bullpenData = bullpenData
-        self.present(vc, animated: true, completion: nil)
-    }
-    
-   
-    
-    
-    func sendToBullpens() {
-        let storyboard = UIStoryboard(name: "Bullpens", bundle: nil)
-        let vc = storyboard.instantiateViewController(withIdentifier: "BullpensVC") as! BullpenViewController
-        present(vc, animated: true, completion: nil)
-        
-    }
-    
-    
-
-    override func didReceiveMemoryWarning() {
-        super.didReceiveMemoryWarning()
-        // Dispose of any resources that can be recreated.
     }
     
     // The number of columns of data
@@ -494,7 +555,33 @@ class AddPitches: UIViewController, UITextFieldDelegate, UIPickerViewDelegate, U
     // Catpure the picker view selection
     func pickerView(_ pickerView: UIPickerView, didSelectRow row: Int, inComponent component: Int) {
         if component == 0{
-             selectedPitch = pitches[component][row]
+            selectedPitch = pitches[component][row]
+            var color = UIColor.black
+            switch selectedPitch{
+                
+            case "F":
+                color = SummaryViewController.fColor
+                break
+            case "S":
+                color = SummaryViewController.sColor
+                break
+            case "B":
+                color = SummaryViewController.bColor
+                break
+            case "X":
+                color = SummaryViewController.xColor
+                break
+            case "2":
+                color = SummaryViewController.twoColor
+                break
+            case "C":
+                color = SummaryViewController.cColor
+                break
+            default:
+                color = UIColor.black
+            }
+            ballImage.image = UIImage.circle(hollow: false, diameter: ballSize, color: color)
+            
         }else{
             selectedResult = pitches[1][row]
         }
@@ -512,7 +599,7 @@ class AddPitches: UIViewController, UITextFieldDelegate, UIPickerViewDelegate, U
                 controllingBall = true
             }
             BallLocation = loc
-            showBall(location: BallLocation, color: UIColor.red)
+            showBall(location: BallLocation)
         }
         
         
@@ -552,7 +639,7 @@ class AddPitches: UIViewController, UITextFieldDelegate, UIPickerViewDelegate, U
                 }
             }
             
-            showBall(location: BallLocation, color: UIColor.red)
+            showBall(location: BallLocation)
         }
         
     }
@@ -562,15 +649,16 @@ class AddPitches: UIViewController, UITextFieldDelegate, UIPickerViewDelegate, U
             let loc = touch.location(in: StrikeZone)
             controllingBall = false
             BallLocation = loc
-            showBall(location: BallLocation, color: UIColor.red)
+            showBall(location: BallLocation)
         }
     }
     
-    func showBall(location: CGPoint?, color: UIColor){
+    func showBall(location: CGPoint?){
     
         if !controllingBall || location == nil{
             return
         }
+        ballImage.isHidden = false;
         var frame = ballImage.frame
         frame.origin.x = StrikeZone.frame.minX + location!.x - frame.width/2
         frame.origin.y = StrikeZone.frame.minY + location!.y - frame.height/2
@@ -581,11 +669,14 @@ class AddPitches: UIViewController, UITextFieldDelegate, UIPickerViewDelegate, U
         
         let permBallImage = UIImageView()
         permBallImage.frame = CGRect(x: StrikeZone.frame.origin.x + location.x - ballSize/2, y: StrikeZone.frame.origin.y + location.y - ballSize/2, width: ballSize, height: ballSize)
-        permBallImage.image = UIImage.circle(diameter: ballSize, color: UIColor.gray)
+        permBallImage.image = UIImage.circle(hollow: false, diameter: ballSize, color: UIColor.gray)
         view.addSubview(permBallImage)
     }
     
     @objc func hardContactPressed(_ sender: UIButton){
+        toggleHardContact()
+    }
+    func toggleHardContact(){
         hardContact = !hardContact
         if hardContact{
             hardContactButton.backgroundColor = ballStrikeColor
@@ -601,7 +692,6 @@ class AddPitches: UIViewController, UITextFieldDelegate, UIPickerViewDelegate, U
         let tx = (viewLocation.x - StrikeZone.frame.width/2) / (strikeZoneImage.frame.width/2)
         // Still relative to zone width
         let ty = (viewLocation.y - StrikeZone.frame.height/2) / (strikeZoneImage.frame.width/2)
-        print(tx,ty)
         return CGPoint(x:tx,y:ty)
     }
     
@@ -615,18 +705,47 @@ class AddPitches: UIViewController, UITextFieldDelegate, UIPickerViewDelegate, U
         // Pass the selected object to the new view controller.
     }
     */
+    
+    func sendToSummaryVC(bullpenData: [Any]) {
+        let storyboard = UIStoryboard(name: "SummaryView", bundle: nil)
+        let vc = storyboard.instantiateViewController(withIdentifier: "SummaryVC") as! SummaryViewController
+        vc.bullpenData = bullpenData
+        self.present(vc, animated: true, completion: nil)
+    }
+    
+    func sendToBullpens() {
+        let storyboard = UIStoryboard(name: "Bullpens", bundle: nil)
+        let vc = storyboard.instantiateViewController(withIdentifier: "BullpensVC") as! BullpenViewController
+        present(vc, animated: true, completion: nil)
+        
+    }
+    
+    @objc func dismissKeyboard() {
+        //Causes the view (or one of its embedded text fields) to resign the first responder status.
+        view.endEditing(true)
+    }
+    
+    override func didReceiveMemoryWarning() {
+        super.didReceiveMemoryWarning()
+        // Dispose of any resources that can be recreated.
+    }
 
 }
 
 extension UIImage {
-    class func circle(diameter: CGFloat, color: UIColor) -> UIImage {
+    class func circle(hollow: Bool, diameter: CGFloat, color: UIColor) -> UIImage {
         UIGraphicsBeginImageContextWithOptions(CGSize(width: diameter, height: diameter), false, 0)
         let ctx = UIGraphicsGetCurrentContext()!
         ctx.saveGState()
-        
         let rect = CGRect(x: 0, y: 0, width: diameter, height: diameter)
         ctx.setFillColor(color.cgColor)
-        ctx.fillEllipse(in: rect)
+        ctx.setStrokeColor(color.cgColor)
+        if hollow{
+            ctx.strokeEllipse(in: rect)
+        }else{
+            ctx.fillEllipse(in: rect)
+        }
+        
         
         ctx.restoreGState()
         let img = UIGraphicsGetImageFromCurrentImageContext()!
