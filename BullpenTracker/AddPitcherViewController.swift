@@ -18,10 +18,10 @@ class AddPitcherViewController: UIViewController {
     override func viewDidLoad() {
         super.viewDidLoad()
         if #available(iOS 11.0, *) {
-            self.additionalSafeAreaInsets.top = 20
+            //self.additionalSafeAreaInsets.top = 20
         }
-        navBar.frame = CGRect(x: 0, y: 20, width: (navBar.frame.size.width), height: (navBar.frame.size.height))
         
+        navBar.sizeToFit()
         let tap: UITapGestureRecognizer = UITapGestureRecognizer(target: self, action: #selector(AddPitcherViewController.dismissKeyboard))
         
         //Uncomment the line below if you want the tap not not interfere and cancel other interactions.

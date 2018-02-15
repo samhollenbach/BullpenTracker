@@ -11,6 +11,7 @@ class BullpenViewController: UITableViewController {
     @IBOutlet weak var titleView: UINavigationItem!
     //var TableData = [String]()
     var BullpenData = [[Any!]]()
+    var PitcherData : [String] = []
     let currentPitcherName = PitcherViewController.getPitcherName(id: PitcherViewController.getCurrentPitcher())
     let noBullpenString = "You have no saved bullpens"
     
@@ -19,7 +20,8 @@ class BullpenViewController: UITableViewController {
         // TODO: Setvartle of VC to pitcher name
         //self.parent?.title = currentPitcherName
         self.tableView.rowHeight = 80.0
-        navBar.frame = CGRect(x: 0, y: 0, width: (navBar.frame.size.width), height: (navBar.frame.size.height))
+        navBar.sizeToFit()
+        
         BullpenData = []
         //self.tableView.contentInset = UIEdgeInsets(top: UIApplication.shared.statusBarFrame.size.height, left: 0, bottom: 0, right: 0)
         titleView.title = "\(currentPitcherName)\'s Bullpens"
@@ -60,14 +62,7 @@ class BullpenViewController: UITableViewController {
             let _ = data[0]
             cell?.textLabel?.text = data[4] as? String
             
-            let formatter = DateFormatter()
-            formatter.dateFormat = "yyyy-MM-dd"
-            
-            let yourDate = formatter.date(from: data[3] as! String)
-            
-            formatter.dateFormat = "MMMM dd, yyyy"
-            
-            let dateFormatted = formatter.string(from: yourDate!)
+            let dateFormatted = BullpenViewController.formatDate(originalDate: data[3] as! String, originalFormat: "yyyy-MM-dd", newFormat: "MMMM dd, yyyy")
             
             cell?.detailTextLabel?.text = dateFormatted
         }else{
@@ -78,16 +73,25 @@ class BullpenViewController: UITableViewController {
         
         return cell!
     }
+    static func formatDate(originalDate: String, originalFormat: String, newFormat: String) -> String {
+        let formatter = DateFormatter()
+        formatter.dateFormat = originalFormat
+        let yourDate = formatter.date(from: originalDate)
+        formatter.dateFormat = newFormat
+        return formatter.string(from: yourDate!)
+    }
+    
     
     @IBAction func sendToPitchersVC(_ sender: UIBarButtonItem) {
         self.performSegue(withIdentifier: "unwindToPitchers", sender: self)
         
     }
     
-    func sendToAddPitchesVC(bullpenData: [Any]) {
+    func sendToAddPitchesVC(bullpenData: [Any], PitcherData:[String]) {
         let storyboard = UIStoryboard(name: "AddPitches", bundle: nil)
         let vc = storyboard.instantiateViewController(withIdentifier: "AddPitches") as! AddPitches
         vc.bullpenData = bullpenData
+        vc.PitcherData = PitcherData
         present(vc, animated: true, completion: nil)
     }
     
@@ -132,18 +136,23 @@ class BullpenViewController: UITableViewController {
         let data = "pitcher_id=\(pitcher_id)&type=\(type)"
         
         ServerConnector.runScript(scriptName: "AddBullpen.php", data: data) { (responseString) in
-            let list = ServerConnector.extractJSON((responseString?.data(using: .utf8))!)
-            let pitcher = list[0] as? NSDictionary
-            let idString = pitcher!["bid"] as? String
-            let id: Int = Int(idString!)!
-            var compPen = false
-            if type == "COMP" || type == "GAME"{
-                compPen = true
+            if let list = ServerConnector.extractJSON((responseString?.data(using: .utf8))!) as? [NSDictionary]{
+                let pitcher = list[0] as NSDictionary
+                let idString = pitcher["bid"] as? String
+                let id: Int = Int(idString!)!
+                var compPen = false
+                if type == "COMP" || type == "GAME"{
+                    compPen = true
+                }
+                
+                DispatchQueue.main.async {
+                    print(self.PitcherData)
+                    self.sendToAddPitchesVC(bullpenData: [id, compPen, "", "", "", 0], PitcherData: self.PitcherData)
+                }
+            }else{
+                print("Error connecting to server")
             }
             
-            DispatchQueue.main.async {
-                self.sendToAddPitchesVC(bullpenData: [id, compPen, "", "", "", 0])
-            }
         }
        
         
@@ -175,6 +184,7 @@ class BullpenViewController: UITableViewController {
         let storyboard = UIStoryboard(name: "SummaryView", bundle: nil)
         let vc = storyboard.instantiateViewController(withIdentifier: "SummaryVC") as! SummaryViewController
         vc.bullpenData = bullpenData
+        vc.PitcherData = PitcherData
         present(vc, animated: true, completion: nil)
         
     }

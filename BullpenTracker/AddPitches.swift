@@ -11,12 +11,12 @@ import UIKit
 class AddPitches: UIViewController, UITextFieldDelegate, UIPickerViewDelegate, UIPickerViewDataSource{
     
     var bullpenData = [Any]()
+    var PitcherData = [String]()
     var competitivePen = false
     
     
     @IBOutlet weak var hardContactButton: UIButton!
     
-    @IBOutlet weak var atBatPicker: UIPickerView!
     @IBOutlet weak var pitchPicker: UIPickerView!
     var totalPitches = 0
     var new: Bool = true
@@ -54,6 +54,7 @@ class AddPitches: UIViewController, UITextFieldDelegate, UIPickerViewDelegate, U
     var newABButton = UIButton(type: .custom)
     var enterButton = UIButton(type: .custom)
     var undoButton = UIButton(type: .custom)
+    let backgroundColor = UIColor.white
     let pitchTypeHighlight = UIColor.white
     let pitchTypeColor = UIColor(red:0.13, green:0.22, blue:0.46, alpha:1.0)
     let ballStrikeHighlight = UIColor.white
@@ -68,6 +69,7 @@ class AddPitches: UIViewController, UITextFieldDelegate, UIPickerViewDelegate, U
     var BallLocation : CGPoint? = nil
     let ballSize : CGFloat = 15
     
+    var permBalls : [UIImageView] = []
     var StrikeViewWidth : CGFloat = 0.0
     var StrikeViewHeight : CGFloat = 0.0
     let strikeZoneRatio : CGFloat = 1.5
@@ -83,7 +85,11 @@ class AddPitches: UIViewController, UITextFieldDelegate, UIPickerViewDelegate, U
         
         self.pitchPicker.delegate = self
         self.pitchPicker.dataSource = self
-
+        
+        
+        
+        navBar.sizeToFit()
+        
         competitivePen = bullpenData[1] as! Bool
         bullpenID = bullpenData[0] as! Int
         
@@ -97,9 +103,34 @@ class AddPitches: UIViewController, UITextFieldDelegate, UIPickerViewDelegate, U
     
     override func viewDidLayoutSubviews() {
         if remakeZone{
+            let f = pitchPicker.frame
+            var h = f.height
+            if h < 200{
+                h = 200
+            }
+            
+            pitchPicker.frame = CGRect(x: f.origin.x, y: f.origin.y, width: f.width, height: h)
+            
+            
+//            let sf = StrikeZone.frame
+//            if sf.height > 200{
+//
+//                StrikeZone.frame = CGRect(x: sf.origin.x, y: sf.origin.y, width: f.width, height: 200)
+//            }
+            
+            //Move position of strike zone area if comp pen
+            if !self.competitivePen{
+                var f = self.StrikeZone.frame
+                f.origin.x = (self.view.frame.width-self.StrikeViewWidth)/2
+                self.StrikeZone.frame = f
+            }
+            
             addButtons()
+            
             makeStrikeZone()
             remakeZone = false
+            
+            
         }
     }
     
@@ -142,9 +173,12 @@ class AddPitches: UIViewController, UITextFieldDelegate, UIPickerViewDelegate, U
             
             let nbwidth : CGFloat = 75
             newABButton.frame = CGRect(x: 10 , y: h-nbwidth-10, width: nbwidth, height: nbwidth)
-            newABButton = makeStandardButton(button: newABButton, title: "New At Bat")
-            newABButton.backgroundColor = enterButtonsColor
-            newABButton.setTitleColor(UIColor.white, for: .normal)
+            newABButton = makeStandardButton(button: newABButton, title: "Start New At Bat")
+            newABButton.backgroundColor = backgroundColor
+            newABButton.layer.borderColor = enterButtonsColor.cgColor
+            newABButton.layer.borderWidth = 1
+            newABButton.titleLabel?.adjustsFontSizeToFitWidth = true
+            newABButton.setTitleColor(UIColor.lightGray, for: .normal)
             newABButton.addTarget(self, action: #selector(newAB), for: .touchUpInside)
             view.addSubview(newABButton)
             
@@ -199,28 +233,10 @@ class AddPitches: UIViewController, UITextFieldDelegate, UIPickerViewDelegate, U
         strikeButtons.append(ballButton)
         view.addSubview(ballButton)
         
-        // Make Executed/Ball-Strike Buttons
-//        for (index, pitch) in bsButtons.enumerated(){
-//
-//            let size: CGFloat = 65
-//            let t = w - (size + 10) * (CGFloat(index+1))
-//
-//            var button = UIButton(type: .custom)
-//            button.frame = CGRect(x: t, y: (pitchPicker.frame.origin.y + pitchPicker.frame.height - 5), width: size, height: size)
-//            button.tag = index
-//            button = makeStandardButton(button: button, title: pitch)
-//            button.layer.borderColor = ballStrikeColor.cgColor
-//            button.backgroundColor = ballStrikeHighlight
-//            button.setTitleColor(ballStrikeColor, for: .normal)
-//            button.addTarget(self, action: #selector(strikeButtonPressed), for: .touchUpInside)
-//            strikeButtons.append(button)
-//            view.addSubview(button)
-//        }
-        
         // Velocity Input Field
         velField.keyboardType = .numberPad
         velField.placeholder = "velo"
-        velField.backgroundColor = UIColor.white
+        velField.backgroundColor = backgroundColor
         velField.layer.borderWidth = 1
         velField.layer.borderColor = enterButtonsColor.cgColor
         velField.textAlignment = .center
@@ -232,7 +248,7 @@ class AddPitches: UIViewController, UITextFieldDelegate, UIPickerViewDelegate, U
         enterButton.frame = CGRect(x: w-ebwidth-10 , y: h-ebwidth-10, width: ebwidth, height: ebwidth)
         enterButton = makeStandardButton(button: enterButton, title: "Enter")
         enterButton.backgroundColor = enterButtonsColor
-        enterButton.setTitleColor(UIColor.white, for: .normal)
+        enterButton.setTitleColor(backgroundColor, for: .normal)
         enterButton.addTarget(self, action: #selector(enterPitch), for: .touchUpInside)
         view.addSubview(enterButton)
         
@@ -243,7 +259,7 @@ class AddPitches: UIViewController, UITextFieldDelegate, UIPickerViewDelegate, U
         undoButton.backgroundColor = enterButtonsColor
         let undoImage: UIImage? = UIImage(named: "Undo")?.withRenderingMode(.alwaysTemplate)
         undoButton.setImage(undoImage, for: .normal)
-        undoButton.imageView?.tintColor = UIColor.white
+        undoButton.imageView?.tintColor = backgroundColor
         undoButton.addTarget(self, action: #selector(pressUndoPitch), for: .touchUpInside)
         view.addSubview(undoButton)
         
@@ -260,12 +276,7 @@ class AddPitches: UIViewController, UITextFieldDelegate, UIPickerViewDelegate, U
             self.StrikeZone.layer.cornerRadius = 8
             self.StrikeZone.backgroundColor = UIColor(red: 0.7765, green: 0.7765, blue: 0.7765, alpha: 1.0)
             
-            // Move position of strike zone area if comp pen
-//            if !self.competitivePen{
-//                var f = self.StrikeZone.frame
-//                f.origin.x = (self.view.frame.width-self.StrikeViewWidth)/2
-//                self.StrikeZone.frame = f
-//            }
+            
             
             // Set up real Strike Zone bounds
             let zoneWidth = self.StrikeViewWidth/(2.2)
@@ -313,15 +324,22 @@ class AddPitches: UIViewController, UITextFieldDelegate, UIPickerViewDelegate, U
             }
             self.currentABPitches = 0
             self.updateABLabel()
+            DispatchQueue.main.async{
+                self.newABButton.backgroundColor = self.backgroundColor
+                self.newABButton.setTitleColor(UIColor.lightGray, for: .normal)
+                for pb in self.permBalls{
+                    pb.image = UIImage.circle(hollow: false, diameter: self.ballSize, color: UIColor.lightGray)
+                }
+            }
         }
     }
     
     func updateABLabel(){
         DispatchQueue.main.async {
             if self.currentABPitches == 1{
-                self.abLabel.text = "Current At Bat \(self.currentABPitches) pitch"
+                self.abLabel.text = "Current At Bat: \(self.currentABPitches) pitch"
             }else{
-                self.abLabel.text = "Current At Bat \(self.currentABPitches) pitches"
+                self.abLabel.text = "Current At Bat: \(self.currentABPitches) pitches"
             }
         }
         
@@ -397,6 +415,8 @@ class AddPitches: UIViewController, UITextFieldDelegate, UIPickerViewDelegate, U
         }
         currentABPitches += 1
         updateABLabel()
+        newABButton.backgroundColor = enterButtonsColor
+        newABButton.setTitleColor(backgroundColor, for: .normal)
     }
     
     
@@ -454,6 +474,10 @@ class AddPitches: UIViewController, UITextFieldDelegate, UIPickerViewDelegate, U
                     self.pitchCountLabel.text = "Total: " + String(self.totalPitches)
                     self.currentABPitches -= 1
                     self.updateABLabel()
+                    
+                    self.permBalls[self.permBalls.count-1].removeFromSuperview()
+                    self.permBalls.removeLast()
+                    
                 }else{
                     self.statusLabel.text = "Failed to remove previous pitch"
                 }
@@ -505,7 +529,7 @@ class AddPitches: UIViewController, UITextFieldDelegate, UIPickerViewDelegate, U
         dismissKeyboard()
         sender.isEnabled = false
         if totalPitches > 0 {
-            self.sendToSummaryVC(bullpenData: self.bullpenData)
+            self.sendToSummaryVC(bullpenData: self.bullpenData, PitcherData: self.PitcherData)
 //            makeData(){ success in
 //                DispatchQueue.main.async {
 //                    print("Success: \(success)")
@@ -554,6 +578,7 @@ class AddPitches: UIViewController, UITextFieldDelegate, UIPickerViewDelegate, U
     
     // Catpure the picker view selection
     func pickerView(_ pickerView: UIPickerView, didSelectRow row: Int, inComponent component: Int) {
+        dismissKeyboard()
         if component == 0{
             selectedPitch = pitches[component][row]
             var color = UIColor.black
@@ -585,7 +610,6 @@ class AddPitches: UIViewController, UITextFieldDelegate, UIPickerViewDelegate, U
         }else{
             selectedResult = pitches[1][row]
         }
-       
         
     }
     override func touchesBegan(_ touches: Set<UITouch>, with event: UIEvent?) {
@@ -612,19 +636,21 @@ class AddPitches: UIViewController, UITextFieldDelegate, UIPickerViewDelegate, U
         super.touchesMoved(touches, with: event)
         if let touch = touches.first{
             let loc = touch.location(in: StrikeZone)
-            if loc.x < 0 || loc.x > StrikeViewWidth || loc.y < 0 || loc.y > StrikeViewHeight {
-                controllingBall = false
-                return
-            }else{
-                controllingBall = true
-            }
-            
+
             var lockX = false
-            if loc.x < 0 || loc.x > StrikeViewWidth  {
+            if loc.x < 0 {
+                BallLocation!.x = 0
+                lockX = true
+            }else if loc.x > StrikeViewWidth{
+                BallLocation!.x = StrikeViewWidth
                 lockX = true
             }
             var lockY = false
-            if loc.y < 0 || loc.y > StrikeViewHeight {
+            if loc.y < 0 {
+                BallLocation!.y = 0
+                lockY = true
+            }else if loc.y > StrikeViewHeight{
+                BallLocation!.y = StrikeViewHeight
                 lockY = true
             }
             if lockX && lockY{
@@ -645,12 +671,12 @@ class AddPitches: UIViewController, UITextFieldDelegate, UIPickerViewDelegate, U
     }
     
     override func touchesEnded(_ touches: Set<UITouch>, with event: UIEvent?) {
-        if let touch = touches.first{
-            let loc = touch.location(in: StrikeZone)
-            controllingBall = false
-            BallLocation = loc
-            showBall(location: BallLocation)
-        }
+//        if let touch = touches.first{
+//            //let loc = touch.location(in: StrikeZone)
+//            controllingBall = false
+//            //BallLocation = loc
+//            //showBall(location: BallLocation)
+//        }
     }
     
     func showBall(location: CGPoint?){
@@ -670,10 +696,12 @@ class AddPitches: UIViewController, UITextFieldDelegate, UIPickerViewDelegate, U
         let permBallImage = UIImageView()
         permBallImage.frame = CGRect(x: StrikeZone.frame.origin.x + location.x - ballSize/2, y: StrikeZone.frame.origin.y + location.y - ballSize/2, width: ballSize, height: ballSize)
         permBallImage.image = UIImage.circle(hollow: false, diameter: ballSize, color: UIColor.gray)
+        permBalls.append(permBallImage)
         view.addSubview(permBallImage)
     }
     
     @objc func hardContactPressed(_ sender: UIButton){
+        dismissKeyboard()
         toggleHardContact()
     }
     func toggleHardContact(){
@@ -706,10 +734,11 @@ class AddPitches: UIViewController, UITextFieldDelegate, UIPickerViewDelegate, U
     }
     */
     
-    func sendToSummaryVC(bullpenData: [Any]) {
+    func sendToSummaryVC(bullpenData: [Any], PitcherData: [String]) {
         let storyboard = UIStoryboard(name: "SummaryView", bundle: nil)
         let vc = storyboard.instantiateViewController(withIdentifier: "SummaryVC") as! SummaryViewController
         vc.bullpenData = bullpenData
+        vc.PitcherData = PitcherData
         self.present(vc, animated: true, completion: nil)
     }
     

@@ -66,7 +66,7 @@ class ServerConnector {
     }
     
     
-    static func getURLData(urlString: String, verbose: Bool? = nil, httpMethod: String = "GET", finished: @escaping ((_ isSuccess: Bool, _ data:Data?, _ response:URLResponse?)->Void)) {
+    static func getURLData(urlString: String, data : String = "", verbose: Bool? = nil, httpMethod: String = "GET", finished: @escaping ((_ isSuccess: Bool, _ data:Data?, _ response:URLResponse?)->Void)) {
         // If verbose is not set, set it to debug value
         let verbose = verbose ?? debug
         // Make URL request
@@ -74,6 +74,7 @@ class ServerConnector {
         let request = NSMutableURLRequest(url: url as URL!)
         request.httpMethod = httpMethod
         request.cachePolicy = NSURLRequest.CachePolicy.reloadIgnoringCacheData
+        request.httpBody = data.data(using: String.Encoding.utf8);
         let session = Foundation.URLSession.shared
         let task = session.dataTask(with: request as URLRequest, completionHandler: {(data, response, error) in
             if let error = error {

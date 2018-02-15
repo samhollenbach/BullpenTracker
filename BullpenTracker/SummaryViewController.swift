@@ -11,6 +11,7 @@ import UIKit
 class SummaryViewController: UIViewController, UIPopoverPresentationControllerDelegate {
 
     var bullpenData: [Any] = []
+    var PitcherData: [String] = []
     @IBOutlet weak var navBar: UINavigationBar!
     @IBOutlet weak var StrikeZone: UIImageView!
     @IBOutlet weak var emailStatusLabel: UILabel!
@@ -22,6 +23,19 @@ class SummaryViewController: UIViewController, UIPopoverPresentationControllerDe
     @IBOutlet weak var xLabel: UILabel!
     @IBOutlet weak var twoLabel: UILabel!
     @IBOutlet weak var cLabel: UILabel!
+    @IBOutlet weak var loadingLabel: UILabel!
+    @IBOutlet weak var executedLabel: UILabel!
+    @IBOutlet weak var notExecutedLabel: UILabel!
+    @IBOutlet weak var showVelocitiesLabel: UILabel!
+    
+    @IBOutlet weak var strikeRefImage: UIImageView!
+    @IBOutlet weak var ballRefImage: UIImageView!
+    
+    @IBOutlet weak var pitcherNameLabel: UILabel!
+    @IBOutlet weak var bullpenTypeLabel: UILabel!
+    @IBOutlet weak var pitchCountLabel: UILabel!
+    @IBOutlet weak var dateLabel: UILabel!
+    
     static let fColor = UIColor.black
     static let sColor = UIColor.orange
     static let bColor = UIColor.blue
@@ -31,8 +45,9 @@ class SummaryViewController: UIViewController, UIPopoverPresentationControllerDe
     
     var pitch_list: [UIImageView] = []
     var pitch_data: [[String:Any]] = []
+    var pitch_labels : [UILabel] = []
     
-    let ballSize : CGFloat = 12
+    let ballSize : CGFloat = 15
     var ballImage: UIImageView!
     var strikeZoneImage: UIImageView!
     var StrikeViewWidth : CGFloat = 0.0
@@ -43,9 +58,14 @@ class SummaryViewController: UIViewController, UIPopoverPresentationControllerDe
     
     var remakeZone = true
     var showingPitches: [String] = []
+    var selectedExecuted = false
+    var selectedNotExecuted = false
+    var showPitchLabels = false
     
     @IBOutlet weak var emailButton: UIButton!
     @IBOutlet weak var addPitchesButton: UIButton!
+    
+    let backgroundColor = UIColor.white
     
     struct defaultsKeys {
         static let lastEmail = "lastEmail"
@@ -55,9 +75,35 @@ class SummaryViewController: UIViewController, UIPopoverPresentationControllerDe
     override func viewDidLoad() {
         super.viewDidLoad()
         if #available(iOS 11.0, *) {
-            self.additionalSafeAreaInsets.top = 20
+            //self.additionalSafeAreaInsets.top = 20
         }
-        navBar.frame = CGRect(x: 0, y: 20, width: (navBar.frame.size.width), height: (navBar.frame.size.height))
+        navBar.sizeToFit()
+        
+        if !PitcherData.isEmpty{
+            pitcherNameLabel.text = PitcherData[1]
+        }else{
+            pitcherNameLabel.text = "Error loading pitcher"
+        }
+        
+        
+        bullpenTypeLabel.text = bullpenData[2] as? String
+        
+        
+        let originalDate =  bullpenData[3] as? String
+        var date = ""
+        if originalDate != nil && originalDate != "" {
+            date = BullpenViewController.formatDate(originalDate: originalDate!, originalFormat: "yyyy-MM-dd", newFormat: "MM/dd/yyyy")
+        }
+        
+        dateLabel.text = date
+        
+        let pc = bullpenData[5] as! Int
+        if pc == 1{
+            pitchCountLabel.text = "1 pitch"
+        }else{
+            pitchCountLabel.text = "\(pc) pitches"
+        }
+        
         DispatchQueue.main.async {
             self.addButtons()
             self.makeGestures()
@@ -78,7 +124,7 @@ class SummaryViewController: UIViewController, UIPopoverPresentationControllerDe
         //tap.cancelsTouchesInView = false
         view.addGestureRecognizer(tap)
         
-        let labCornerRad : CGFloat = 10
+        let labCornerRad : CGFloat = 8
         let tapPitchesGesture1 = UITapGestureRecognizer(target: self, action: #selector(SummaryViewController.tapPitches))
         fLabel.tag = 1
         fLabel.isUserInteractionEnabled = true
@@ -109,13 +155,82 @@ class SummaryViewController: UIViewController, UIPopoverPresentationControllerDe
         cLabel.layer.cornerRadius = labCornerRad
         cLabel.isUserInteractionEnabled = true
         cLabel.addGestureRecognizer(tapPitchesGesture6)
+        
+        let tapExecutedGesture1 = UITapGestureRecognizer(target: self, action: #selector(SummaryViewController.tapExecuted))
+        executedLabel.tag = 1
+        executedLabel.layer.cornerRadius = labCornerRad
+        executedLabel.isUserInteractionEnabled = true
+        executedLabel.addGestureRecognizer(tapExecutedGesture1)
+        
+        let tapExecutedGesture2 = UITapGestureRecognizer(target: self, action: #selector(SummaryViewController.tapExecuted))
+        notExecutedLabel.tag = 2
+        notExecutedLabel.layer.cornerRadius = labCornerRad
+        notExecutedLabel.isUserInteractionEnabled = true
+        notExecutedLabel.addGestureRecognizer(tapExecutedGesture2)
+        
+        let tapShowVelocitiesGesture = UITapGestureRecognizer(target: self, action: #selector(SummaryViewController.tapShowVelocities))
+        showVelocitiesLabel.tag = 2
+        showVelocitiesLabel.layer.cornerRadius = labCornerRad
+        showVelocitiesLabel.isUserInteractionEnabled = true
+        showVelocitiesLabel.addGestureRecognizer(tapShowVelocitiesGesture)
     }
+    @objc func tapShowVelocities(sender: UITapGestureRecognizer){
+        showPitchLabels = !showPitchLabels
+        if showPitchLabels{
+            showVelocitiesLabel.backgroundColor = UIColor.lightGray
+        }else{
+            showVelocitiesLabel.backgroundColor = UIColor.white
+        }
+        showVelocities()
+    }
+    
+    func showVelocities(){
+        if showPitchLabels{
+            for i in 0..<pitch_labels.count{
+                let pitchImg = pitch_data[i]["ballImg"] as! UIImageView
+                if pitchImg.isHidden {
+                    pitch_labels[i].isHidden = true
+                }else{
+                    pitch_labels[i].isHidden = false
+                }
+            }
+        }else{
+            
+            for v in pitch_labels{
+                v.isHidden = true
+            }
+        }
+    }
+    
+    @objc func tapExecuted(sender: UITapGestureRecognizer){
+        let t = sender.view!.tag
+        if t == 1{
+            if selectedExecuted{
+                selectedExecuted = false
+                executedLabel.backgroundColor = backgroundColor
+            }else{
+                selectedExecuted = true
+                executedLabel.backgroundColor = UIColor.lightGray
+            }
+        }else if t == 2{
+            if selectedNotExecuted{
+                selectedNotExecuted = false
+                notExecutedLabel.backgroundColor = backgroundColor
+            }else{
+                selectedNotExecuted = true
+                notExecutedLabel.backgroundColor = UIColor.lightGray
+            }
+        }
+        
+        showOnlyPitches()
+    }
+    
     
     @objc func tapPitches(sender: UITapGestureRecognizer){
         let l = sender.view! as! UILabel
         if showingPitches.contains(l.text!){
             showingPitches.remove(at: showingPitches.index(of: l.text!)!)
-            l.backgroundColor = UIColor.white
+            l.backgroundColor = backgroundColor
         }else{
             showingPitches.append(l.text!)
             l.backgroundColor = UIColor.lightGray
@@ -126,39 +241,35 @@ class SummaryViewController: UIViewController, UIPopoverPresentationControllerDe
     
     func showOnlyPitches(){
         for p in pitch_data{
-            if showingPitches.contains(p["type"] as! String){
+            if ((!selectedExecuted && !selectedNotExecuted) || (selectedExecuted && (p["bs"] as! String == "S" || p["bs"] as! String == "X")) || (selectedNotExecuted && (p["bs"] as! String == "B" || p["bs"]  as! String == "N"))) && (showingPitches.contains(p["type"] as! String) || showingPitches.isEmpty){
                 (p["ballImg"] as! UIImageView).isHidden = false
             }else{
                 (p["ballImg"] as! UIImageView).isHidden = true
             }
         }
+        showVelocities()
+        
     }
     
     func addButtons(){
-        //let w = self.view.frame.size.width
-        //let h = self.view.frame.size.height
-
-        //emailButton.frame = CGRect(x: w/2-125, y: h-150, width: 100, height: 100)
+        
         emailButton.layer.cornerRadius = 0.5 * emailButton.bounds.size.width
         emailButton.clipsToBounds = true
         emailButton.setTitle("Email Stats", for: .normal)
         emailButton.layer.borderWidth = 1
         emailButton.layer.borderColor = UIColor.black.cgColor
-        emailButton.backgroundColor = UIColor.white
+        emailButton.backgroundColor = backgroundColor
         emailButton.setTitleColor(UIColor.black, for: .normal)
         emailButton.addTarget(self, action: #selector(pressEmailBullpen), for: .touchUpInside)
-        //view.addSubview(emailButton)
         
-        //addPitchesButton.frame = CGRect(x: w/2+25, y: h-150, width: 100, height: 100)
         addPitchesButton.layer.cornerRadius = 0.5 * addPitchesButton.bounds.size.width
         addPitchesButton.clipsToBounds = true
         addPitchesButton.layer.borderWidth = 1
         addPitchesButton.layer.borderColor = UIColor.black.cgColor
         addPitchesButton.setTitle("Add Pitches", for: .normal)
-        addPitchesButton.backgroundColor = UIColor.white
+        addPitchesButton.backgroundColor = backgroundColor
         addPitchesButton.setTitleColor(UIColor.black, for: .normal)
         addPitchesButton.addTarget(self, action: #selector(addPitches), for: .touchUpInside)
-        //view.addSubview(addPitchesButton)
         
         fLabel.textColor = SummaryViewController.fColor
         sLabel.textColor = SummaryViewController.sColor
@@ -167,10 +278,15 @@ class SummaryViewController: UIViewController, UIPopoverPresentationControllerDe
         twoLabel.textColor = SummaryViewController.twoColor
         cLabel.textColor = SummaryViewController.cColor
         
+        strikeRefImage.image = UIImage.circle(hollow: false, diameter: ballSize, color: UIColor.black)
+        ballRefImage.image = UIImage.circle(hollow: true, diameter: ballSize, color: UIColor.black)
+        
+        
     }
     
     func makeStrikeZone(){
         DispatchQueue.main.async {
+            self.loadingLabel.isHidden = true
             // Main Strike Zone layer setup
             self.StrikeZone.isUserInteractionEnabled = true
             self.StrikeViewWidth = self.StrikeZone.frame.width
@@ -190,6 +306,7 @@ class SummaryViewController: UIViewController, UIPopoverPresentationControllerDe
             self.strikeZoneImage.layer.borderColor = UIColor.black.cgColor
             self.strikeZoneImage.backgroundColor = UIColor.white
             self.view.addSubview(self.strikeZoneImage)
+            
         }
         
         DispatchQueue.main.async{
@@ -208,7 +325,7 @@ class SummaryViewController: UIViewController, UIPopoverPresentationControllerDe
             self.pitch_data = []
             for i in 0 ..< pitches.count {
                 if let pitch = pitches[i] as? NSDictionary {
-                    if let type = pitch["pitch_type"] as? String, let px_s = pitch["pitchX"] as? String, let py_s = pitch["pitchY"] as? String, let bs = pitch["ball_strike"] as? String, let vel = pitch["vel"] as? String {
+                    if let type = pitch["pitch_type"] as? String, let px_s = pitch["pitchX"] as? String, let py_s = pitch["pitchY"] as? String, let bs = pitch["ball_strike"] as? String, let vel = pitch["vel"] as? String, let hc = pitch["hard_contact"] as? String, let pr = pitch["result"] as? String {
                         let px = CGFloat((px_s as NSString).floatValue)
                         let py = CGFloat((py_s as NSString).floatValue)
                         var color = UIColor.black
@@ -241,18 +358,26 @@ class SummaryViewController: UIViewController, UIPopoverPresentationControllerDe
                             h = true
                         }
                         
-                        
-                        
-                        
-                        
                         DispatchQueue.main.async {
                             let loc = self.getTranslatedLocation(pitchLocation: CGPoint(x: px, y: py))
                             let ballImg = self.createPermanentBall(location: loc, color: color, hollow: h)
-                            let pData = ["type":type, "bs": bs, "vel":vel, "px":px, "py":py, "ballImg":ballImg] as [String:Any]
+                            let pData = ["type":type, "bs": bs, "vel":vel, "px":px, "py":py, "hardContact":hc, "pitchResult":pr, "ballImg":ballImg] as [String:Any]
                             self.pitch_data.append(pData)
+                            
+                            let pLabel = UILabel()
+                            var plframe = ballImg.frame
+                            plframe.origin.x += self.ballSize + 3
+                            pLabel.frame = plframe
+                            if (vel != "0"){
+                                pLabel.text = vel
+                            }else{
+                                pLabel.text = ""
+                            }
+                            
+                            pLabel.adjustsFontSizeToFitWidth = true
+                            pLabel.isHidden = true
+                            self.pitch_labels.append(pLabel)
                         }
-                        
-                        
                     }
                 }
             }
@@ -265,6 +390,9 @@ class SummaryViewController: UIViewController, UIPopoverPresentationControllerDe
                     bimg.isUserInteractionEnabled = true
                     bimg.addGestureRecognizer(tapPitchOnZoneGesture)
                     self.view.addSubview(bimg)
+                    self.view.addSubview(self.pitch_labels[i])
+                    
+                    
                     
                 }
             }
@@ -275,35 +403,68 @@ class SummaryViewController: UIViewController, UIPopoverPresentationControllerDe
     
     @objc func tapPitchOnZone(sender: UIGestureRecognizer){
         let p = pitch_data[sender.view!.tag]
-        print(p["type"]!, p["bs"]!, p["vel"]!)
-        
         let popController = UIStoryboard(name: "SummaryView", bundle: nil).instantiateViewController(withIdentifier: "PitchPopover")
-        // set the presentation style
         popController.modalPresentationStyle = UIModalPresentationStyle.popover
-        
-        // set up the popover presentation controller
         popController.popoverPresentationController?.permittedArrowDirections = UIPopoverArrowDirection.up
         popController.popoverPresentationController?.delegate = self as UIPopoverPresentationControllerDelegate
-        popController.popoverPresentationController?.sourceView = sender.view // button
+        popController.popoverPresentationController?.sourceView = sender.view
         popController.popoverPresentationController?.sourceRect = sender.view!.bounds
         let vc = popController as! PitchPopoverViewController
+        var bsTemp = p["bs"]! as! String
+        switch bsTemp{
+        case "X":
+            bsTemp = "Executed"
+            break
+        case "N":
+            bsTemp = "Not Executed"
+            break
+        case "S":
+            bsTemp = "Strike"
+            break
+        case "B":
+            bsTemp = "Ball"
+            break
+        default:
+            bsTemp = "N/A"
+            break
+    
+        }
+        vc.ballStrike = bsTemp
         vc.pitchType = p["type"]! as! String
-        vc.ballStrike = p["bs"]! as! String
+       
         
         var v = p["vel"]! as! String
         if (v == "0"){
-            v = "NA"
+            v = "N/A"
+        }else{
+            v.append(" mph")
         }
         vc.vel = v
         
+        var hc = p["hardContact"] as! String
+        if (hc == "1"){
+            hc = "Yes"
+        }else{
+            hc = "No"
+        }
+        vc.hardContact = hc
         
-        vc.update()
-        // present the popover
+        var pr = p["pitchResult"] as! String
+        
+        switch pr{
+        case "NA":
+            pr = "N/A"
+            break
+        default:
+            pr = "N/A"
+            break
+        }
+        vc.pitchResult = pr
+  
         self.present(popController, animated: true, completion: nil)
     }
     
     func adaptivePresentationStyle(for controller: UIPresentationController, traitCollection: UITraitCollection) -> UIModalPresentationStyle {
-        // return UIModalPresentationStyle.FullScreen
         return UIModalPresentationStyle.none
     }
     
@@ -434,13 +595,14 @@ class SummaryViewController: UIViewController, UIPopoverPresentationControllerDe
     
     @objc func addPitches(){
         
-        sendToAddPitchesVC(bullpenData: bullpenData, comp: false)
+        sendToAddPitchesVC(bullpenData: bullpenData, comp: false, PitcherData: PitcherData)
     }
     
-    func sendToAddPitchesVC(bullpenData: [Any], comp: Bool) {
+    func sendToAddPitchesVC(bullpenData: [Any], comp: Bool, PitcherData: [String]) {
         let storyboard = UIStoryboard(name: "AddPitches", bundle: nil)
         let vc = storyboard.instantiateViewController(withIdentifier: "AddPitches") as! AddPitches
         vc.bullpenData = bullpenData
+        vc.PitcherData = PitcherData
         vc.new = false
         DispatchQueue.main.async {
             self.present(vc, animated: true, completion: nil)

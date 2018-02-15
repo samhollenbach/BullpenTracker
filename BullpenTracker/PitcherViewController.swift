@@ -12,20 +12,34 @@ class PitcherViewController: UITableViewController {
     static private var currentPitcher:Int = -1
     static private var currentBullpen:Int = -1
     
+    @IBOutlet weak var refreshController: UIRefreshControl!
+    
+    var team: Int = -1
+    
     static var PitcherData:[[String]] = []
     
     override func viewDidLoad() {
         super.viewDidLoad()
         if #available(iOS 11.0, *) {
-            self.additionalSafeAreaInsets.top = 0
+            //self.additionalSafeAreaInsets.top = 0
         }
-        PitcherViewController.PitcherData = []
-        self.tableView.rowHeight = 80.0
         
-        //navBar.frame = CGRect(x: 0, y: 0, width: (navBar.frame.size.width), height: (navBar.frame.size.height)+UIApplication.shared.statusBarFrame.height)
-        navBar.frame = CGRect(x: 0, y: 0, width: (navBar.frame.size.width), height: 44)
-        getPitcherDataFromURL("http://52.55.212.19/GetPitchers.php")
+        self.tableView.rowHeight = 80.0
+        var f = self.view.frame
+        f.origin.y = -20
+        self.view.frame = f
+        
+        navBar.sizeToFit()
+        refreshController.addTarget(self, action: #selector(refreshTable), for: .valueChanged)
+        PitcherViewController.PitcherData = []
+        getPitcherDataStandard()
     }
+    
+    @objc func refreshTable(){
+        getPitcherDataStandard()
+        
+    }
+    
     
     
     static func getCurrentPitcher() -> Int{
@@ -75,16 +89,25 @@ class PitcherViewController: UITableViewController {
     
     override func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
         //let str = PitcherViewController.TableData[indexPath.row]
-        let id = Int(PitcherViewController.PitcherData[indexPath.row][0])!
+        let pData = PitcherViewController.PitcherData[indexPath.row]
+        let id = Int(pData[0])!
         
         PitcherViewController.setCurrentPitcher(pitcherId: id)
         let storyboard = UIStoryboard(name: "Bullpens", bundle: nil)
         let vc = storyboard.instantiateViewController(withIdentifier: "BullpensVC") as! BullpenViewController
+        vc.PitcherData = pData
         present(vc, animated: true, completion: nil)
     }
     
+    func getPitcherDataStandard(){
+        getPitcherDataFromURL("http://52.55.212.19/GetPitchers.php")
+        refreshController.endRefreshing()
+    }
+    
+    
     func getPitcherDataFromURL(_ link:String) {
-        ServerConnector.getURLData(urlString: link) { (success, data, response) in
+        let data = "team_id=\(team)"
+        ServerConnector.getURLData(urlString: link, data: data, httpMethod: "POST") { (success, data, response) in
             if data != nil{
                 self.fillPitcherData(data!)
             }else{
@@ -115,5 +138,18 @@ class PitcherViewController: UITableViewController {
         self.tableView.reloadData()
         
     }
+    
+    @IBAction func backPressed(_ sender: Any) {
+        sendToTeamsVC()
+    }
+    
+    
+    func sendToTeamsVC(){
+        let storyboard = UIStoryboard(name: "TeamSelect", bundle: nil)
+        let vc = storyboard.instantiateViewController(withIdentifier: "myTeams") as! TeamSelectViewController
+        present(vc, animated: true, completion: nil)
+    }
+    
+    
     
 }
