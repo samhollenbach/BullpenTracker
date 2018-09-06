@@ -12,19 +12,24 @@
 		E90D903B1F54C15F00EF89C5 /* SummaryView.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = E90D903A1F54C15F00EF89C5 /* SummaryView.storyboard */; };
 		E90D903D1F54C16C00EF89C5 /* SummaryViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = E90D903C1F54C16C00EF89C5 /* SummaryViewController.swift */; };
 		E92804EB20265D6B00D1ED4E /* PitchPopoverViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = E92804EA20265D6B00D1ED4E /* PitchPopoverViewController.swift */; };
+		E929B9DD203DDDF4008E2E11 /* CreateAccountViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = E929B9DC203DDDF4008E2E11 /* CreateAccountViewController.swift */; };
 		E92D26FA1EEE889100075468 /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = E92D26F91EEE889100075468 /* AppDelegate.swift */; };
 		E92D26FF1EEE889100075468 /* Main.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = E92D26FD1EEE889100075468 /* Main.storyboard */; };
 		E92D27011EEE889100075468 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = E92D27001EEE889100075468 /* Assets.xcassets */; };
 		E92D27041EEE889100075468 /* LaunchScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = E92D27021EEE889100075468 /* LaunchScreen.storyboard */; };
+		E9337E3220420C4100B23C38 /* ChangePasswordViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = E9337E3120420C4100B23C38 /* ChangePasswordViewController.swift */; };
+		E9391C6B203B44BF0047A483 /* AddTeamPlayerViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = E9391C6A203B44BF0047A483 /* AddTeamPlayerViewController.swift */; };
 		E9432E672034A127000449DB /* TeamSelect.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = E9432E662034A127000449DB /* TeamSelect.storyboard */; };
 		E9432E692034A13B000449DB /* TeamSelectViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = E9432E682034A13B000449DB /* TeamSelectViewController.swift */; };
 		E9432E6B2034A331000449DB /* HomePageViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = E9432E6A2034A331000449DB /* HomePageViewController.swift */; };
+		E9444F96203F4758007955A0 /* LoginViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = E9444F95203F4758007955A0 /* LoginViewController.swift */; };
 		E97470BD2032A8110050A2A3 /* CINavigationBar.swift in Sources */ = {isa = PBXBuildFile; fileRef = E97470BC2032A8110050A2A3 /* CINavigationBar.swift */; };
 		E99E41D41EF85C9E00B7B14B /* PitcherViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = E99E41D31EF85C9E00B7B14B /* PitcherViewController.swift */; };
 		E99E41D61EF8715500B7B14B /* Bullpens.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = E99E41D51EF8715500B7B14B /* Bullpens.storyboard */; };
 		E99E41D81EF8752D00B7B14B /* BullpenViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = E99E41D71EF8752D00B7B14B /* BullpenViewController.swift */; };
 		E99E41DA1EF8864700B7B14B /* AddPitcherViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = E99E41D91EF8864700B7B14B /* AddPitcherViewController.swift */; };
 		E9B36EDD1F536D7B00E674AA /* AddPitches.swift in Sources */ = {isa = PBXBuildFile; fileRef = E9B36EDB1F536D7B00E674AA /* AddPitches.swift */; };
+		E9D946BA20362F4C005A8D0C /* BTHelper.swift in Sources */ = {isa = PBXBuildFile; fileRef = E9D946B920362F4C005A8D0C /* BTHelper.swift */; };
 		E9F9E0C72005ECA700F515AB /* ServerConnector.swift in Sources */ = {isa = PBXBuildFile; fileRef = E9F9E0C62005ECA700F515AB /* ServerConnector.swift */; };
 /* End PBXBuildFile section */
 
@@ -34,21 +39,26 @@
 		E90D903A1F54C15F00EF89C5 /* SummaryView.storyboard */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.storyboard; path = SummaryView.storyboard; sourceTree = "<group>"; };
 		E90D903C1F54C16C00EF89C5 /* SummaryViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = SummaryViewController.swift; sourceTree = "<group>"; };
 		E92804EA20265D6B00D1ED4E /* PitchPopoverViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PitchPopoverViewController.swift; sourceTree = "<group>"; };
+		E929B9DC203DDDF4008E2E11 /* CreateAccountViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CreateAccountViewController.swift; sourceTree = "<group>"; };
 		E92D26F61EEE889100075468 /* BullpenTracker.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = BullpenTracker.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		E92D26F91EEE889100075468 /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
 		E92D26FE1EEE889100075468 /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/Main.storyboard; sourceTree = "<group>"; };
 		E92D27001EEE889100075468 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		E92D27031EEE889100075468 /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/LaunchScreen.storyboard; sourceTree = "<group>"; };
 		E92D27051EEE889100075468 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
+		E9337E3120420C4100B23C38 /* ChangePasswordViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ChangePasswordViewController.swift; sourceTree = "<group>"; };
+		E9391C6A203B44BF0047A483 /* AddTeamPlayerViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AddTeamPlayerViewController.swift; sourceTree = "<group>"; };
 		E9432E662034A127000449DB /* TeamSelect.storyboard */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; path = TeamSelect.storyboard; sourceTree = "<group>"; };
 		E9432E682034A13B000449DB /* TeamSelectViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TeamSelectViewController.swift; sourceTree = "<group>"; };
 		E9432E6A2034A331000449DB /* HomePageViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HomePageViewController.swift; sourceTree = "<group>"; };
+		E9444F95203F4758007955A0 /* LoginViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LoginViewController.swift; sourceTree = "<group>"; };
 		E97470BC2032A8110050A2A3 /* CINavigationBar.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CINavigationBar.swift; sourceTree = "<group>"; };
 		E99E41D31EF85C9E00B7B14B /* PitcherViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = PitcherViewController.swift; sourceTree = "<group>"; };
 		E99E41D51EF8715500B7B14B /* Bullpens.storyboard */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.storyboard; path = Bullpens.storyboard; sourceTree = "<group>"; };
 		E99E41D71EF8752D00B7B14B /* BullpenViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = BullpenViewController.swift; sourceTree = "<group>"; };
 		E99E41D91EF8864700B7B14B /* AddPitcherViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = AddPitcherViewController.swift; sourceTree = "<group>"; };
 		E9B36EDB1F536D7B00E674AA /* AddPitches.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = AddPitches.swift; sourceTree = "<group>"; };
+		E9D946B920362F4C005A8D0C /* BTHelper.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BTHelper.swift; sourceTree = "<group>"; };
 		E9F9E0C62005ECA700F515AB /* ServerConnector.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ServerConnector.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
@@ -83,8 +93,9 @@
 			isa = PBXGroup;
 			children = (
 				E92D26F91EEE889100075468 /* AppDelegate.swift */,
-				E92D27021EEE889100075468 /* LaunchScreen.storyboard */,
 				E92D26FD1EEE889100075468 /* Main.storyboard */,
+				E92D27021EEE889100075468 /* LaunchScreen.storyboard */,
+				E9391C6A203B44BF0047A483 /* AddTeamPlayerViewController.swift */,
 				E99E41D31EF85C9E00B7B14B /* PitcherViewController.swift */,
 				E99E41D91EF8864700B7B14B /* AddPitcherViewController.swift */,
 				E9084A3B1EF88C5000EB4514 /* RemovePitcherViewController.swift */,
@@ -96,12 +107,16 @@
 				E90D903C1F54C16C00EF89C5 /* SummaryViewController.swift */,
 				E92804EA20265D6B00D1ED4E /* PitchPopoverViewController.swift */,
 				E9432E662034A127000449DB /* TeamSelect.storyboard */,
+				E9337E3120420C4100B23C38 /* ChangePasswordViewController.swift */,
+				E9444F95203F4758007955A0 /* LoginViewController.swift */,
 				E9432E6A2034A331000449DB /* HomePageViewController.swift */,
 				E9432E682034A13B000449DB /* TeamSelectViewController.swift */,
+				E929B9DC203DDDF4008E2E11 /* CreateAccountViewController.swift */,
 				E92D27001EEE889100075468 /* Assets.xcassets */,
 				E92D27051EEE889100075468 /* Info.plist */,
 				E9F9E0C62005ECA700F515AB /* ServerConnector.swift */,
 				E97470BC2032A8110050A2A3 /* CINavigationBar.swift */,
+				E9D946B920362F4C005A8D0C /* BTHelper.swift */,
 			);
 			path = BullpenTracker;
 			sourceTree = "<group>";
@@ -186,13 +201,18 @@
 			files = (
 				E99E41DA1EF8864700B7B14B /* AddPitcherViewController.swift in Sources */,
 				E9F9E0C72005ECA700F515AB /* ServerConnector.swift in Sources */,
+				E9D946BA20362F4C005A8D0C /* BTHelper.swift in Sources */,
 				E99E41D41EF85C9E00B7B14B /* PitcherViewController.swift in Sources */,
 				E9432E692034A13B000449DB /* TeamSelectViewController.swift in Sources */,
 				E9B36EDD1F536D7B00E674AA /* AddPitches.swift in Sources */,
+				E9391C6B203B44BF0047A483 /* AddTeamPlayerViewController.swift in Sources */,
 				E9084A3C1EF88C5000EB4514 /* RemovePitcherViewController.swift in Sources */,
+				E929B9DD203DDDF4008E2E11 /* CreateAccountViewController.swift in Sources */,
 				E97470BD2032A8110050A2A3 /* CINavigationBar.swift in Sources */,
 				E92804EB20265D6B00D1ED4E /* PitchPopoverViewController.swift in Sources */,
 				E9432E6B2034A331000449DB /* HomePageViewController.swift in Sources */,
+				E9337E3220420C4100B23C38 /* ChangePasswordViewController.swift in Sources */,
+				E9444F96203F4758007955A0 /* LoginViewController.swift in Sources */,
 				E99E41D81EF8752D00B7B14B /* BullpenViewController.swift in Sources */,
 				E90D903D1F54C16C00EF89C5 /* SummaryViewController.swift in Sources */,
 				E92D26FA1EEE889100075468 /* AppDelegate.swift in Sources */,

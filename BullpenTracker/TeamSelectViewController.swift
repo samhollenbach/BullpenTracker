@@ -15,10 +15,6 @@ class TeamSelectViewController: UITableViewController{
     
     var TeamData: [[String:Any]] = []
     
-    struct defaultsKeys {
-        static let savedTeamIDs = "savedTeams"
-    }
-    
     
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -33,7 +29,7 @@ class TeamSelectViewController: UITableViewController{
     func fillTeamData(){
         TeamData = []
         let defaults = UserDefaults.standard
-        let teamsArray = defaults.array(forKey: defaultsKeys.savedTeamIDs) as? [[String:Any]] ?? [[String:Any]]()
+        let teamsArray = defaults.array(forKey: BTHelper.defaultsKeys.savedTeamIDs) as? [[String:Any]] ?? [[String:Any]]()
         for team in teamsArray{
             TeamData.append(team)
         }
@@ -47,14 +43,14 @@ class TeamSelectViewController: UITableViewController{
     func addTeamToList(teamData : [String: Any]){
         let tid = teamData["id"] as? String
         if tid == nil{
-            showCodeErrorPopup(error:"Internal error (found null team ID)")
+            showErrorPopup(errorTitle: "Team Access Error", error:"Internal error (found null team ID)")
             print("Team ID null")
             return
         }
         
         for t_dat in TeamData{
             if t_dat["id"] as? String == tid{
-                showCodeErrorPopup(error:"That team is already in your list")
+                showErrorPopup(errorTitle: "Team Access Error", error:"That team is already in your list")
                 print("Team \(tid!) is already in list")
                 return
             }
@@ -66,7 +62,7 @@ class TeamSelectViewController: UITableViewController{
         }
         
         let defaults = UserDefaults.standard
-        defaults.set(TeamData, forKey: defaultsKeys.savedTeamIDs)
+        defaults.set(TeamData, forKey: BTHelper.defaultsKeys.savedTeamIDs)
     }
     
     func processTeamCode(code: String){
@@ -80,12 +76,12 @@ class TeamSelectViewController: UITableViewController{
             let teams = ServerConnector.extractJSON(response!.data(using: .utf8)!)
             //self.TeamData = []
             if teams.count > 1{
-                self.showCodeErrorPopup(error:"Internal error (more than one team with access code)")
+                self.showErrorPopup(errorTitle: "Team Access Error", error:"Internal error (more than one team with access code)")
                 print("Found more than one team with same access code!")
                 return
             }
             if teams.count == 0{
-                self.showCodeErrorPopup(error:"No team found with this code")
+                self.showErrorPopup(errorTitle: "Team Access Error", error:"No team found with this code")
                 return
             }
             
@@ -101,19 +97,68 @@ class TeamSelectViewController: UITableViewController{
         }
     }
     
-    func showCodeErrorPopup(error: String = ""){
+    func showErrorPopup(errorTitle: String, error: String = ""){
         var errorMessage = "Could not find a team with entered access code"
         if error != ""{
             errorMessage = error
         }
         
-         let codeErrorPop = UIAlertController(title: "Team Access Error", message: errorMessage, preferredStyle: .alert)
+         let codeErrorPop = UIAlertController(title: errorTitle, message: errorMessage, preferredStyle: .alert)
         let okayAction = UIAlertAction(title: "Okay", style: .default, handler: {
             (action : UIAlertAction!) -> Void in
             
         })
         codeErrorPop.addAction(okayAction)
         self.present(codeErrorPop, animated: true, completion: nil)
+    }
+    
+    func createNewTeam(teamName: String, teamInfo: String, teamAccess: String){
+        let data = "team_name=\(teamName)&team_info=\(teamInfo)&team_access=\(teamAccess)"
+        ServerConnector.runScript(scriptName: "AddTeam.php", data: data){response in
+            self.processTeamCode(code: teamAccess)
+        }
+    }
+    
+    func tapCreateTeam(){
+        let createTeamPopup = UIAlertController(title: "Create Team", message: "Enter the name of your team and team info below (in the future this will be a premium feature)", preferredStyle: .alert)
+        
+        
+        let saveAction = UIAlertAction(title: "Create", style: .default, handler: {
+            alert -> Void in
+            
+            let teamNameField = createTeamPopup.textFields![0] as UITextField
+            let teamInfoField = createTeamPopup.textFields![1] as UITextField
+            let teamAccessField = createTeamPopup.textFields![2] as UITextField
+            
+            
+            print("teamName  \(teamNameField.text!)")
+            if teamNameField.text != "" && teamAccessField.text != ""{
+                self.createNewTeam(teamName: teamNameField.text!, teamInfo: teamInfoField.text!, teamAccess: teamAccessField.text!)
+            }else{
+                self.showErrorPopup(errorTitle: "Team Create Error", error: "Please enter a valid team name")
+            }
+        })
+        
+       
+        createTeamPopup.addTextField { (teamNameField : UITextField!) -> Void in
+            teamNameField.placeholder = "Team Name"
+        }
+        createTeamPopup.addTextField { (teamInfoField : UITextField!) -> Void in
+            teamInfoField.placeholder = "Team Info"
+        }
+        createTeamPopup.addTextField { (teamAccessField : UITextField!) -> Void in
+            teamAccessField.placeholder = "Access Code"
+        }
+        
+        let cancelAction = UIAlertAction(title: "Cancel", style: .destructive, handler: {
+            (action : UIAlertAction!) -> Void in
+            
+        })
+        
+        createTeamPopup.addAction(saveAction)
+        createTeamPopup.addAction(cancelAction)
+        
+        self.present(createTeamPopup, animated: true, completion: nil)
     }
     
     @IBAction func addTeam(_ sender: Any) {
@@ -124,15 +169,20 @@ class TeamSelectViewController: UITableViewController{
             
             let codeField = addTeamPopup.textFields![0] as UITextField
             //let secondTextField = addTeamPopup.textFields![1] as UITextField
-            
             print("teamCode \(codeField.text!)")
             if codeField.text != ""{
                 self.processTeamCode(code: codeField.text!)
             }else{
-                self.showCodeErrorPopup()
+                self.showErrorPopup(errorTitle: "Team Access Error")
             }
         })
-        let cancelAction = UIAlertAction(title: "Cancel", style: .cancel, handler: {
+        
+        let createTeam = UIAlertAction(title: "Create New", style: .default, handler: {
+            (action : UIAlertAction!) -> Void in
+            self.tapCreateTeam()
+        })
+        
+        let cancelAction = UIAlertAction(title: "Cancel", style: .destructive, handler: {
             (action : UIAlertAction!) -> Void in
             
         })
@@ -140,8 +190,10 @@ class TeamSelectViewController: UITableViewController{
         addTeamPopup.addTextField { (textField : UITextField!) -> Void in
             textField.placeholder = "Enter Team Code"
         }
-        addTeamPopup.addAction(cancelAction)
         addTeamPopup.addAction(saveAction)
+        addTeamPopup.addAction(createTeam)
+        addTeamPopup.addAction(cancelAction)
+        
         
         
         self.present(addTeamPopup, animated: true, completion: nil)
@@ -181,21 +233,26 @@ class TeamSelectViewController: UITableViewController{
         return cell!
     }
     
+    
+    @IBAction func dismissVC(_ sender: Any) {
+        dismiss(animated: true, completion: nil)
+    }
+    
+    
     func sendToPitchersVC(teamID : Int){
         let storyboard = UIStoryboard(name: "Main", bundle: nil)
         let vc = storyboard.instantiateViewController(withIdentifier: "PitchersVC") as! PitcherViewController
-        vc.team = teamID
+        BTHelper.CurrentTeam = teamID
         present(vc, animated: true, completion: nil)
     }
     
     
     override func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
-        let tData = TeamData[indexPath.row]
         if TeamData.count == 0{
             print("Not a valid team")
             return
         }
-        
+        let tData = TeamData[indexPath.row]
         tableView.deselectRow(at: indexPath, animated: false)
         sendToPitchersVC(teamID: Int(tData["id"] as! String)!)
         

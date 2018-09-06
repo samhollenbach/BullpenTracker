@@ -36,6 +36,10 @@ class RemovePitcherViewController: UIViewController {
         view.endEditing(true)
     }
     
+    @IBAction func dismissVC(_ sender: Any) {
+        dismiss(animated: true, completion: nil)
+    }
+    
 
     @IBAction func RemovePitcher(_ sender: UIButton) {
         let pitcher_name = textField.text!

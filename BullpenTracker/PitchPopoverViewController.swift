@@ -29,7 +29,13 @@ class PitchPopoverViewController: UIViewController {
         bsLabel.text = "Ball/Strike: \(ballStrike)"
         vLabel.text = "Velocity: \(vel)"
         hcLabel.text = "Hard Contact: \(hardContact)"
+        if hardContact == "Yes"{
+            hcLabel.textColor = UIColor.red
+        }
         prLabel.text = "Pitch Result: \(pitchResult)"
+        if pitchResult != "N/A" && pitchResult != "None"{
+            prLabel.textColor = UIColor.green
+        }
     }
 
 }

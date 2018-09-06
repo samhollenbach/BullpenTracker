@@ -20,6 +20,8 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
             //statusBar.backgroundColor = UIColor(red:0.06, green:0.11, blue:0.26, alpha:1.0)
             statusBar.backgroundColor = UIColor.clear
         }
+        let defaults = UserDefaults.standard
+        BTHelper.LoggedInPitcher = defaults.integer(forKey: BTHelper.defaultsKeys.storedLoginPitcherID)
         
         
         // Override point for customization after application launch.

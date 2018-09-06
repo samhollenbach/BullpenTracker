@@ -11,9 +11,10 @@ import UIKit
 class AddPitcherViewController: UIViewController {
 
     @IBOutlet weak var navBar: UINavigationBar!
-    @IBOutlet weak var nameField: UITextField!
+    @IBOutlet weak var firstNameField: UITextField!
     
-    @IBOutlet weak var numberField: UITextField!
+    @IBOutlet weak var lastNameField: UITextField!
+    @IBOutlet weak var emailField: UITextField!
     
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -41,11 +42,19 @@ class AddPitcherViewController: UIViewController {
     }
     
     
+    @IBAction func dismissVC(_ sender: Any) {
+        dismiss(animated: true, completion: nil)
+    }
+    
     @IBAction func submitNewPitcher(_ sender: UIButton) {
         
-        let name = nameField.text!.trimmingCharacters(in: .whitespacesAndNewlines)
-        let number = numberField.text!
-        let data = "name=\(name)&number=\(number)"
+        let firstName = firstNameField.text!.trimmingCharacters(in: .whitespacesAndNewlines)
+        let lastName = lastNameField.text!.trimmingCharacters(in: .whitespacesAndNewlines)
+        let email = emailField.text!.trimmingCharacters(in: .whitespacesAndNewlines)
+        let throw_arm = "R"
+        
+        
+        let data = "firstname=\(firstName)&lastname=\(lastName)&email=\(email)&throws=\(throw_arm)"
         
         ServerConnector.runScript(scriptName: "AddPitcher.php", data: data)
         

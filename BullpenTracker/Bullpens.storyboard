@@ -55,6 +55,7 @@
                         <outlet property="navBar" destination="zc6-l4-sZ3" id="fde-Bi-sKh"/>
                         <outlet property="titleView" destination="BCf-mG-vJQ" id="qay-hi-p7w"/>
                         <segue destination="1nJ-Af-HXV" kind="unwind" identifier="unwindToPitchers" unwindAction="unwindToPitchersWithSegue:" id="fL8-Xp-amj"/>
+                        <segue destination="1nJ-Af-HXV" kind="unwind" identifier="unwindToHomePage" unwindAction="unwindToHomePageWithSegue:" id="8TQ-m8-U7D"/>
                     </connections>
                 </tableViewController>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="YfC-ZR-lSc" userLabel="First Responder" sceneMemberID="firstResponder"/>

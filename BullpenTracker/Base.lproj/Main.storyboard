@@ -1,15 +1,108 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<document type="com.apple.InterfaceBuilder3.CocoaTouch.Storyboard.XIB" version="3.0" toolsVersion="13771" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" useTraitCollections="YES" colorMatched="YES">
+<document type="com.apple.InterfaceBuilder3.CocoaTouch.Storyboard.XIB" version="3.0" toolsVersion="14109" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" useTraitCollections="YES" colorMatched="YES">
     <device id="retina4_7" orientation="portrait">
         <adaptation id="fullscreen"/>
     </device>
     <dependencies>
         <deployment identifier="iOS"/>
-        <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="13772"/>
+        <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="14088"/>
         <capability name="Navigation items with more than one left or right bar item" minToolsVersion="7.0"/>
         <capability name="documents saved in the Xcode 8 format" minToolsVersion="8.0"/>
     </dependencies>
     <scenes>
+        <!--Add Team Player View Controller-->
+        <scene sceneID="9Rj-0Z-mGq">
+            <objects>
+                <viewController storyboardIdentifier="addTeamPlayer" id="aYZ-Jw-tpH" customClass="AddTeamPlayerViewController" customModule="BullpenTracker" customModuleProvider="target" sceneMemberID="viewController">
+                    <layoutGuides>
+                        <viewControllerLayoutGuide type="top" id="WxN-0F-fOD"/>
+                        <viewControllerLayoutGuide type="bottom" id="HAC-3l-eHv"/>
+                    </layoutGuides>
+                    <view key="view" contentMode="scaleToFill" id="2Ti-2t-QAp">
+                        <rect key="frame" x="0.0" y="0.0" width="375" height="667"/>
+                        <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
+                        <subviews>
+                            <navigationBar contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="ob4-mb-x3B" customClass="CINavigationBar" customModule="BullpenTracker" customModuleProvider="target">
+                                <rect key="frame" x="0.0" y="0.0" width="375" height="66"/>
+                                <constraints>
+                                    <constraint firstAttribute="height" constant="66" id="E3r-gu-jdK"/>
+                                </constraints>
+                                <color key="barTintColor" red="0.1333333333" green="0.21960784310000001" blue="0.46274509800000002" alpha="1" colorSpace="calibratedRGB"/>
+                                <textAttributes key="titleTextAttributes">
+                                    <color key="textColor" red="0.99999600649999998" green="1" blue="1" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
+                                </textAttributes>
+                                <items>
+                                    <navigationItem title="Add Player" id="mfG-kw-DDE">
+                                        <barButtonItem key="leftBarButtonItem" systemItem="cancel" id="14m-e4-p5J">
+                                            <color key="tintColor" white="1" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
+                                            <connections>
+                                                <action selector="dismissVC:" destination="aYZ-Jw-tpH" id="Owq-Ke-zbb"/>
+                                            </connections>
+                                        </barButtonItem>
+                                    </navigationItem>
+                                </items>
+                                <userDefinedRuntimeAttributes>
+                                    <userDefinedRuntimeAttribute type="number" keyPath="customHeight">
+                                        <real key="value" value="66"/>
+                                    </userDefinedRuntimeAttribute>
+                                </userDefinedRuntimeAttributes>
+                            </navigationBar>
+                            <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" fixedFrame="YES" text="Enter a player's email to invite them to your team" textAlignment="center" lineBreakMode="tailTruncation" numberOfLines="2" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="xrL-z2-E2R">
+                                <rect key="frame" x="51" y="76" width="273" height="52"/>
+                                <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
+                                <fontDescription key="fontDescription" type="italicSystem" pointSize="17"/>
+                                <nil key="textColor"/>
+                                <nil key="highlightedColor"/>
+                            </label>
+                            <button opaque="NO" contentMode="scaleToFill" fixedFrame="YES" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="3ya-nV-VHw">
+                                <rect key="frame" x="144" y="283" width="88" height="57"/>
+                                <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
+                                <fontDescription key="fontDescription" type="system" pointSize="23"/>
+                                <state key="normal" title="Send">
+                                    <color key="titleColor" red="0.1333333333" green="0.21960784310000001" blue="0.46274509800000002" alpha="1" colorSpace="calibratedRGB"/>
+                                </state>
+                                <connections>
+                                    <action selector="sendPressed:" destination="aYZ-Jw-tpH" eventType="touchUpInside" id="aEW-KI-55i"/>
+                                </connections>
+                            </button>
+                            <textField opaque="NO" contentMode="scaleToFill" fixedFrame="YES" contentHorizontalAlignment="left" contentVerticalAlignment="center" borderStyle="roundedRect" textAlignment="natural" minimumFontSize="17" translatesAutoresizingMaskIntoConstraints="NO" id="kM5-CR-mTB">
+                                <rect key="frame" x="260" y="221" width="46" height="30"/>
+                                <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
+                                <nil key="textColor"/>
+                                <fontDescription key="fontDescription" type="system" pointSize="18"/>
+                                <textInputTraits key="textInputTraits" keyboardType="numberPad"/>
+                            </textField>
+                            <textField opaque="NO" contentMode="scaleToFill" fixedFrame="YES" contentHorizontalAlignment="left" contentVerticalAlignment="center" borderStyle="roundedRect" placeholder="Email" textAlignment="natural" minimumFontSize="17" translatesAutoresizingMaskIntoConstraints="NO" id="aYK-cA-XSC">
+                                <rect key="frame" x="52" y="148" width="272" height="30"/>
+                                <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
+                                <nil key="textColor"/>
+                                <fontDescription key="fontDescription" type="system" pointSize="14"/>
+                                <textInputTraits key="textInputTraits" keyboardType="emailAddress" textContentType="email"/>
+                            </textField>
+                            <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" fixedFrame="YES" text="Uniform Number: #" textAlignment="center" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="xMb-sj-V3c">
+                                <rect key="frame" x="107" y="221" width="147" height="28"/>
+                                <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
+                                <fontDescription key="fontDescription" type="system" pointSize="17"/>
+                                <nil key="textColor"/>
+                                <nil key="highlightedColor"/>
+                            </label>
+                        </subviews>
+                        <color key="backgroundColor" white="1" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
+                        <constraints>
+                            <constraint firstItem="ob4-mb-x3B" firstAttribute="top" secondItem="2Ti-2t-QAp" secondAttribute="top" id="5Xg-hu-BHw"/>
+                            <constraint firstItem="ob4-mb-x3B" firstAttribute="leading" secondItem="2Ti-2t-QAp" secondAttribute="leading" id="RhA-zx-sTW"/>
+                            <constraint firstAttribute="trailing" secondItem="ob4-mb-x3B" secondAttribute="trailing" id="if4-i8-0KM"/>
+                        </constraints>
+                    </view>
+                    <connections>
+                        <outlet property="emailField" destination="aYK-cA-XSC" id="kep-Tl-bzg"/>
+                        <outlet property="numberField" destination="kM5-CR-mTB" id="W1I-uk-yhA"/>
+                    </connections>
+                </viewController>
+                <placeholder placeholderIdentifier="IBFirstResponder" id="g9d-2h-rhI" userLabel="First Responder" sceneMemberID="firstResponder"/>
+            </objects>
+            <point key="canvasLocation" x="-1668" y="-294.60269865067471"/>
+        </scene>
         <!--Pitcher View Controller-->
         <scene sceneID="rlr-q7-tQY">
             <objects>
@@ -36,16 +129,14 @@
                                 <navigationItem title="Pitchers" id="4rQ-S0-zQj">
                                     <barButtonItem key="leftBarButtonItem" title="Back" id="75u-jq-d7j">
                                         <connections>
-                                            <action selector="backPressed:" destination="CHI-wt-k7n" id="6lK-vW-bnK"/>
+                                            <action selector="dismissVC:" destination="CHI-wt-k7n" id="XvW-cd-KWQ"/>
                                         </connections>
                                     </barButtonItem>
                                     <rightBarButtonItems>
                                         <barButtonItem systemItem="add" id="jWF-45-eYd">
                                             <color key="tintColor" white="1" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
                                             <connections>
-                                                <segue destination="jCc-u2-GUK" kind="popoverPresentation" popoverAnchorBarButtonItem="jWF-45-eYd" id="2a4-lz-BVC">
-                                                    <popoverArrowDirection key="popoverArrowDirection" up="YES" down="YES" left="YES" right="YES"/>
-                                                </segue>
+                                                <action selector="addPitcherPressed:" destination="CHI-wt-k7n" id="vdp-uQ-hU0"/>
                                             </connections>
                                         </barButtonItem>
                                         <barButtonItem systemItem="trash" id="upV-Gg-Ieu">
@@ -120,7 +211,7 @@
                                         <barButtonItem key="leftBarButtonItem" systemItem="cancel" id="Any-ep-d9j">
                                             <color key="tintColor" white="1" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
                                             <connections>
-                                                <segue destination="CHI-wt-k7n" kind="show" id="jRK-Z9-SP8"/>
+                                                <action selector="dismissVC:" destination="P3p-h4-ntl" id="Syd-k8-yUp"/>
                                             </connections>
                                         </barButtonItem>
                                     </navigationItem>
@@ -165,7 +256,7 @@
         <!--Add Pitcher View Controller-->
         <scene sceneID="7sm-Ox-nBi">
             <objects>
-                <viewController id="jCc-u2-GUK" customClass="AddPitcherViewController" customModule="BullpenTracker" customModuleProvider="target" sceneMemberID="viewController">
+                <viewController storyboardIdentifier="AddPitcherVC" id="jCc-u2-GUK" customClass="AddPitcherViewController" customModule="BullpenTracker" customModuleProvider="target" sceneMemberID="viewController">
                     <layoutGuides>
                         <viewControllerLayoutGuide type="top" id="9PC-Fs-rng"/>
                         <viewControllerLayoutGuide type="bottom" id="YQK-cf-DRF"/>
@@ -183,42 +274,56 @@
                                         <barButtonItem key="leftBarButtonItem" systemItem="cancel" id="wOA-fr-lSU">
                                             <color key="tintColor" white="1" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
                                             <connections>
-                                                <segue destination="CHI-wt-k7n" kind="show" id="FEa-CB-pFN"/>
+                                                <action selector="dismissVC:" destination="jCc-u2-GUK" id="5dJ-Ev-dHX"/>
                                             </connections>
                                         </barButtonItem>
                                     </navigationItem>
                                 </items>
                             </navigationBar>
                             <textField opaque="NO" clipsSubviews="YES" contentMode="scaleToFill" fixedFrame="YES" contentHorizontalAlignment="left" contentVerticalAlignment="center" borderStyle="roundedRect" placeholder="New Pitcher" textAlignment="center" minimumFontSize="18" translatesAutoresizingMaskIntoConstraints="NO" id="di9-TB-Coc">
-                                <rect key="frame" x="96" y="189" width="182" height="30"/>
+                                <rect key="frame" x="82" y="94" width="182" height="30"/>
                                 <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
                                 <nil key="textColor"/>
                                 <fontDescription key="fontDescription" type="system" pointSize="21"/>
                                 <textInputTraits key="textInputTraits" autocapitalizationType="words"/>
                             </textField>
-                            <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" fixedFrame="YES" text="Pitcher Name" textAlignment="natural" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="QCh-9A-hKu">
-                                <rect key="frame" x="111" y="144" width="152" height="21"/>
+                            <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" fixedFrame="YES" text="First Name" textAlignment="natural" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="QCh-9A-hKu">
+                                <rect key="frame" x="116" y="57" width="132" height="29"/>
+                                <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
+                                <fontDescription key="fontDescription" type="system" pointSize="24"/>
+                                <nil key="textColor"/>
+                                <nil key="highlightedColor"/>
+                            </label>
+                            <textField opaque="NO" clipsSubviews="YES" contentMode="scaleToFill" fixedFrame="YES" contentHorizontalAlignment="left" contentVerticalAlignment="center" borderStyle="roundedRect" placeholder="New Pitcher" textAlignment="center" minimumFontSize="18" translatesAutoresizingMaskIntoConstraints="NO" id="kZ0-cM-038">
+                                <rect key="frame" x="82" y="283" width="182" height="30"/>
+                                <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
+                                <nil key="textColor"/>
+                                <fontDescription key="fontDescription" type="system" pointSize="21"/>
+                                <textInputTraits key="textInputTraits" autocapitalizationType="words"/>
+                            </textField>
+                            <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" fixedFrame="YES" text="Last Name" textAlignment="natural" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="GK2-JG-bDV">
+                                <rect key="frame" x="107" y="145" width="132" height="29"/>
                                 <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
                                 <fontDescription key="fontDescription" type="system" pointSize="24"/>
                                 <nil key="textColor"/>
                                 <nil key="highlightedColor"/>
                             </label>
                             <textField opaque="NO" clipsSubviews="YES" contentMode="scaleToFill" fixedFrame="YES" contentHorizontalAlignment="left" contentVerticalAlignment="center" borderStyle="roundedRect" placeholder="Player Number" textAlignment="center" minimumFontSize="18" translatesAutoresizingMaskIntoConstraints="NO" id="mua-0X-s8G">
-                                <rect key="frame" x="96" y="305" width="182" height="30"/>
+                                <rect key="frame" x="82" y="192" width="182" height="30"/>
                                 <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
                                 <nil key="textColor"/>
                                 <fontDescription key="fontDescription" type="system" pointSize="21"/>
                                 <textInputTraits key="textInputTraits" keyboardType="numberPad"/>
                             </textField>
-                            <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" fixedFrame="YES" text="Number" textAlignment="center" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="gII-iw-8XV">
-                                <rect key="frame" x="111" y="260" width="152" height="29"/>
+                            <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" fixedFrame="YES" text="Email" textAlignment="center" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="gII-iw-8XV">
+                                <rect key="frame" x="97" y="246" width="152" height="29"/>
                                 <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
                                 <fontDescription key="fontDescription" type="system" pointSize="24"/>
                                 <nil key="textColor"/>
                                 <nil key="highlightedColor"/>
                             </label>
                             <button opaque="NO" contentMode="scaleToFill" fixedFrame="YES" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="aov-u3-R7N">
-                                <rect key="frame" x="126" y="354" width="122" height="74"/>
+                                <rect key="frame" x="112" y="347" width="122" height="74"/>
                                 <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
                                 <fontDescription key="fontDescription" type="system" pointSize="28"/>
                                 <state key="normal" title="Submit"/>
@@ -230,9 +335,10 @@
                         <color key="backgroundColor" white="1" alpha="1" colorSpace="calibratedWhite"/>
                     </view>
                     <connections>
-                        <outlet property="nameField" destination="di9-TB-Coc" id="igf-Us-LRN"/>
+                        <outlet property="emailField" destination="kZ0-cM-038" id="gH4-cq-UAf"/>
+                        <outlet property="firstNameField" destination="di9-TB-Coc" id="bgB-u7-yfj"/>
+                        <outlet property="lastNameField" destination="mua-0X-s8G" id="Qqo-a5-CDT"/>
                         <outlet property="navBar" destination="FNB-rb-gMn" id="GdM-Uk-oke"/>
-                        <outlet property="numberField" destination="mua-0X-s8G" id="OUN-sm-TcI"/>
                     </connections>
                 </viewController>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="duI-yG-e5W" userLabel="First Responder" sceneMemberID="firstResponder"/>
@@ -240,7 +346,4 @@
             <point key="canvasLocation" x="52" y="-22.03898050974513"/>
         </scene>
     </scenes>
-    <inferredMetricsTieBreakers>
-        <segue reference="jRK-Z9-SP8"/>
-    </inferredMetricsTieBreakers>
 </document>

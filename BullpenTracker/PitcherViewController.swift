@@ -9,12 +9,9 @@ import Foundation
 class PitcherViewController: UITableViewController {
     
     @IBOutlet weak var navBar: UINavigationBar!
-    static private var currentPitcher:Int = -1
-    static private var currentBullpen:Int = -1
     
     @IBOutlet weak var refreshController: UIRefreshControl!
-    
-    var team: Int = -1
+
     
     static var PitcherData:[[String]] = []
     
@@ -29,10 +26,13 @@ class PitcherViewController: UITableViewController {
         f.origin.y = -20
         self.view.frame = f
         
+        BTHelper.ResetPitcher()
+        
         navBar.sizeToFit()
         refreshController.addTarget(self, action: #selector(refreshTable), for: .valueChanged)
         PitcherViewController.PitcherData = []
         getPitcherDataStandard()
+        
     }
     
     @objc func refreshTable(){
@@ -43,11 +43,11 @@ class PitcherViewController: UITableViewController {
     
     
     static func getCurrentPitcher() -> Int{
-        return currentPitcher
+        return BTHelper.CurrentPitcher
     }
     
     static func setCurrentPitcher(pitcherId : Int){
-        currentPitcher = pitcherId
+        BTHelper.CurrentPitcher = pitcherId
     }
     
     static func getPitcherName(id:Int) -> String{
@@ -60,11 +60,11 @@ class PitcherViewController: UITableViewController {
     }
     
     static func getCurrentBullpen() -> Int{
-        return currentBullpen
+        return BTHelper.CurrentBullpen
     }
     
     static func setCurrentBullpen(bullpenId : Int){
-        currentBullpen = bullpenId
+        BTHelper.CurrentBullpen = bullpenId
     }
     
     @IBAction func unwindToPitchers(segue: UIStoryboardSegue) {}
@@ -87,26 +87,23 @@ class PitcherViewController: UITableViewController {
         return cell
     }
     
+    //Send to bullpens
     override func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
         //let str = PitcherViewController.TableData[indexPath.row]
-        let pData = PitcherViewController.PitcherData[indexPath.row]
-        let id = Int(pData[0])!
-        
-        PitcherViewController.setCurrentPitcher(pitcherId: id)
-        let storyboard = UIStoryboard(name: "Bullpens", bundle: nil)
-        let vc = storyboard.instantiateViewController(withIdentifier: "BullpensVC") as! BullpenViewController
-        vc.PitcherData = pData
-        present(vc, animated: true, completion: nil)
+        sendToBullpensVC(pitcherRowID: indexPath.row)
     }
     
+    
+    
+    
     func getPitcherDataStandard(){
-        getPitcherDataFromURL("http://52.55.212.19/GetPitchers.php")
+        getPitcherDataFromURL("\(ServerConnector.publicIP)GetPitchers.php")
         refreshController.endRefreshing()
     }
     
     
     func getPitcherDataFromURL(_ link:String) {
-        let data = "team_id=\(team)"
+        let data = "team_id=\(BTHelper.CurrentTeam)"
         ServerConnector.getURLData(urlString: link, data: data, httpMethod: "POST") { (success, data, response) in
             if data != nil{
                 self.fillPitcherData(data!)
@@ -139,15 +136,54 @@ class PitcherViewController: UITableViewController {
         
     }
     
+    @IBAction func dismissVC(_ sender: Any) {
+        BTHelper.ResetTeam()
+        dismiss(animated: true, completion: nil)
+    }
+    
+    @IBAction func addPitcherPressed(_ sender: Any) {
+        let storyboard = UIStoryboard(name: "Main", bundle: nil)
+        let vc = storyboard.instantiateViewController(withIdentifier: "addTeamPlayer") as! AddTeamPlayerViewController
+        present(vc, animated: true, completion: nil)
+    }
+    
     @IBAction func backPressed(_ sender: Any) {
         sendToTeamsVC()
     }
     
+    func sendToBullpensVC(pitcherRowID: Int){
+        let pData = PitcherViewController.PitcherData[pitcherRowID]
+        let id = Int(pData[0])!
+        
+        PitcherViewController.setCurrentPitcher(pitcherId: id)
+        let storyboard = UIStoryboard(name: "Bullpens", bundle: nil)
+        let vc = storyboard.instantiateViewController(withIdentifier: "BullpensVC") as! BullpenViewController
+        vc.PitcherData = pData
+        present(vc, animated: true, completion: nil)
+    }
     
     func sendToTeamsVC(){
         let storyboard = UIStoryboard(name: "TeamSelect", bundle: nil)
         let vc = storyboard.instantiateViewController(withIdentifier: "myTeams") as! TeamSelectViewController
         present(vc, animated: true, completion: nil)
+    }
+    
+    func animateTable() {
+        self.tableView.reloadData()
+        let cells = tableView.visibleCells
+        let tableHeight: CGFloat = tableView.bounds.size.height
+        for (index, cell) in cells.enumerated() {
+            cell.transform = CGAffineTransform(translationX: 0, y: tableHeight)
+            UIView.animate(withDuration: 1.0, delay: 0.05 * Double(index), usingSpringWithDamping: 0.85, initialSpringVelocity: 0, options: [], animations: {
+                    cell.transform = CGAffineTransform(translationX: 0, y: 0);
+                }, completion: nil)
+        }
+    }
+    
+    
+    override func didReceiveMemoryWarning() {
+        super.didReceiveMemoryWarning()
+        // Dispose of any resources that can be recreated.
     }
     
     

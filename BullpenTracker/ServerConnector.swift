@@ -8,11 +8,11 @@
 
 import Foundation
 
-let publicIP = "http://52.55.212.19/"
-let debug = false
 
 class ServerConnector {
     
+    static let publicIP = "http://54.175.185.55/"
+    static let debug = true
     
     static func extractJSON(_ data: Data) -> NSArray {
         let json: Any?
@@ -35,7 +35,7 @@ class ServerConnector {
         let request:NSMutableURLRequest = NSMutableURLRequest(url:url as URL)
         request.httpMethod = httpMethod
         request.httpBody = data.data(using: String.Encoding.utf8);
-        let task = URLSession.shared.dataTask(with: request as URLRequest!, completionHandler: { data, response, error in
+        let task = URLSession.shared.dataTask(with: (request as URLRequest?)!, completionHandler: { data, response, error in
             guard let data = data, error == nil else {
                 // check for fundamental networking error
                 if verbose{
@@ -71,7 +71,7 @@ class ServerConnector {
         let verbose = verbose ?? debug
         // Make URL request
         let url: NSURL = NSURL(string: urlString)!
-        let request = NSMutableURLRequest(url: url as URL!)
+        let request = NSMutableURLRequest(url: (url as URL?)!)
         request.httpMethod = httpMethod
         request.cachePolicy = NSURLRequest.CachePolicy.reloadIgnoringCacheData
         request.httpBody = data.data(using: String.Encoding.utf8);

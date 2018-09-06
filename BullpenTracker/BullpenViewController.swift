@@ -17,23 +17,35 @@ class BullpenViewController: UITableViewController {
     
     override func viewDidLoad() {
         super.viewDidLoad()
-        // TODO: Setvartle of VC to pitcher name
-        //self.parent?.title = currentPitcherName
         self.tableView.rowHeight = 80.0
         navBar.sizeToFit()
         
         BullpenData = []
-        //self.tableView.contentInset = UIEdgeInsets(top: UIApplication.shared.statusBarFrame.size.height, left: 0, bottom: 0, right: 0)
-        titleView.title = "\(currentPitcherName)\'s Bullpens"
+        
+        
+        if currentPitcherName == "Pitcher Not Found" &&  BTHelper.CurrentTeam == -1{
+            titleView.title = "My Bullpens"
+        }else{
+            
+            titleView.title = "\(currentPitcherName)\'s Bullpens"
+        }
         update()
         
     }
     
     func update(){
-        
-        ServerConnector.getURLData(urlString: "http://52.55.212.19/GetBullpens.php", verbose: false) { (success, data, response) in
-            self.fillBullpenList(data!)
+        if BTHelper.CurrentTeam == -1{
+            let data = "pitcher=\(BTHelper.CurrentPitcher)&team=\(1)"
+            ServerConnector.getURLData(urlString: "\(ServerConnector.publicIP)GetBullpens.php", data: data, httpMethod: "POST") { (success, data, response) in
+                self.fillBullpenList(data!)
+            }
+        }else{
+            let data = "pitcher=\(BTHelper.CurrentPitcher)&team=\(BTHelper.CurrentTeam)"
+            ServerConnector.getURLData(urlString: "\(ServerConnector.publicIP)GetTeamBullpens.php", data: data, httpMethod: "POST") { (success, data, response) in
+                self.fillBullpenList(data!)
+            }
         }
+        
         
     }
     
@@ -83,7 +95,13 @@ class BullpenViewController: UITableViewController {
     
     
     @IBAction func sendToPitchersVC(_ sender: UIBarButtonItem) {
-        self.performSegue(withIdentifier: "unwindToPitchers", sender: self)
+        if BTHelper.CurrentTeam == -1{
+            self.performSegue(withIdentifier: "unwindToHomePage", sender: self)
+        }else{
+            self.performSegue(withIdentifier: "unwindToPitchers", sender: self)
+        }
+        
+        
         
     }
     
@@ -133,7 +151,7 @@ class BullpenViewController: UITableViewController {
     func createNewBullpen(type: String){
         
         let pitcher_id = PitcherViewController.getCurrentPitcher()
-        let data = "pitcher_id=\(pitcher_id)&type=\(type)"
+        let data = "pitcher_id=\(pitcher_id)&type=\(type)&team=\(BTHelper.CurrentTeam)"
         
         ServerConnector.runScript(scriptName: "AddBullpen.php", data: data) { (responseString) in
             if let list = ServerConnector.extractJSON((responseString?.data(using: .utf8))!) as? [NSDictionary]{
@@ -247,8 +265,12 @@ class BullpenViewController: UITableViewController {
     
     func do_table_refresh() {
         self.tableView.reloadData()
-       
         
+    }
+    
+    override func didReceiveMemoryWarning() {
+        super.didReceiveMemoryWarning()
+        // Dispose of any resources that can be recreated.
     }
     
 }

@@ -36,13 +36,6 @@ class SummaryViewController: UIViewController, UIPopoverPresentationControllerDe
     @IBOutlet weak var pitchCountLabel: UILabel!
     @IBOutlet weak var dateLabel: UILabel!
     
-    static let fColor = UIColor.black
-    static let sColor = UIColor.orange
-    static let bColor = UIColor.blue
-    static let xColor = UIColor.green
-    static let twoColor = UIColor.purple
-    static let cColor = UIColor.red
-    
     var pitch_list: [UIImageView] = []
     var pitch_data: [[String:Any]] = []
     var pitch_labels : [UILabel] = []
@@ -65,6 +58,7 @@ class SummaryViewController: UIViewController, UIPopoverPresentationControllerDe
     @IBOutlet weak var emailButton: UIButton!
     @IBOutlet weak var addPitchesButton: UIButton!
     
+    var OfflinePitchData : [[String: Any?]] = []
     let backgroundColor = UIColor.white
     
     struct defaultsKeys {
@@ -82,27 +76,33 @@ class SummaryViewController: UIViewController, UIPopoverPresentationControllerDe
         if !PitcherData.isEmpty{
             pitcherNameLabel.text = PitcherData[1]
         }else{
-            pitcherNameLabel.text = "Error loading pitcher"
+            //pitcherNameLabel.text = "Error loading pitcher"
+            pitcherNameLabel.text = ""
         }
         
-        
-        bullpenTypeLabel.text = bullpenData[2] as? String
-        
-        
-        let originalDate =  bullpenData[3] as? String
-        var date = ""
-        if originalDate != nil && originalDate != "" {
-            date = BullpenViewController.formatDate(originalDate: originalDate!, originalFormat: "yyyy-MM-dd", newFormat: "MM/dd/yyyy")
-        }
-        
-        dateLabel.text = date
-        
-        let pc = bullpenData[5] as! Int
-        if pc == 1{
-            pitchCountLabel.text = "1 pitch"
+        if !bullpenData.isEmpty{
+            bullpenTypeLabel.text = bullpenData[2] as? String
+            let originalDate =  bullpenData[3] as? String
+            var date = ""
+            if originalDate != nil && originalDate != "" {
+                date = BullpenViewController.formatDate(originalDate: originalDate!, originalFormat: "yyyy-MM-dd", newFormat: "MM/dd/yyyy")
+            }
+            
+            dateLabel.text = date
+            
+            let pc = bullpenData[5] as! Int
+            if pc == 1{
+                pitchCountLabel.text = "1 pitch"
+            }else{
+                pitchCountLabel.text = "\(pc) pitches"
+            }
         }else{
-            pitchCountLabel.text = "\(pc) pitches"
+            bullpenTypeLabel.text = ""
         }
+        
+        
+        
+        
         
         DispatchQueue.main.async {
             self.addButtons()
@@ -271,12 +271,12 @@ class SummaryViewController: UIViewController, UIPopoverPresentationControllerDe
         addPitchesButton.setTitleColor(UIColor.black, for: .normal)
         addPitchesButton.addTarget(self, action: #selector(addPitches), for: .touchUpInside)
         
-        fLabel.textColor = SummaryViewController.fColor
-        sLabel.textColor = SummaryViewController.sColor
-        bLabel.textColor = SummaryViewController.bColor
-        xLabel.textColor = SummaryViewController.xColor
-        twoLabel.textColor = SummaryViewController.twoColor
-        cLabel.textColor = SummaryViewController.cColor
+        fLabel.textColor = BTHelper.PitchTypeColors["F"]
+        sLabel.textColor = BTHelper.PitchTypeColors["S"]
+        bLabel.textColor = BTHelper.PitchTypeColors["B"]
+        xLabel.textColor = BTHelper.PitchTypeColors["X"]
+        twoLabel.textColor = BTHelper.PitchTypeColors["2"]
+        cLabel.textColor = BTHelper.PitchTypeColors["C"]
         
         strikeRefImage.image = UIImage.circle(hollow: false, diameter: ballSize, color: UIColor.black)
         ballRefImage.image = UIImage.circle(hollow: true, diameter: ballSize, color: UIColor.black)
@@ -314,13 +314,91 @@ class SummaryViewController: UIViewController, UIPopoverPresentationControllerDe
         }
     }
     
+    func fillStrikeZoneOffline(){
+        for op in OfflinePitchData{
+            if let px = op["pitchX"] as? CGFloat, let py = op["pitchY"] as? CGFloat{
+                let type = op["pitch_type"] as! String
+                var color = UIColor.black
+                if let c = BTHelper.PitchTypeColors[type]{
+                    color = c
+                }
+                
+                let bs = op["ball_strike"] as! String
+                
+                var h = false
+                if bs == "B" || bs == "N"{
+                    h = true
+                }
+                
+                var hc = op["hard_contact"] as? Bool
+                var pr = op["pitch_result"] as? String
+                var vel = op["vel"] as? String
+                if hc == nil{
+                    hc = false
+                }
+                var pr_b = true
+                if pr == nil{
+                    pr = "N/A"
+                }
+                if pr == "N/A"{
+                    pr_b = false
+                }
+                var flipped = false
+                if (pr == "LS" || pr == "SS"){
+                    flipped = true
+                }
+                
+                if vel == nil{
+                    vel = "0"
+                }
+            
+                DispatchQueue.main.async {
+                    let loc = self.getTranslatedLocation(pitchLocation: CGPoint(x: px, y: py))
+                    let ballImg = self.createPermanentBall(location: loc, color: color, hollow: h, pitchHasResult: pr_b, hardContact: hc!, flippedTriangle: flipped)
+                    let pData = ["type":type, "bs": bs, "vel":vel!, "px":px, "py":py, "hardContact":hc!, "pitchResult":pr!, "ballImg":ballImg] as [String:Any]
+                    self.pitch_data.append(pData)
+                    
+                    let pLabel = UILabel()
+                    var plframe = ballImg.frame
+                    plframe.origin.x += self.ballSize + 3
+                    pLabel.frame = plframe
+                    if (vel != "0"){
+                        pLabel.text = vel
+                    }else{
+                        pLabel.text = ""
+                    }
+                    
+                    pLabel.adjustsFontSizeToFitWidth = true
+                    pLabel.isHidden = true
+                    self.pitch_labels.append(pLabel)
+                    
+                    let tapPitchOnZoneGesture = UITapGestureRecognizer(target: self, action: #selector(SummaryViewController.tapPitchOnZone))
+                    ballImg.isUserInteractionEnabled = true
+                    ballImg.addGestureRecognizer(tapPitchOnZoneGesture)
+                    self.view.addSubview(ballImg)
+                    self.view.addSubview(pLabel)
+                }
+            }
+            
+            
+        }
+        
+        
+    }
+    
     func fillStrikeZone(){
-        let data = "bullpen_id=\(bullpenData[0])"
+        if BTHelper.offlineMode{
+            fillStrikeZoneOffline()
+            return
+        }
+        let data = "bullpen_id=\(bullpenData[0] as! Int)"
+        print(data)
         ServerConnector.runScript(scriptName: "GetBullpenPitches.php", data: data){ response in
             if response == nil{
                 print("Could not load pitch data")
                 return
             }
+            print(response!)
             let pitches = ServerConnector.extractJSON(response!.data(using: .utf8)!)
             self.pitch_data = []
             for i in 0 ..< pitches.count {
@@ -328,29 +406,10 @@ class SummaryViewController: UIViewController, UIPopoverPresentationControllerDe
                     if let type = pitch["pitch_type"] as? String, let px_s = pitch["pitchX"] as? String, let py_s = pitch["pitchY"] as? String, let bs = pitch["ball_strike"] as? String, let vel = pitch["vel"] as? String, let hc = pitch["hard_contact"] as? String, let pr = pitch["result"] as? String {
                         let px = CGFloat((px_s as NSString).floatValue)
                         let py = CGFloat((py_s as NSString).floatValue)
-                        var color = UIColor.black
                         
-                        switch type{
-                        case "F":
-                            color = SummaryViewController.fColor
-                            break
-                        case "S":
-                            color = SummaryViewController.sColor
-                            break
-                        case "B":
-                            color = SummaryViewController.bColor
-                            break
-                        case "X":
-                            color = SummaryViewController.xColor
-                            break
-                        case "2":
-                            color = SummaryViewController.twoColor
-                            break
-                        case "C":
-                            color = SummaryViewController.cColor
-                            break
-                        default:
-                            color = UIColor.black
+                        var color = UIColor.black
+                        if let c = BTHelper.PitchTypeColors[type]{
+                            color = c
                         }
                         
                         var h = false
@@ -358,9 +417,20 @@ class SummaryViewController: UIViewController, UIPopoverPresentationControllerDe
                             h = true
                         }
                         
+                        var hc_b = false
+                        if hc == "1"{
+                            hc_b = true
+                        }
+                        
+                        let pr_b = (pr != "N/A") && (pr != "NA")
+                        var flipped = false
+                        if (pr == "LS" || pr == "SS"){
+                            flipped = true
+                        }
+                        
                         DispatchQueue.main.async {
                             let loc = self.getTranslatedLocation(pitchLocation: CGPoint(x: px, y: py))
-                            let ballImg = self.createPermanentBall(location: loc, color: color, hollow: h)
+                            let ballImg = self.createPermanentBall(location: loc, color: color, hollow: h, pitchHasResult: pr_b, hardContact: hc_b, flippedTriangle: flipped)
                             let pData = ["type":type, "bs": bs, "vel":vel, "px":px, "py":py, "hardContact":hc, "pitchResult":pr, "ballImg":ballImg] as [String:Any]
                             self.pitch_data.append(pData)
                             
@@ -399,6 +469,7 @@ class SummaryViewController: UIViewController, UIPopoverPresentationControllerDe
             
         }
         
+        
     }
     
     @objc func tapPitchOnZone(sender: UIGestureRecognizer){
@@ -413,6 +484,9 @@ class SummaryViewController: UIViewController, UIPopoverPresentationControllerDe
         var bsTemp = p["bs"]! as! String
         switch bsTemp{
         case "X":
+            bsTemp = "Executed"
+            break
+        case "Y":
             bsTemp = "Executed"
             break
         case "N":
@@ -441,25 +515,27 @@ class SummaryViewController: UIViewController, UIPopoverPresentationControllerDe
         }
         vc.vel = v
         
-        var hc = p["hardContact"] as! String
-        if (hc == "1"){
-            hc = "Yes"
-        }else{
-            hc = "No"
+        var hc = "No"
+        if let hc_s = p["hardContact"] as? String{
+            if (hc_s == "1"){
+                hc = "Yes"
+            }else{
+                hc = "No"
+            }
+        }else if let hc_b = p["hardContact"] as? Bool{
+            if hc_b{
+                hc = "Yes"
+            }
         }
         vc.hardContact = hc
         
-        var pr = p["pitchResult"] as! String
-        
-        switch pr{
-        case "NA":
-            pr = "N/A"
-            break
-        default:
-            pr = "N/A"
-            break
+        var pr = p["pitchResult"] as? String
+        pr = BTHelper.PitchResults[pr!]
+        if pr == nil{
+            pr = "None"
         }
-        vc.pitchResult = pr
+        
+        vc.pitchResult = pr!
   
         self.present(popController, animated: true, completion: nil)
     }
@@ -468,10 +544,15 @@ class SummaryViewController: UIViewController, UIPopoverPresentationControllerDe
         return UIModalPresentationStyle.none
     }
     
-    func createPermanentBall(location: CGPoint, color: UIColor, hollow: Bool) -> UIImageView{
+    func createPermanentBall(location: CGPoint, color: UIColor, hollow: Bool, pitchHasResult: Bool, hardContact: Bool, flippedTriangle: Bool = false) -> UIImageView{
         let permBallImage = UIImageView()
         permBallImage.frame = CGRect(x: location.x - ballSize/2, y: location.y - ballSize/2, width: ballSize, height: ballSize)
-        permBallImage.image = UIImage.circle(hollow: hollow, diameter: ballSize, color: color)
+        if pitchHasResult{
+            permBallImage.image = UIImage.triangle(hollow: hollow, diameter: ballSize, color: color, flipped: flippedTriangle)
+        }else{
+            permBallImage.image = UIImage.circle(hollow: hollow, diameter: ballSize, color: color, withX: hardContact)
+        }
+        
         return permBallImage
     }
     
@@ -538,8 +619,16 @@ class SummaryViewController: UIViewController, UIPopoverPresentationControllerDe
   
     
     @IBAction func doneButtonPressed(_ sender: AnyObject) {
-        DispatchQueue.main.async{
-            self.performSegue(withIdentifier: "unwindToBullpens", sender: self)
+        
+        if BTHelper.offlineMode{
+            BTHelper.offlineMode = false
+            DispatchQueue.main.async{
+                self.performSegue(withIdentifier: "unwindToHomePage", sender: self)
+            }
+        }else{
+            DispatchQueue.main.async{
+                self.performSegue(withIdentifier: "unwindToBullpens", sender: self)
+            }
         }
     }
     

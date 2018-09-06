@@ -7,6 +7,7 @@
 //
 
 import UIKit
+import Foundation
 
 class AddPitches: UIViewController, UITextFieldDelegate, UIPickerViewDelegate, UIPickerViewDataSource{
     
@@ -47,7 +48,7 @@ class AddPitches: UIViewController, UITextFieldDelegate, UIPickerViewDelegate, U
     var permanentBalls: [UIImageView] = []
     
     var bullpenID = -1
-    var abID = 0;
+    var abID = 0
     var pitches: [[String]] = [[String]]()
     
     var add_success = false
@@ -73,12 +74,15 @@ class AddPitches: UIViewController, UITextFieldDelegate, UIPickerViewDelegate, U
     var StrikeViewWidth : CGFloat = 0.0
     var StrikeViewHeight : CGFloat = 0.0
     let strikeZoneRatio : CGFloat = 1.5
-    var showPitchHistory = true
-    var hardContact = false
+    private var showPitchHistory = true
+    private var hardContact = false
     
-    var currentABPitches = 0
+    private var currentABPitches = 0
     
-    var remakeZone = true
+    private var remakeZone = true
+    
+    private var OfflinePitchData : [[String: Any?]] = []
+    
     
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -90,8 +94,15 @@ class AddPitches: UIViewController, UITextFieldDelegate, UIPickerViewDelegate, U
         
         navBar.sizeToFit()
         
-        competitivePen = bullpenData[1] as! Bool
-        bullpenID = bullpenData[0] as! Int
+        if BTHelper.offlineMode{
+            competitivePen = true
+            bullpenID = -5
+        }else{
+            competitivePen = bullpenData[1] as! Bool
+            bullpenID = bullpenData[0] as! Int
+        }
+        
+        
         
         let tap: UITapGestureRecognizer = UITapGestureRecognizer(target: self, action: #selector(AddPitcherViewController.dismissKeyboard))
         view.addGestureRecognizer(tap)
@@ -138,7 +149,12 @@ class AddPitches: UIViewController, UITextFieldDelegate, UIPickerViewDelegate, U
         pitches = [["F", "S", "B", "X", "2", "C"], ["None", "Swing and miss", "Strike taken", "Swinging strikout", "Looking strikeout"]]
         selectedPitch = pitches[0][0]
         selectedResult = pitches[1][0]
-        totalPitches = bullpenData[5] as! Int
+        if BTHelper.offlineMode{
+            totalPitches = OfflinePitchData.count
+        }else{
+            totalPitches = bullpenData[5] as! Int
+        }
+        
     }
     
     // Initialize most of
@@ -315,7 +331,35 @@ class AddPitches: UIViewController, UITextFieldDelegate, UIPickerViewDelegate, U
         if currentABPitches == 0{
             return
         }
-        let data = "b_id=\(bullpenID)"
+        let abPopup = UIAlertController(title: "Batter Details", message: "Is the batter left or right handed", preferredStyle: .actionSheet)
+        
+        
+        let lefty = UIAlertAction(title: "Left", style: .default, handler: {
+            alert -> Void in
+            self.sendNewAB(side: "L")
+        })
+        let righty = UIAlertAction(title: "Right", style: .default, handler: {
+            alert -> Void in
+            self.sendNewAB(side: "R")
+        })
+        let cancelAction = UIAlertAction(title: "Cancel", style: .destructive, handler: {
+            (action : UIAlertAction!) -> Void in
+            
+        })
+        
+        abPopup.addAction(lefty)
+        abPopup.addAction(righty)
+        abPopup.addAction(cancelAction)
+        
+        self.present(abPopup, animated: true, completion: nil)
+        
+        
+        
+    }
+    
+    func sendNewAB(side: String){
+        
+        let data = "b_id=\(bullpenID)&batter_side=\(side)"
         ServerConnector.runScript(scriptName: "AddAtBat.php", data: data){ response in
             if response == "null"{
                 self.abID = 0
@@ -373,7 +417,7 @@ class AddPitches: UIViewController, UITextFieldDelegate, UIPickerViewDelegate, U
         var resultCode:String
         switch selectedResult{
         case "None":
-            resultCode = "NA"
+            resultCode = "N/A"
             break
         case "Swing and miss":
             resultCode = "SM"
@@ -388,27 +432,58 @@ class AddPitches: UIViewController, UITextFieldDelegate, UIPickerViewDelegate, U
             resultCode = "LS"
             break
         default:
-            resultCode = "NA"
+            resultCode = "N/A"
         }
         if BallLocation != nil{
             createPermanentBall(location: BallLocation!)
         }
         
-        addPitch(pitch: pitch, strike: strike, vel: vel!, result: resultCode, hard_contact: hardContact){ success in
-            DispatchQueue.main.async {
-                if success{
-                    self.totalPitches += 1
-                    self.pitchCountLabel.text = "Total: " + String(self.totalPitches)
-                    self.statusLabel.text = "Last pitch: \(pitch), \(strike)"
-                    if self.competitivePen{
-                         self.statusLabel.text?.append(", \(resultCode)")
+        var s = strike
+        if s=="Strike"{
+            s = "S"
+        }else if s=="Ball"{
+            s = "B"
+        }else if s=="Y"{
+            s = "X"
+        }
+        
+        if BTHelper.offlineMode{
+            
+            var offlinePitch = ["pitch_type": pitch, "ball_strike": strike, "vel": vel!, "result":resultCode, "hard_contact": hardContact] as [String : Any]
+            if BallLocation != nil && !ballImage.isHidden{
+                let loc : CGPoint = getTranslatedLocation(viewLocation: BallLocation!)
+                offlinePitch["pitchX"] =  loc.x
+                offlinePitch["pitchY"] =  loc.y
+            }
+            OfflinePitchData.append(offlinePitch)
+            self.totalPitches += 1
+            self.pitchCountLabel.text = "Total: \(self.totalPitches)"
+            self.statusLabel.text = "Last pitch: \(pitch), \(strike)"
+            if self.competitivePen{
+                self.statusLabel.text?.append(", \(resultCode)")
+                self.pitchPicker.selectRow(0, inComponent: 1, animated:false)
+            }
+            self.enterButton.backgroundColor = self.enterButtonsColor
+        }else{
+            addPitch(pitch: pitch, strike: strike, vel: vel!, result: resultCode, hard_contact: hardContact){ success in
+                DispatchQueue.main.async {
+                    if success{
+                        self.totalPitches += 1
+                        self.pitchCountLabel.text = "Total: \(self.totalPitches)"
+                        self.statusLabel.text = "Last pitch: \(pitch), \(strike)"
+                        if self.competitivePen{
+                            self.statusLabel.text?.append(", \(resultCode)")
+                            self.pitchPicker.selectRow(0, inComponent: 1, animated:false)
+                        }
+                    }else{
+                        self.statusLabel.text = "Trouble connecting to database, try again"
                     }
-                }else{
-                    self.statusLabel.text = "Trouble connecting to database, try again"
+                    self.enterButton.backgroundColor = self.enterButtonsColor
                 }
-                self.enterButton.backgroundColor = self.enterButtonsColor
             }
         }
+        
+        
         velField.text = ""
         if hardContact{
             toggleHardContact()
@@ -421,17 +496,8 @@ class AddPitches: UIViewController, UITextFieldDelegate, UIPickerViewDelegate, U
     
     
     func addPitch(pitch: String, strike: String, vel: String, result: String, hard_contact: Bool, completion: @escaping (Bool) -> ()){
-        var s = strike
-        if s=="Strike"{
-            s = "S"
-        }else if s=="Ball"{
-            s = "B"
-        }else if s=="Y"{
-            s = "X"
-        }
         
-        
-        var data = "bullpen_id=\(bullpenID)&pitch_type=\(pitch)&ball_strike=\(s)&vel=\(vel)&result=\(result)"
+        var data = "bullpen_id=\(bullpenID)&pitch_type=\(pitch)&ball_strike=\(strike)&vel=\(vel)&result=\(result)"
         
         if competitivePen{
             let hc = hard_contact ? 1 : 0
@@ -441,18 +507,25 @@ class AddPitches: UIViewController, UITextFieldDelegate, UIPickerViewDelegate, U
         if BallLocation != nil && !ballImage.isHidden{
             let loc : CGPoint = getTranslatedLocation(viewLocation: BallLocation!)
             data.append("&pitchX=\(loc.x)&pitchY=\(loc.y)")
-            BallLocation = nil
-            ballImage.isHidden = true;
         }
         
         
         
         ServerConnector.runScript(scriptName: "AddPitch.php", data: data){ response in
             completion(response != nil)
+            if response == nil{
+                print("Error running Add Pitch script")
+                return
+            }
             let pitch_list = ServerConnector.extractJSON((response?.data(using: .utf8))!)
             let pitch = pitch_list[0] as? NSDictionary
             let last_pitch = pitch!["last_id"] as! String
             self.lastPitchID = Int(last_pitch)!
+            self.BallLocation = nil
+            DispatchQueue.main.async {
+                self.ballImage.isHidden = true;
+            }
+            
         }
     }
     
@@ -488,10 +561,16 @@ class AddPitches: UIViewController, UITextFieldDelegate, UIPickerViewDelegate, U
     
     
     func undoPitch(completion: @escaping (Bool) -> ()){
-        let data = "id=\(lastPitchID)&bullpen_id=\(bullpenID)"
-        ServerConnector.runScript(scriptName: "RemovePitch.php", data: data){ response in
-            completion(response != nil)
+        if BTHelper.offlineMode{
+            let _ = OfflinePitchData.popLast()
+            completion(true)
+        }else{
+            let data = "id=\(lastPitchID)&bullpen_id=\(bullpenID)"
+            ServerConnector.runScript(scriptName: "RemovePitch.php", data: data){ response in
+                completion(response != nil)
+            }
         }
+        
     }
     
     
@@ -563,7 +642,6 @@ class AddPitches: UIViewController, UITextFieldDelegate, UIPickerViewDelegate, U
         }else{
             return 1
         }
-        
     }
     
     // The number of rows of data
@@ -582,28 +660,8 @@ class AddPitches: UIViewController, UITextFieldDelegate, UIPickerViewDelegate, U
         if component == 0{
             selectedPitch = pitches[component][row]
             var color = UIColor.black
-            switch selectedPitch{
-                
-            case "F":
-                color = SummaryViewController.fColor
-                break
-            case "S":
-                color = SummaryViewController.sColor
-                break
-            case "B":
-                color = SummaryViewController.bColor
-                break
-            case "X":
-                color = SummaryViewController.xColor
-                break
-            case "2":
-                color = SummaryViewController.twoColor
-                break
-            case "C":
-                color = SummaryViewController.cColor
-                break
-            default:
-                color = UIColor.black
+            if let c = BTHelper.PitchTypeColors[selectedPitch]{
+                color = c
             }
             ballImage.image = UIImage.circle(hollow: false, diameter: ballSize, color: color)
             
@@ -714,7 +772,6 @@ class AddPitches: UIViewController, UITextFieldDelegate, UIPickerViewDelegate, U
             hardContactButton.setTitleColor(ballStrikeColor, for: .normal)
         }
     }
-    
     // Points will be relative to the center of the strike zone at (0, 0). Strike zone top should be at -strikeZoneRatio, left side at -1.0
     func getTranslatedLocation(viewLocation : CGPoint) -> CGPoint{
         let tx = (viewLocation.x - StrikeZone.frame.width/2) / (strikeZoneImage.frame.width/2)
@@ -737,8 +794,13 @@ class AddPitches: UIViewController, UITextFieldDelegate, UIPickerViewDelegate, U
     func sendToSummaryVC(bullpenData: [Any], PitcherData: [String]) {
         let storyboard = UIStoryboard(name: "SummaryView", bundle: nil)
         let vc = storyboard.instantiateViewController(withIdentifier: "SummaryVC") as! SummaryViewController
-        vc.bullpenData = bullpenData
-        vc.PitcherData = PitcherData
+        
+        if BTHelper.offlineMode{
+            vc.OfflinePitchData = self.OfflinePitchData
+        }else{
+            vc.bullpenData = bullpenData
+            vc.PitcherData = PitcherData
+        }
         self.present(vc, animated: true, completion: nil)
     }
     
@@ -762,7 +824,7 @@ class AddPitches: UIViewController, UITextFieldDelegate, UIPickerViewDelegate, U
 }
 
 extension UIImage {
-    class func circle(hollow: Bool, diameter: CGFloat, color: UIColor) -> UIImage {
+    class func circle(hollow: Bool, diameter: CGFloat, color: UIColor, withX: Bool = false) -> UIImage {
         UIGraphicsBeginImageContextWithOptions(CGSize(width: diameter, height: diameter), false, 0)
         let ctx = UIGraphicsGetCurrentContext()!
         ctx.saveGState()
@@ -770,10 +832,26 @@ extension UIImage {
         ctx.setFillColor(color.cgColor)
         ctx.setStrokeColor(color.cgColor)
         if hollow{
+            ctx.setLineWidth(2.0)
             ctx.strokeEllipse(in: rect)
         }else{
             ctx.fillEllipse(in: rect)
+            
         }
+        if withX{
+            let l = diameter/2.0 * CGFloat(cos(Double.pi/4.0))
+            ctx.setStrokeColor(UIColor.red.cgColor)
+            let p1 = CGPoint(x:  l + diameter/2.0, y: l + diameter/2.0)
+            let p2 = CGPoint(x:  -l + diameter/2.0, y: l + diameter/2.0)
+            let p3 = CGPoint(x:  l + diameter/2.0, y: -l + diameter/2.0)
+            let p4 = CGPoint(x:  -l + diameter/2.0, y: -l + diameter/2.0)
+            
+            let points = [p1, p4, p2, p3]
+            ctx.setLineWidth(2.0)
+            ctx.strokeLineSegments(between: points)
+        }
+        
+        
         
         
         ctx.restoreGState()
@@ -782,4 +860,42 @@ extension UIImage {
         
         return img
     }
+    
+    class func triangle(hollow: Bool, diameter: CGFloat, color: UIColor, flipped: Bool) -> UIImage{
+        UIGraphicsBeginImageContextWithOptions(CGSize(width: diameter, height: diameter), false, 0)
+        let ctx = UIGraphicsGetCurrentContext()!
+        ctx.saveGState()
+        ctx.setFillColor(color.cgColor)
+        ctx.setStrokeColor(color.cgColor)
+        
+        
+        var p1 = CGPoint(x: 0.0, y: sqrt(3.0)/2 * diameter)
+        var p2 = CGPoint(x: diameter/2, y: 0.0)
+        var p3 = CGPoint(x: diameter, y: sqrt(3.0)/2 * diameter)
+        
+        if flipped{
+            p1 = CGPoint(x: 0.0, y: 0.0)
+            p2 = CGPoint(x: diameter/2, y: sqrt(3.0)/2 * diameter)
+            p3 = CGPoint(x: diameter, y: 0)
+        }
+        let points = [p1, p2, p2, p3, p3, p1]
+        
+        if hollow{
+            ctx.setLineWidth(2.0)
+            ctx.strokeLineSegments(between: points)
+        }else{
+            ctx.beginPath()
+            ctx.addLines(between: points)
+            ctx.fillPath()
+            ctx.closePath()
+        }
+        ctx.restoreGState()
+        let img = UIGraphicsGetImageFromCurrentImageContext()!
+        UIGraphicsEndImageContext()
+        
+        return img
+    }
+    
 }
+
+
