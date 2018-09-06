@@ -14,6 +14,9 @@ class HomePageViewController: UIViewController{
     
     @IBOutlet weak var myTeamsButton: UIButton!
     @IBOutlet weak var indivStatsButton: UIButton!
+    @IBOutlet weak var loginStatusButton: UIButton!
+    
+    let loggedEmail = UserDefaults.standard.string(forKey: BTHelper.defaultsKeys.storedLoginPitcherEmail)
     
     override func viewDidLoad() {
         
@@ -27,6 +30,11 @@ class HomePageViewController: UIViewController{
         indivStatsButton.layer.cornerRadius = indivStatsButton.frame.width/5
         
         
+        if loggedEmail == ""{
+            loginStatusButton.setTitle("Not Logged in", for: .normal)
+        }else{
+            loginStatusButton.setTitle("Logged in as \(loggedEmail!)", for: .normal)
+        }
         
     }
     
@@ -37,6 +45,22 @@ class HomePageViewController: UIViewController{
         sendToMyTeams()
     }
     
+    @IBAction func loginStatusPressed(_ sender: Any) {
+        //TODO: change to choose to log out message
+        
+        if loggedEmail == ""{
+            let storyboard = UIStoryboard(name: "TeamSelect", bundle: nil)
+            let vc = storyboard.instantiateViewController(withIdentifier: "loginVC") as! LoginViewController
+            present(vc, animated: true, completion: nil)
+        }else{
+            BTHelper.LogOut()
+            loginStatusButton.setTitle("Not Logged In", for: .normal)
+        }
+        
+        
+    }
+    
+    
     func sendToMyTeams() {
         let storyboard = UIStoryboard(name: "TeamSelect", bundle: nil)
         let vc = storyboard.instantiateViewController(withIdentifier: "myTeams") as! TeamSelectViewController
@@ -46,9 +70,7 @@ class HomePageViewController: UIViewController{
     
     @IBAction func clickIndividualStats(_ sender: Any) {
         let defaults = UserDefaults.standard
-        var pid = defaults.integer(forKey: BTHelper.defaultsKeys.storedLoginPitcherID)
-        pid = -1
-        //TODO: TAKE THIS SHIT OUT ^
+        let pid = defaults.integer(forKey: BTHelper.defaultsKeys.storedLoginPitcherID)
         if pid == -1 || pid == 0{
             let storyboard = UIStoryboard(name: "TeamSelect", bundle: nil)
             let vc = storyboard.instantiateViewController(withIdentifier: "loginVC") as! LoginViewController

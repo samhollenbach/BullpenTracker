@@ -14,11 +14,13 @@ class BTHelper{
     struct defaultsKeys {
         static let savedTeamIDs = "savedTeams"
         static let storedLoginPitcherID = "storedLogin"
+        static let storedLoginPitcherEmail = "storedEmail"
     }
     
     
     static var offlineMode = false
     
+    static var LoggedInPitcherEmail : String = ""
     static var LoggedInPitcher : Int = -1
     static var CurrentTeam : Int = -1
     static var CurrentPitcher : Int = -1
@@ -37,10 +39,12 @@ class BTHelper{
         self.TeamColorSecondary = secondary
     }
     
-    static func StoreLogin(pitcherID: Int){
+    static func StoreLogin(pitcherID: Int, pitcherEmail: String){
         let defaults = UserDefaults.standard
         defaults.setValue(pitcherID, forKey: defaultsKeys.storedLoginPitcherID)
+        defaults.setValue(pitcherEmail, forKey: defaultsKeys.storedLoginPitcherEmail)
         self.LoggedInPitcher = pitcherID
+        self.LoggedInPitcherEmail = pitcherEmail
     }
     
     static func LogOut(){

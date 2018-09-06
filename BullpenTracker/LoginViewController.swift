@@ -36,10 +36,10 @@ class LoginViewController : UIViewController{
             return
         }
         let data = "email=\(email)&password=\(pass)"
-        login(data: data)
+        login(data: data, email: email)
     }
     
-    func login(data: String){
+    func login(data: String, email: String = ""){
         ServerConnector.runScript(scriptName: "Login.php", data: data, verbose: true){
             response in
             if response == nil{
@@ -57,7 +57,7 @@ class LoginViewController : UIViewController{
             
             if let pid = Int(response!){
                 BTHelper.CurrentPitcher = pid
-                BTHelper.StoreLogin(pitcherID: pid)
+                BTHelper.StoreLogin(pitcherID: pid, pitcherEmail: email)
                 DispatchQueue.main.async {
                     let storyboard = UIStoryboard(name: "Bullpens", bundle: nil)
                     let vc = storyboard.instantiateViewController(withIdentifier: "BullpensVC") as! BullpenViewController

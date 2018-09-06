@@ -82,7 +82,7 @@ class CreateAcountViewController : UIViewController, UITextFieldDelegate, UIPick
             response in
             if response != nil && response == "1"{
                 let loginData = "email=\(email)&password=\(pass1)"
-                self.login(data: loginData)
+                self.login(data: loginData, email: email)
             }else{
                 BTHelper.showErrorPopup(source: self, errorTitle: "Registration Error", error: "Could not create account")
                 
@@ -93,7 +93,7 @@ class CreateAcountViewController : UIViewController, UITextFieldDelegate, UIPick
         
     }
     
-    func login(data: String){
+    func login(data: String, email: String = ""){
         ServerConnector.runScript(scriptName: "Login.php", data: data, verbose: true){
             response in
             if response == nil{
@@ -107,7 +107,7 @@ class CreateAcountViewController : UIViewController, UITextFieldDelegate, UIPick
             
             if let pid = Int(response!){
                 BTHelper.CurrentPitcher = pid
-                BTHelper.StoreLogin(pitcherID: pid)
+                BTHelper.StoreLogin(pitcherID: pid, pitcherEmail: email)
                 DispatchQueue.main.async {
                     let storyboard = UIStoryboard(name: "Bullpens", bundle: nil)
                     let vc = storyboard.instantiateViewController(withIdentifier: "BullpensVC") as! BullpenViewController
