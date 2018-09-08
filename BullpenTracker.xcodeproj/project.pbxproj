@@ -23,6 +23,7 @@
 		E9432E692034A13B000449DB /* TeamSelectViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = E9432E682034A13B000449DB /* TeamSelectViewController.swift */; };
 		E9432E6B2034A331000449DB /* HomePageViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = E9432E6A2034A331000449DB /* HomePageViewController.swift */; };
 		E9444F96203F4758007955A0 /* LoginViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = E9444F95203F4758007955A0 /* LoginViewController.swift */; };
+		E947665C214366B1008CA81C /* BullpenData.swift in Sources */ = {isa = PBXBuildFile; fileRef = E947665B214366B1008CA81C /* BullpenData.swift */; };
 		E97470BD2032A8110050A2A3 /* CINavigationBar.swift in Sources */ = {isa = PBXBuildFile; fileRef = E97470BC2032A8110050A2A3 /* CINavigationBar.swift */; };
 		E99E41D41EF85C9E00B7B14B /* PitcherViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = E99E41D31EF85C9E00B7B14B /* PitcherViewController.swift */; };
 		E99E41D61EF8715500B7B14B /* Bullpens.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = E99E41D51EF8715500B7B14B /* Bullpens.storyboard */; };
@@ -52,6 +53,7 @@
 		E9432E682034A13B000449DB /* TeamSelectViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TeamSelectViewController.swift; sourceTree = "<group>"; };
 		E9432E6A2034A331000449DB /* HomePageViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HomePageViewController.swift; sourceTree = "<group>"; };
 		E9444F95203F4758007955A0 /* LoginViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LoginViewController.swift; sourceTree = "<group>"; };
+		E947665B214366B1008CA81C /* BullpenData.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BullpenData.swift; sourceTree = "<group>"; };
 		E97470BC2032A8110050A2A3 /* CINavigationBar.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CINavigationBar.swift; sourceTree = "<group>"; };
 		E99E41D31EF85C9E00B7B14B /* PitcherViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = PitcherViewController.swift; sourceTree = "<group>"; };
 		E99E41D51EF8715500B7B14B /* Bullpens.storyboard */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.storyboard; path = Bullpens.storyboard; sourceTree = "<group>"; };
@@ -110,6 +112,7 @@
 				E9337E3120420C4100B23C38 /* ChangePasswordViewController.swift */,
 				E9444F95203F4758007955A0 /* LoginViewController.swift */,
 				E9432E6A2034A331000449DB /* HomePageViewController.swift */,
+				E947665B214366B1008CA81C /* BullpenData.swift */,
 				E9432E682034A13B000449DB /* TeamSelectViewController.swift */,
 				E929B9DC203DDDF4008E2E11 /* CreateAccountViewController.swift */,
 				E92D27001EEE889100075468 /* Assets.xcassets */,
@@ -148,7 +151,7 @@
 			isa = PBXProject;
 			attributes = {
 				LastSwiftUpdateCheck = 0800;
-				LastUpgradeCheck = 0920;
+				LastUpgradeCheck = 0930;
 				ORGANIZATIONNAME = "Sam Hollenbach";
 				TargetAttributes = {
 					E92D26F51EEE889100075468 = {
@@ -206,6 +209,7 @@
 				E9432E692034A13B000449DB /* TeamSelectViewController.swift in Sources */,
 				E9B36EDD1F536D7B00E674AA /* AddPitches.swift in Sources */,
 				E9391C6B203B44BF0047A483 /* AddTeamPlayerViewController.swift in Sources */,
+				E947665C214366B1008CA81C /* BullpenData.swift in Sources */,
 				E9084A3C1EF88C5000EB4514 /* RemovePitcherViewController.swift in Sources */,
 				E929B9DD203DDDF4008E2E11 /* CreateAccountViewController.swift in Sources */,
 				E97470BD2032A8110050A2A3 /* CINavigationBar.swift in Sources */,
@@ -254,6 +258,7 @@
 				CLANG_WARN_BOOL_CONVERSION = YES;
 				CLANG_WARN_COMMA = YES;
 				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DEPRECATED_OBJC_IMPLEMENTATIONS = YES;
 				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
 				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
 				CLANG_WARN_EMPTY_BODY = YES;
@@ -261,6 +266,7 @@
 				CLANG_WARN_INFINITE_RECURSION = YES;
 				CLANG_WARN_INT_CONVERSION = YES;
 				CLANG_WARN_NON_LITERAL_NULL_CONVERSION = YES;
+				CLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF = YES;
 				CLANG_WARN_OBJC_LITERAL_CONVERSION = YES;
 				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
 				CLANG_WARN_RANGE_LOOP_ANALYSIS = YES;
@@ -313,6 +319,7 @@
 				CLANG_WARN_BOOL_CONVERSION = YES;
 				CLANG_WARN_COMMA = YES;
 				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DEPRECATED_OBJC_IMPLEMENTATIONS = YES;
 				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
 				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
 				CLANG_WARN_EMPTY_BODY = YES;
@@ -320,6 +327,7 @@
 				CLANG_WARN_INFINITE_RECURSION = YES;
 				CLANG_WARN_INT_CONVERSION = YES;
 				CLANG_WARN_NON_LITERAL_NULL_CONVERSION = YES;
+				CLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF = YES;
 				CLANG_WARN_OBJC_LITERAL_CONVERSION = YES;
 				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
 				CLANG_WARN_RANGE_LOOP_ANALYSIS = YES;

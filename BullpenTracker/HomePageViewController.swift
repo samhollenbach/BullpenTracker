@@ -14,7 +14,8 @@ class HomePageViewController: UIViewController{
     
     @IBOutlet weak var myTeamsButton: UIButton!
     @IBOutlet weak var indivStatsButton: UIButton!
-    @IBOutlet weak var loginStatusButton: UIButton!
+    @IBOutlet weak var loginStatusLabel: UILabel!
+    @IBOutlet weak var logoutButton: UIButton!
     
     let loggedEmail = UserDefaults.standard.string(forKey: BTHelper.defaultsKeys.storedLoginPitcherEmail)
     
@@ -30,22 +31,32 @@ class HomePageViewController: UIViewController{
         indivStatsButton.layer.cornerRadius = indivStatsButton.frame.width/5
         
         
-        if loggedEmail == ""{
-            loginStatusButton.setTitle("Not Logged in", for: .normal)
-        }else{
-            loginStatusButton.setTitle("Logged in as \(loggedEmail!)", for: .normal)
-        }
+        updateLoggedStatus()
         
     }
     
-    @IBAction func unwindToHomePage(segue:UIStoryboardSegue) { }
+    func updateLoggedStatus(){
+        if loggedEmail == ""{
+            loginStatusLabel.text = "Not Logged In"
+            logoutButton.isHidden = true
+        }else{
+            loginStatusLabel.text = "Logged in as \(loggedEmail!)"
+            logoutButton.isHidden = false
+        }
+    }
+    
+    @IBAction func unwindToHomePage(segue:UIStoryboardSegue) {
+        updateLoggedStatus()
+    }
     
     
     @IBAction func clickMyTeams(_ sender: Any) {
         sendToMyTeams()
     }
     
-    @IBAction func loginStatusPressed(_ sender: Any) {
+    
+    
+    @IBAction func logoutPressed(_ sender: Any) {
         //TODO: change to choose to log out message
         
         if loggedEmail == ""{
@@ -54,7 +65,8 @@ class HomePageViewController: UIViewController{
             present(vc, animated: true, completion: nil)
         }else{
             BTHelper.LogOut()
-            loginStatusButton.setTitle("Not Logged In", for: .normal)
+            loginStatusLabel.text = "Not Logged In"
+            logoutButton.isHidden = true
         }
         
         

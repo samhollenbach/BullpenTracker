@@ -84,8 +84,7 @@ class TeamSelectViewController: UITableViewController{
                 self.showErrorPopup(errorTitle: "Team Access Error", error:"No team found with this code")
                 return
             }
-            
-            print(teams)
+
             for i in 0 ..< teams.count {
                 if let team = teams[i] as? NSDictionary {
                     if let teamID = team["id"] as? String, let teamName = team["team_name"] as? String, let teamInfo = team["team_info"] as? String{

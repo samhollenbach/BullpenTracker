@@ -457,31 +457,43 @@
                                 <nil key="highlightedColor"/>
                             </label>
                             <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="fYq-Id-GF1">
-                                <rect key="frame" x="0.0" y="557" width="375" height="23"/>
-                                <state key="normal" title="Not Logged In">
+                                <rect key="frame" x="0.0" y="599" width="375" height="23"/>
+                                <constraints>
+                                    <constraint firstAttribute="height" constant="23" id="2Mp-s2-yHY"/>
+                                </constraints>
+                                <fontDescription key="fontDescription" type="system" pointSize="13"/>
+                                <state key="normal" title="Logout">
                                     <color key="titleColor" white="1" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
                                 </state>
                                 <connections>
-                                    <action selector="loginStatusPressed:" destination="zuS-te-UkO" eventType="touchUpInside" id="CK1-Fc-84v"/>
+                                    <action selector="logoutPressed:" destination="zuS-te-UkO" eventType="touchUpInside" id="czI-gz-YtV"/>
                                 </connections>
                             </button>
+                            <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Not Logged In" textAlignment="center" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="2St-Ix-JGn">
+                                <rect key="frame" x="0.0" y="566" width="375" height="21"/>
+                                <fontDescription key="fontDescription" type="system" pointSize="17"/>
+                                <color key="textColor" red="1" green="1" blue="1" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
+                                <nil key="highlightedColor"/>
+                            </label>
                         </subviews>
                         <color key="backgroundColor" red="0.1333333333" green="0.21960784310000001" blue="0.46274509800000002" alpha="1" colorSpace="calibratedRGB"/>
                         <constraints>
                             <constraint firstItem="msK-uH-B5v" firstAttribute="leading" secondItem="0nM-WC-IdF" secondAttribute="leading" id="2Bm-uW-PEc"/>
                             <constraint firstItem="umz-pG-6op" firstAttribute="leading" secondItem="QlI-yU-yQ1" secondAttribute="leading" constant="69" id="2LZ-wJ-bSQ"/>
                             <constraint firstItem="0nM-WC-IdF" firstAttribute="height" secondItem="msK-uH-B5v" secondAttribute="height" id="3sY-VE-ywC"/>
-                            <constraint firstItem="fYq-Id-GF1" firstAttribute="top" secondItem="0nM-WC-IdF" secondAttribute="bottom" constant="24" id="6OW-mi-xi4"/>
-                            <constraint firstItem="fYq-Id-GF1" firstAttribute="leading" secondItem="QlI-yU-yQ1" secondAttribute="leading" id="6pt-cp-B3F"/>
+                            <constraint firstItem="fYq-Id-GF1" firstAttribute="leading" secondItem="w17-4u-gbu" secondAttribute="leading" id="7L5-G7-s2H"/>
+                            <constraint firstItem="fYq-Id-GF1" firstAttribute="centerX" secondItem="0nM-WC-IdF" secondAttribute="centerX" id="Kd8-du-gVh"/>
+                            <constraint firstItem="2St-Ix-JGn" firstAttribute="top" secondItem="0nM-WC-IdF" secondAttribute="bottom" constant="33" id="N8J-Nc-9GU"/>
                             <constraint firstItem="msK-uH-B5v" firstAttribute="leading" secondItem="QlI-yU-yQ1" secondAttribute="leading" constant="112" id="PFM-BI-GLz"/>
                             <constraint firstItem="umz-pG-6op" firstAttribute="centerX" secondItem="msK-uH-B5v" secondAttribute="centerX" id="Som-Qx-evo"/>
+                            <constraint firstItem="fYq-Id-GF1" firstAttribute="trailing" secondItem="2St-Ix-JGn" secondAttribute="trailing" id="T6H-nI-c8k"/>
                             <constraint firstItem="msK-uH-B5v" firstAttribute="top" secondItem="umz-pG-6op" secondAttribute="bottom" constant="35" id="WSQ-oN-3WK"/>
+                            <constraint firstItem="fYq-Id-GF1" firstAttribute="top" secondItem="2St-Ix-JGn" secondAttribute="bottom" constant="12" id="dsA-c0-b1o"/>
                             <constraint firstItem="0nM-WC-IdF" firstAttribute="width" secondItem="msK-uH-B5v" secondAttribute="width" id="fs2-4q-yMB"/>
                             <constraint firstItem="umz-pG-6op" firstAttribute="centerX" secondItem="w17-4u-gbu" secondAttribute="centerX" id="gBp-qZ-D6A"/>
-                            <constraint firstItem="fYq-Id-GF1" firstAttribute="centerX" secondItem="0nM-WC-IdF" secondAttribute="centerX" id="pZ0-mu-fm4"/>
-                            <constraint firstItem="QlI-yU-yQ1" firstAttribute="bottom" secondItem="fYq-Id-GF1" secondAttribute="bottom" constant="43" id="ppq-qA-2PN"/>
                             <constraint firstItem="msK-uH-B5v" firstAttribute="trailing" secondItem="0nM-WC-IdF" secondAttribute="trailing" id="rGc-8x-WnH"/>
                             <constraint firstItem="0nM-WC-IdF" firstAttribute="top" secondItem="msK-uH-B5v" secondAttribute="bottom" constant="99" id="twP-Vp-43k"/>
+                            <constraint firstItem="fYq-Id-GF1" firstAttribute="leading" secondItem="2St-Ix-JGn" secondAttribute="leading" id="u3m-Y5-5rA"/>
                             <constraint firstItem="umz-pG-6op" firstAttribute="top" secondItem="QlI-yU-yQ1" secondAttribute="top" constant="15" id="ybR-YM-Rre"/>
                         </constraints>
                         <viewLayoutGuide key="safeArea" id="QlI-yU-yQ1"/>
@@ -492,7 +504,8 @@
                     <simulatedToolbarMetrics key="simulatedBottomBarMetrics"/>
                     <connections>
                         <outlet property="indivStatsButton" destination="0nM-WC-IdF" id="YCB-IM-VSi"/>
-                        <outlet property="loginStatusButton" destination="fYq-Id-GF1" id="JFg-Q7-Uf6"/>
+                        <outlet property="loginStatusLabel" destination="2St-Ix-JGn" id="C1a-At-vDW"/>
+                        <outlet property="logoutButton" destination="fYq-Id-GF1" id="08u-CU-LZk"/>
                         <outlet property="myTeamsButton" destination="msK-uH-B5v" id="pj6-cY-vbP"/>
                     </connections>
                 </viewController>

@@ -11,6 +11,9 @@ import Foundation
 
 class AddPitches: UIViewController, UITextFieldDelegate, UIPickerViewDelegate, UIPickerViewDataSource{
     
+    var CurrentBullpen : Bullpen? = nil
+    
+    
     var bullpenData = [Any]()
     var PitcherData = [String]()
     var competitivePen = false
@@ -157,7 +160,7 @@ class AddPitches: UIViewController, UITextFieldDelegate, UIPickerViewDelegate, U
         
     }
     
-    // Initialize most of
+    // Initialize buttons
     func addButtons(){
         // Main canvas width and height
         let w = self.view.frame.size.width
