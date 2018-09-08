@@ -26,7 +26,54 @@ class ServerConnector {
         }
     }
     
+    // TODO: START USING THIS !!!!!!
+    // Make requests to server (POST, GET)
+    // Returns (data, response, error)
+    // data: JSON data from server to parse with extractJSON function (above), nil if error
+    // response: Server response, nil if error
+    // error: String describing error, nil if successful
     
+    static func serverRequest(URI: String, parameters: String, httpMethod: String = "POST", verbose: Bool? = nil,
+                              finished: @escaping((_ data: Data?, _ response:URLResponse?, _ error: Error?)->Void)){
+        // If verbose is not set, set it to debug value
+        let verbose = verbose ?? debug
+        
+        // Make URL request
+        let url: NSURL = NSURL(string: "\(publicIP)\(URI)")!
+        let request:NSMutableURLRequest = NSMutableURLRequest(url:url as URL)
+        request.httpMethod = httpMethod
+        request.httpBody = parameters.data(using: String.Encoding.utf8);
+        let task = URLSession.shared.dataTask(with: (request as URLRequest?)!,
+                                              completionHandler: { data, response, error in
+                                                
+            print("Server Response:\n\(String(describing: response))")
+            guard let data = data, error == nil else {
+                // Check for fundamental networking error
+                if verbose{ print("error=\(String(describing: error))") }
+                finished(nil, nil, error)
+                return
+            }
+            
+            if let httpStatus = response as? HTTPURLResponse, httpStatus.statusCode != 200 {
+                // Check for http errors
+                if verbose{
+                    print("HTTP response code is \(httpStatus.statusCode) (should be 200)")
+                    
+                }
+                finished(nil, nil, error)
+                return
+            }
+            
+            let responseString = String(data: data, encoding: .utf8)
+            if verbose{ print("responseString = \(String(describing: responseString))") }
+            finished(data, response, nil)
+            
+        })
+        task.resume()
+        sleep(1)
+    }
+    
+    // DEPRECATED
     static func runScript(scriptName: String, data: String, verbose: Bool? = nil, httpMethod: String = "POST", finished: @escaping((_ response:String?)->Void) = { _ in }){
         // If verbose is not set, set it to debug value
         let verbose = verbose ?? debug
@@ -35,7 +82,8 @@ class ServerConnector {
         let request:NSMutableURLRequest = NSMutableURLRequest(url:url as URL)
         request.httpMethod = httpMethod
         request.httpBody = data.data(using: String.Encoding.utf8);
-        let task = URLSession.shared.dataTask(with: (request as URLRequest?)!, completionHandler: { data, response, error in
+        let task = URLSession.shared.dataTask(with: (request as URLRequest?)!,
+                                              completionHandler: { data, response, error in
             guard let data = data, error == nil else {
                 // check for fundamental networking error
                 if verbose{
@@ -65,7 +113,7 @@ class ServerConnector {
         sleep(1)
     }
     
-    
+    // DEPRECATED
     static func getURLData(urlString: String, data : String = "", verbose: Bool? = nil, httpMethod: String = "GET", finished: @escaping ((_ isSuccess: Bool, _ data:Data?, _ response:URLResponse?)->Void)) {
         // If verbose is not set, set it to debug value
         let verbose = verbose ?? debug
