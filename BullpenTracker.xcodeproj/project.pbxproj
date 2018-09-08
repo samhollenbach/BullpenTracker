@@ -112,14 +112,14 @@
 				E9337E3120420C4100B23C38 /* ChangePasswordViewController.swift */,
 				E9444F95203F4758007955A0 /* LoginViewController.swift */,
 				E9432E6A2034A331000449DB /* HomePageViewController.swift */,
-				E947665B214366B1008CA81C /* BullpenData.swift */,
 				E9432E682034A13B000449DB /* TeamSelectViewController.swift */,
 				E929B9DC203DDDF4008E2E11 /* CreateAccountViewController.swift */,
 				E92D27001EEE889100075468 /* Assets.xcassets */,
 				E92D27051EEE889100075468 /* Info.plist */,
+				E947665B214366B1008CA81C /* BullpenData.swift */,
 				E9F9E0C62005ECA700F515AB /* ServerConnector.swift */,
-				E97470BC2032A8110050A2A3 /* CINavigationBar.swift */,
 				E9D946B920362F4C005A8D0C /* BTHelper.swift */,
+				E97470BC2032A8110050A2A3 /* CINavigationBar.swift */,
 			);
 			path = BullpenTracker;
 			sourceTree = "<group>";

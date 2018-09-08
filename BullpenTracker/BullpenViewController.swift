@@ -10,6 +10,9 @@ class BullpenViewController: UITableViewController {
     @IBOutlet weak var navBar: UINavigationBar!
     @IBOutlet weak var titleView: UINavigationItem!
     //var TableData = [String]()
+    
+    var CurrentBullpen : Bullpen? = nil
+    
     var BullpenData = [[Any!]]()
     var PitcherData : [String] = []
     let currentPitcherName = PitcherViewController.getPitcherName(id: PitcherViewController.getCurrentPitcher())
@@ -21,6 +24,10 @@ class BullpenViewController: UITableViewController {
         navBar.sizeToFit()
         
         BullpenData = []
+        
+        //NEW
+        CurrentBullpen = nil
+        
         
         
         if currentPitcherName == "Pitcher Not Found" &&  BTHelper.CurrentTeam == -1{
@@ -105,13 +112,6 @@ class BullpenViewController: UITableViewController {
         
     }
     
-    func sendToAddPitchesVC(bullpenData: [Any], PitcherData:[String]) {
-        let storyboard = UIStoryboard(name: "AddPitches", bundle: nil)
-        let vc = storyboard.instantiateViewController(withIdentifier: "AddPitches") as! AddPitches
-        vc.bullpenData = bullpenData
-        vc.PitcherData = PitcherData
-        present(vc, animated: true, completion: nil)
-    }
     
     
     @IBAction func addBullpen(_ sender: AnyObject) {
@@ -138,15 +138,28 @@ class BullpenViewController: UITableViewController {
         bullpenTypeSelector.addAction(gameAction)
         bullpenTypeSelector.addAction(cancelAction)
         
-        
-        
-        self.present(bullpenTypeSelector, animated: true) {
-            // ...
-        }
-        
-        
+        self.present(bullpenTypeSelector, animated: true) {}
         
     }
+    
+    //DEPRECATE
+    func sendToAddPitchesVC(bullpenData: [Any], PitcherData:[String]) {
+        let storyboard = UIStoryboard(name: "AddPitches", bundle: nil)
+        let vc = storyboard.instantiateViewController(withIdentifier: "AddPitches") as! AddPitches
+        vc.bullpenData = bullpenData
+        vc.PitcherData = PitcherData
+        present(vc, animated: true, completion: nil)
+    }
+    
+    //NEW
+    func sendToAddPitchesVC(currentBullpen: Bullpen?, PitcherData: [String]) {
+        let storyboard = UIStoryboard(name: "AddPitches", bundle: nil)
+        let vc = storyboard.instantiateViewController(withIdentifier: "AddPitches") as! AddPitches
+        vc.CurrentBullpen = currentBullpen
+        vc.PitcherData = PitcherData
+        present(vc, animated: true, completion: nil)
+    }
+    
     
     func createNewBullpen(type: String){
         
@@ -163,8 +176,11 @@ class BullpenViewController: UITableViewController {
                     compPen = true
                 }
                 
+                //TODO: Replace pitcher(id) with pitcherToken
+                //self.CurrentBullpen = Bullpen.Bullpen("\(pitcher)", id, type, nil)
+                
                 DispatchQueue.main.async {
-                    print(self.PitcherData)
+                    //self.sendToAddPitchesVC(currentBullpen : self.CurrentBullpen, PitcherData: self.PitcherData)
                     self.sendToAddPitchesVC(bullpenData: [id, compPen, "", "", "", 0], PitcherData: self.PitcherData)
                 }
             }else{

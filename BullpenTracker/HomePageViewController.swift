@@ -17,7 +17,7 @@ class HomePageViewController: UIViewController{
     @IBOutlet weak var loginStatusLabel: UILabel!
     @IBOutlet weak var logoutButton: UIButton!
     
-    let loggedEmail = UserDefaults.standard.string(forKey: BTHelper.defaultsKeys.storedLoginPitcherEmail)
+    var loggedEmail = UserDefaults.standard.string(forKey: BTHelper.defaultsKeys.storedLoginPitcherEmail)
     
     override func viewDidLoad() {
         
@@ -36,7 +36,8 @@ class HomePageViewController: UIViewController{
     }
     
     func updateLoggedStatus(){
-        if loggedEmail == ""{
+        loggedEmail = UserDefaults.standard.string(forKey: BTHelper.defaultsKeys.storedLoginPitcherEmail)
+        if loggedEmail == "" || loggedEmail == nil{
             loginStatusLabel.text = "Not Logged In"
             logoutButton.isHidden = true
         }else{
