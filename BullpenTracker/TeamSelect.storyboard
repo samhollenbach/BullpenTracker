@@ -419,7 +419,7 @@
                         <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                         <subviews>
                             <button opaque="NO" clipsSubviews="YES" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="wordWrap" translatesAutoresizingMaskIntoConstraints="NO" id="msK-uH-B5v">
-                                <rect key="frame" x="112" y="134" width="150" height="150"/>
+                                <rect key="frame" x="112" y="137" width="150" height="150"/>
                                 <color key="backgroundColor" white="1" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
                                 <constraints>
                                     <constraint firstAttribute="width" secondItem="msK-uH-B5v" secondAttribute="height" multiplier="1:1" id="4CD-ff-fZi"/>
@@ -431,20 +431,6 @@
                                 </state>
                                 <connections>
                                     <action selector="clickMyTeams:" destination="zuS-te-UkO" eventType="touchUpInside" id="8Z3-sv-QYh"/>
-                                </connections>
-                            </button>
-                            <button opaque="NO" clipsSubviews="YES" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="wordWrap" translatesAutoresizingMaskIntoConstraints="NO" id="0nM-WC-IdF">
-                                <rect key="frame" x="112" y="383" width="150" height="150"/>
-                                <color key="backgroundColor" white="1" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
-                                <constraints>
-                                    <constraint firstAttribute="width" secondItem="0nM-WC-IdF" secondAttribute="height" multiplier="1:1" id="jkN-Ef-O8f"/>
-                                </constraints>
-                                <fontDescription key="fontDescription" type="boldSystem" pointSize="24"/>
-                                <state key="normal" title="Individual Stats">
-                                    <color key="titleColor" red="0.1333333333" green="0.21960784310000001" blue="0.46274509800000002" alpha="1" colorSpace="calibratedRGB"/>
-                                </state>
-                                <connections>
-                                    <action selector="clickIndividualStats:" destination="zuS-te-UkO" eventType="touchUpInside" id="5yp-ws-8iW"/>
                                 </connections>
                             </button>
                             <label opaque="NO" userInteractionEnabled="NO" contentMode="center" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Bullpen Tracker" textAlignment="center" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="umz-pG-6op">
@@ -475,6 +461,20 @@
                                 <color key="textColor" red="1" green="1" blue="1" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
                                 <nil key="highlightedColor"/>
                             </label>
+                            <button opaque="NO" clipsSubviews="YES" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="wordWrap" translatesAutoresizingMaskIntoConstraints="NO" id="0nM-WC-IdF">
+                                <rect key="frame" x="112" y="362" width="150" height="150"/>
+                                <color key="backgroundColor" white="1" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
+                                <constraints>
+                                    <constraint firstAttribute="width" secondItem="0nM-WC-IdF" secondAttribute="height" multiplier="1:1" id="jkN-Ef-O8f"/>
+                                </constraints>
+                                <fontDescription key="fontDescription" type="boldSystem" pointSize="24"/>
+                                <state key="normal" title="Individual Stats">
+                                    <color key="titleColor" red="0.1333333333" green="0.21960784310000001" blue="0.46274509800000002" alpha="1" colorSpace="calibratedRGB"/>
+                                </state>
+                                <connections>
+                                    <action selector="clickIndividualStats:" destination="zuS-te-UkO" eventType="touchUpInside" id="5yp-ws-8iW"/>
+                                </connections>
+                            </button>
                         </subviews>
                         <color key="backgroundColor" red="0.1333333333" green="0.21960784310000001" blue="0.46274509800000002" alpha="1" colorSpace="calibratedRGB"/>
                         <constraints>
@@ -483,16 +483,16 @@
                             <constraint firstItem="0nM-WC-IdF" firstAttribute="height" secondItem="msK-uH-B5v" secondAttribute="height" id="3sY-VE-ywC"/>
                             <constraint firstItem="fYq-Id-GF1" firstAttribute="leading" secondItem="w17-4u-gbu" secondAttribute="leading" id="7L5-G7-s2H"/>
                             <constraint firstItem="fYq-Id-GF1" firstAttribute="centerX" secondItem="0nM-WC-IdF" secondAttribute="centerX" id="Kd8-du-gVh"/>
-                            <constraint firstItem="2St-Ix-JGn" firstAttribute="top" secondItem="0nM-WC-IdF" secondAttribute="bottom" constant="33" id="N8J-Nc-9GU"/>
+                            <constraint firstItem="2St-Ix-JGn" firstAttribute="top" secondItem="0nM-WC-IdF" secondAttribute="bottom" constant="54" id="N8J-Nc-9GU"/>
                             <constraint firstItem="msK-uH-B5v" firstAttribute="leading" secondItem="QlI-yU-yQ1" secondAttribute="leading" constant="112" id="PFM-BI-GLz"/>
                             <constraint firstItem="umz-pG-6op" firstAttribute="centerX" secondItem="msK-uH-B5v" secondAttribute="centerX" id="Som-Qx-evo"/>
                             <constraint firstItem="fYq-Id-GF1" firstAttribute="trailing" secondItem="2St-Ix-JGn" secondAttribute="trailing" id="T6H-nI-c8k"/>
-                            <constraint firstItem="msK-uH-B5v" firstAttribute="top" secondItem="umz-pG-6op" secondAttribute="bottom" constant="35" id="WSQ-oN-3WK"/>
+                            <constraint firstItem="msK-uH-B5v" firstAttribute="top" secondItem="umz-pG-6op" secondAttribute="bottom" constant="38" id="WSQ-oN-3WK"/>
                             <constraint firstItem="fYq-Id-GF1" firstAttribute="top" secondItem="2St-Ix-JGn" secondAttribute="bottom" constant="12" id="dsA-c0-b1o"/>
                             <constraint firstItem="0nM-WC-IdF" firstAttribute="width" secondItem="msK-uH-B5v" secondAttribute="width" id="fs2-4q-yMB"/>
                             <constraint firstItem="umz-pG-6op" firstAttribute="centerX" secondItem="w17-4u-gbu" secondAttribute="centerX" id="gBp-qZ-D6A"/>
                             <constraint firstItem="msK-uH-B5v" firstAttribute="trailing" secondItem="0nM-WC-IdF" secondAttribute="trailing" id="rGc-8x-WnH"/>
-                            <constraint firstItem="0nM-WC-IdF" firstAttribute="top" secondItem="msK-uH-B5v" secondAttribute="bottom" constant="99" id="twP-Vp-43k"/>
+                            <constraint firstItem="0nM-WC-IdF" firstAttribute="top" secondItem="msK-uH-B5v" secondAttribute="bottom" constant="75" id="twP-Vp-43k"/>
                             <constraint firstItem="fYq-Id-GF1" firstAttribute="leading" secondItem="2St-Ix-JGn" secondAttribute="leading" id="u3m-Y5-5rA"/>
                             <constraint firstItem="umz-pG-6op" firstAttribute="top" secondItem="QlI-yU-yQ1" secondAttribute="top" constant="15" id="ybR-YM-Rre"/>
                         </constraints>
