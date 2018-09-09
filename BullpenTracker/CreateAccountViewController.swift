@@ -44,14 +44,11 @@ class CreateAcountViewController : UIViewController, UITextFieldDelegate, UIPick
         self.armPicker.dataSource = self
         self.armPicker.layer.cornerRadius = 5
         armSelected = armChoices[0]
-        
     }
     
     @IBAction func cancelPressed(_ sender: Any) {
         dismiss(animated: true, completion: nil)
     }
-    
-    
     
     @objc func dismissKeyboard() {
         //Causes the view (or one of its embedded text fields) to resign the first responder status.
@@ -75,7 +72,6 @@ class CreateAcountViewController : UIViewController, UITextFieldDelegate, UIPick
             return
         }
         
-        
         let data = "firstname=\(firstName)&lastname=\(lastName)&email=\(email)&throws=\(armSelected)&password=\(pass1)"
         
         ServerConnector.runScript(scriptName: "CreateAccount.php", data: data, verbose: true){
@@ -87,47 +83,7 @@ class CreateAcountViewController : UIViewController, UITextFieldDelegate, UIPick
                 BTHelper.showErrorPopup(source: self, errorTitle: "Registration Error", error: "Could not create account")
                 
             }
-            
         }
-        
-        
-    }
-    
-    func login(data: String){
-        ServerConnector.serverRequest(URI: "Login.php", parameters: data, finished: {
-            data, response, error in
-            
-            if response == nil{
-                DispatchQueue.main.async {
-                    BTHelper.showErrorPopup(source: self, errorTitle: "Server Error", error: "Error connecting to server")
-                }
-                return
-            }
-            
-            let loggedPitcherDict = ServerConnector.extractJSONtoDict(data!)
-            
-            
-            if loggedPitcherDict.isEmpty{
-                DispatchQueue.main.async {
-                    BTHelper.showErrorPopup(source: self, errorTitle: "Login Error", error: "Invalid email or password")
-                }
-                return
-            }
-            let pid = Int((loggedPitcherDict["id"] as! NSString).floatValue)
-            
-            let pnum = Int((loggedPitcherDict["number"] as! NSString).floatValue)
-            
-            let loggedPitcher = Pitcher(id: pid, pitcherToken: "poop", email: loggedPitcherDict["email"] as? String, firstname: loggedPitcherDict["firstname"] as? String, lastname: loggedPitcherDict["lastname"] as? String ,number: pnum, throwSide: loggedPitcherDict["throws"] as? String)
-            
-            BTHelper.LogPitcher(pitcher: loggedPitcher)
-            DispatchQueue.main.async {
-                let storyboard = UIStoryboard(name: "Bullpens", bundle: nil)
-                let vc = storyboard.instantiateViewController(withIdentifier: "BullpensVC") as! BullpenViewController
-                vc.individualMode = true
-                self.present(vc, animated: true, completion: nil)
-            }
-            
-        })
     }
     
     func numberOfComponents(in pickerView: UIPickerView) -> Int {

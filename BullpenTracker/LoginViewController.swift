@@ -41,42 +41,6 @@ class LoginViewController : UIViewController{
         BTHelper.login(loginData: data, sender: self)
     }
     
-    func login(data: String, email: String = ""){
-        ServerConnector.serverRequest(URI: "Login.php", parameters: data, finished: {
-            data, response, error in
-            
-            if response == nil{
-                DispatchQueue.main.async {
-                    BTHelper.showErrorPopup(source: self, errorTitle: "Server Error", error: "Error connecting to server")
-                }
-                return
-            }
-            
-            let loggedPitcherDict = ServerConnector.extractJSONtoDict(data!)
-
-            
-            if loggedPitcherDict.isEmpty{
-                DispatchQueue.main.async {
-                    BTHelper.showErrorPopup(source: self, errorTitle: "Login Error", error: "Invalid email or password")
-                }
-                return
-            }
-            let pid = Int((loggedPitcherDict["id"] as! NSString).floatValue)
-            
-            let pnum = Int((loggedPitcherDict["number"] as! NSString).floatValue)
-            
-            let loggedPitcher = Pitcher(id: pid, pitcherToken: "poop", email: loggedPitcherDict["email"] as? String, firstname: loggedPitcherDict["firstname"] as? String, lastname: loggedPitcherDict["lastname"] as? String ,number: pnum, throwSide: loggedPitcherDict["throws"] as? String)
-            
-            BTHelper.LogPitcher(pitcher: loggedPitcher)
-            DispatchQueue.main.async {
-                let storyboard = UIStoryboard(name: "Bullpens", bundle: nil)
-                let vc = storyboard.instantiateViewController(withIdentifier: "BullpensVC") as! BullpenViewController
-                vc.individualMode = true
-                self.present(vc, animated: true, completion: nil)
-            }
-            
-        })
-    }
 
     @IBAction func offlineMode(_ sender: Any) {
         
