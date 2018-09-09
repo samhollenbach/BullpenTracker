@@ -15,6 +15,8 @@ class LoginViewController : UIViewController{
     @IBOutlet weak var passField: UITextField!
     @IBOutlet weak var offlineButton: UIButton!
     
+    var newLoginPID = -1
+    
     override func viewDidLoad() {
         super.viewDidLoad()
         
@@ -40,36 +42,40 @@ class LoginViewController : UIViewController{
     }
     
     func login(data: String, email: String = ""){
-        ServerConnector.runScript(scriptName: "Login.php", data: data, verbose: true){
-            response in
+        ServerConnector.serverRequest(URI: "Login.php", parameters: data, finished: {
+            data, response, error in
+            
             if response == nil{
                 DispatchQueue.main.async {
                     BTHelper.showErrorPopup(source: self, errorTitle: "Server Error", error: "Error connecting to server")
                 }
                 return
             }
-            if response! == "-1"{
+            
+            let loggedPitcherDict = ServerConnector.extractJSONtoDict(data!)
+
+            
+            if loggedPitcherDict.isEmpty{
                 DispatchQueue.main.async {
                     BTHelper.showErrorPopup(source: self, errorTitle: "Login Error", error: "Invalid email or password")
                 }
                 return
             }
+            let pid = Int((loggedPitcherDict["id"] as! NSString).floatValue)
             
-            if let pid = Int(response!){
-                BTHelper.CurrentPitcher = pid
-                BTHelper.StoreLogin(pitcherID: pid, pitcherEmail: email)
-                DispatchQueue.main.async {
-                    let storyboard = UIStoryboard(name: "Bullpens", bundle: nil)
-                    let vc = storyboard.instantiateViewController(withIdentifier: "BullpensVC") as! BullpenViewController
-                    self.present(vc, animated: true, completion: nil)
-                }
-                
-            }else{
-                DispatchQueue.main.async {
-                    BTHelper.showErrorPopup(source: self, errorTitle: "Login Error", error: "Invalid pitcher ID (internal error)")
-                }
+            let pnum = Int((loggedPitcherDict["number"] as! NSString).floatValue)
+            
+            let loggedPitcher = Pitcher(id: pid, pitcherToken: "poop", firstname: loggedPitcherDict["firstname"] as? String, lastname: loggedPitcherDict["lastname"] as? String ,number: pnum, throwSide: loggedPitcherDict["throws"] as? String)
+            
+            BTHelper.LogPitcher(pitcher: loggedPitcher)
+            DispatchQueue.main.async {
+                let storyboard = UIStoryboard(name: "Bullpens", bundle: nil)
+                let vc = storyboard.instantiateViewController(withIdentifier: "BullpensVC") as! BullpenViewController
+                vc.individualMode = true
+                self.present(vc, animated: true, completion: nil)
             }
-        }
+            
+        })
     }
 
     @IBAction func offlineMode(_ sender: Any) {

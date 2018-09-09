@@ -12,8 +12,7 @@ class PitcherViewController: UITableViewController {
     
     @IBOutlet weak var refreshController: UIRefreshControl!
 
-    
-    static var PitcherData:[[String]] = []
+    static var PitcherList: [Pitcher] = []
     
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -30,7 +29,9 @@ class PitcherViewController: UITableViewController {
         
         navBar.sizeToFit()
         refreshController.addTarget(self, action: #selector(refreshTable), for: .valueChanged)
-        PitcherViewController.PitcherData = []
+        
+        PitcherViewController.PitcherList = []
+        
         getPitcherDataStandard()
         
     }
@@ -43,17 +44,17 @@ class PitcherViewController: UITableViewController {
     
     
     static func getCurrentPitcher() -> Int{
-        return BTHelper.CurrentPitcher
+        return BTHelper.CurrentPitcherID
     }
     
     static func setCurrentPitcher(pitcherId : Int){
-        BTHelper.CurrentPitcher = pitcherId
+        BTHelper.CurrentPitcherID = pitcherId
     }
     
     static func getPitcherName(id:Int) -> String{
-        for pdat in PitcherData{
-            if Int(pdat[0])! == id{
-                return pdat[1]
+        for pitcher in PitcherList{
+            if pitcher.id != nil && pitcher.id! == id{
+                return pitcher.fullName() ?? "Unknown Name (Internal Error)"
             }
         }
         return "Pitcher Not Found"
@@ -75,14 +76,14 @@ class PitcherViewController: UITableViewController {
     }
     
     override func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
-        return PitcherViewController.PitcherData.count
+        return PitcherViewController.PitcherList.count
     }
     
     
     override func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
         let cell = tableView.dequeueReusableCell(withIdentifier: "cell", for: indexPath)
         cell.textLabel?.font = UIFont(name: "Helvetica Neue", size: 24)
-        let ptext = "#\(PitcherViewController.PitcherData[indexPath.row][2]) \(PitcherViewController.PitcherData[indexPath.row][1])"
+        let ptext = "#\(PitcherViewController.PitcherList[indexPath.row].number!) \(PitcherViewController.PitcherList[indexPath.row].fullName()!)"
         cell.textLabel?.text = ptext
         return cell
     }
@@ -116,17 +117,18 @@ class PitcherViewController: UITableViewController {
     
     
     func fillPitcherData(_ data: Data) {
-        let pitcher_list = ServerConnector.extractJSON(data)
-        PitcherViewController.PitcherData.removeAll()
+        let pitcher_list = ServerConnector.extractJSONtoList(data)
+        PitcherViewController.PitcherList.removeAll()
         for i in 0 ..< pitcher_list.count {
             if let pitcher_obj = pitcher_list[i] as? NSDictionary {
-                if let name = pitcher_obj["name"] as? String, let pitcher_id = pitcher_obj["id"] as? String, let pitcher_num = pitcher_obj["number"] as? String{
-                    let pdata = [pitcher_id, name, pitcher_num]
-                    PitcherViewController.PitcherData.append(pdata)
+                if let firstname = pitcher_obj["firstname"] as? String, let lastname = pitcher_obj["lastname"] as? String, let pitcher_id = pitcher_obj["id"] as? String, let pitcher_num = pitcher_obj["number"] as? String{
+                    //TODO: Add throw_side to object
+                    let curPitcher = Pitcher(id: Int(pitcher_id), pitcherToken: "tmp", firstname: firstname, lastname: lastname,  number: Int(pitcher_num), throwSide: "Q")
+                    PitcherViewController.PitcherList.append(curPitcher)
                 }
             }
         }
-        PitcherViewController.PitcherData = PitcherViewController.PitcherData.sorted(by: {Int($0[2])! < Int($1[2])!})
+        PitcherViewController.PitcherList = PitcherViewController.PitcherList.sorted(by: {$0.number! < $1.number!})
         
         DispatchQueue.main.async(execute: {self.do_table_refresh()})
     }
@@ -152,13 +154,13 @@ class PitcherViewController: UITableViewController {
     }
     
     func sendToBullpensVC(pitcherRowID: Int){
-        let pData = PitcherViewController.PitcherData[pitcherRowID]
-        let id = Int(pData[0])!
+        let curPitcher : Pitcher = PitcherViewController.PitcherList[pitcherRowID]
+        let id = curPitcher.id!
         
         PitcherViewController.setCurrentPitcher(pitcherId: id)
         let storyboard = UIStoryboard(name: "Bullpens", bundle: nil)
         let vc = storyboard.instantiateViewController(withIdentifier: "BullpensVC") as! BullpenViewController
-        vc.PitcherData = pData
+        vc.CurrentPitcher = curPitcher
         present(vc, animated: true, completion: nil)
     }
     

@@ -11,11 +11,10 @@ import Foundation
 
 class AddPitches: UIViewController, UITextFieldDelegate, UIPickerViewDelegate, UIPickerViewDataSource{
     
-    var CurrentBullpen : Bullpen? = nil
-    
-    
-    var bullpenData = [Any]()
-    var PitcherData = [String]()
+    var CurrentBullpen : Bullpen?
+    var CurrentPitcher : Pitcher?
+    var CurrentAtBat : AtBat?
+
     var competitivePen = false
     
     
@@ -90,6 +89,11 @@ class AddPitches: UIViewController, UITextFieldDelegate, UIPickerViewDelegate, U
     override func viewDidLoad() {
         super.viewDidLoad()
         
+        if CurrentBullpen == nil{
+            BTHelper.showErrorPopup(source: self, errorTitle: "Could not find bullpen (Internal Error)")
+            self.performSegue(withIdentifier: "unwindToBullpens", sender: self)
+        }
+        
         self.pitchPicker.delegate = self
         self.pitchPicker.dataSource = self
         
@@ -101,8 +105,10 @@ class AddPitches: UIViewController, UITextFieldDelegate, UIPickerViewDelegate, U
             competitivePen = true
             bullpenID = -5
         }else{
-            competitivePen = bullpenData[1] as! Bool
-            bullpenID = bullpenData[0] as! Int
+            competitivePen = CurrentBullpen!.compPen!
+            //competitivePen = bullpenData[1] as! Bool
+            bullpenID = CurrentBullpen!.id!
+            //bullpenID = bullpenData[0] as! Int
         }
         
         
@@ -155,7 +161,8 @@ class AddPitches: UIViewController, UITextFieldDelegate, UIPickerViewDelegate, U
         if BTHelper.offlineMode{
             totalPitches = OfflinePitchData.count
         }else{
-            totalPitches = bullpenData[5] as! Int
+            totalPitches = CurrentBullpen!.pitchList != nil ? CurrentBullpen!.pitchList!.count : 0
+            //totalPitches = bullpenData[5] as! Int
         }
         
     }
@@ -502,15 +509,19 @@ class AddPitches: UIViewController, UITextFieldDelegate, UIPickerViewDelegate, U
         
         var data = "bullpen_id=\(bullpenID)&pitch_type=\(pitch)&ball_strike=\(strike)&vel=\(vel)&result=\(result)"
         
+        var hc : Int? = nil
         if competitivePen{
-            let hc = hard_contact ? 1 : 0
-            data.append("&hard_contact=\(hc)")
+            hc = hard_contact ? 1 : 0
+            data.append("&hard_contact=\(String(describing: hc))")
         }
-        
+        var pitchLocation : PitchLocation? = nil
         if BallLocation != nil && !ballImage.isHidden{
             let loc : CGPoint = getTranslatedLocation(viewLocation: BallLocation!)
             data.append("&pitchX=\(loc.x)&pitchY=\(loc.y)")
+            pitchLocation = PitchLocation(x: loc.x, y: loc.y, catcherView: true)
         }
+        
+        var newPitch = Pitch(pitchType: pitch, ballStrike: strike, vel: Float(vel), pitchLocation: pitchLocation, pitchResult: result, hardContact: hc, atBat: CurrentAtBat, uploadedToServer: false)
         
         
         
@@ -520,16 +531,20 @@ class AddPitches: UIViewController, UITextFieldDelegate, UIPickerViewDelegate, U
                 print("Error running Add Pitch script")
                 return
             }
-            let pitch_list = ServerConnector.extractJSON((response?.data(using: .utf8))!)
-            let pitch = pitch_list[0] as? NSDictionary
-            let last_pitch = pitch!["last_id"] as! String
+            newPitch.uploadedToServer = true
+            let pitch = ServerConnector.extractJSONtoDict((response?.data(using: .utf8))!)
+            //let pitch = pitch_list[0] as? NSDictionary
+            let last_pitch = pitch["last_id"] as! String
             self.lastPitchID = Int(last_pitch)!
             self.BallLocation = nil
             DispatchQueue.main.async {
                 self.ballImage.isHidden = true;
             }
-            
         }
+        
+        CurrentBullpen?.pitchList?.append(newPitch)
+        
+        
     }
     
     
@@ -564,6 +579,7 @@ class AddPitches: UIViewController, UITextFieldDelegate, UIPickerViewDelegate, U
     
     
     func undoPitch(completion: @escaping (Bool) -> ()){
+        let _ = CurrentBullpen?.pitchList?.popLast()
         if BTHelper.offlineMode{
             let _ = OfflinePitchData.popLast()
             completion(true)
@@ -611,15 +627,7 @@ class AddPitches: UIViewController, UITextFieldDelegate, UIPickerViewDelegate, U
         dismissKeyboard()
         sender.isEnabled = false
         if totalPitches > 0 {
-            self.sendToSummaryVC(bullpenData: self.bullpenData, PitcherData: self.PitcherData)
-//            makeData(){ success in
-//                DispatchQueue.main.async {
-//                    print("Success: \(success)")
-//                    //idk y
-//                    //sleep(1)
-//                    self.sendToSummaryVC(bullpenData: self.bullpenData)
-//                }
-//            }
+            self.sendToSummaryVC(CurrentBullpen: self.CurrentBullpen!, CurrentPitcher: self.CurrentPitcher!)
         }else{
             if new{
                 self.performSegue(withIdentifier: "unwindToBullpens", sender: self)
@@ -632,7 +640,7 @@ class AddPitches: UIViewController, UITextFieldDelegate, UIPickerViewDelegate, U
     }
     
     func makeData(completion: @escaping (Bool) -> ()){
-        let data = "bullpen_id=\(bullpenID)"
+        let data = "bullpen_id=\(CurrentBullpen!.id!)"
         ServerConnector.runScript(scriptName: "get_stats.php", data: data){ response in
             completion(response != nil)
         }
@@ -794,15 +802,15 @@ class AddPitches: UIViewController, UITextFieldDelegate, UIPickerViewDelegate, U
     }
     */
     
-    func sendToSummaryVC(bullpenData: [Any], PitcherData: [String]) {
+    func sendToSummaryVC(CurrentBullpen: Bullpen, CurrentPitcher: Pitcher) {
         let storyboard = UIStoryboard(name: "SummaryView", bundle: nil)
         let vc = storyboard.instantiateViewController(withIdentifier: "SummaryVC") as! SummaryViewController
         
         if BTHelper.offlineMode{
             vc.OfflinePitchData = self.OfflinePitchData
         }else{
-            vc.bullpenData = bullpenData
-            vc.PitcherData = PitcherData
+            vc.CurrentBullpen = CurrentBullpen
+            vc.CurrentPitcher = CurrentPitcher
         }
         self.present(vc, animated: true, completion: nil)
     }
@@ -810,6 +818,7 @@ class AddPitches: UIViewController, UITextFieldDelegate, UIPickerViewDelegate, U
     func sendToBullpens() {
         let storyboard = UIStoryboard(name: "Bullpens", bundle: nil)
         let vc = storyboard.instantiateViewController(withIdentifier: "BullpensVC") as! BullpenViewController
+        vc.CurrentPitcher = CurrentPitcher
         present(vc, animated: true, completion: nil)
         
     }

@@ -106,7 +106,7 @@ class CreateAcountViewController : UIViewController, UITextFieldDelegate, UIPick
             }
             
             if let pid = Int(response!){
-                BTHelper.CurrentPitcher = pid
+                BTHelper.CurrentPitcherID = pid
                 BTHelper.StoreLogin(pitcherID: pid, pitcherEmail: email)
                 DispatchQueue.main.async {
                     let storyboard = UIStoryboard(name: "Bullpens", bundle: nil)

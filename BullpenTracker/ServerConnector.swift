@@ -14,17 +14,42 @@ class ServerConnector {
     static let publicIP = "http://54.175.185.55/"
     static let debug = true
     
-    static func extractJSON(_ data: Data) -> NSArray {
-        let json: Any?
+    static func extractJSONtoList(_ data: Data) -> [[String:Any]] {
+        let json_list: Any?
         do {
-            json = try JSONSerialization.jsonObject(with: data, options: [])
+            json_list = try JSONSerialization.jsonObject(with: data, options: [])
         } catch { return []}
-        if let list = json as? NSArray{
-            return list
+        if let list = json_list as? NSArray{
+            var list_of_dicts : [[String:Any]] = []
+            for l in list{
+                
+                if let dict = l as? [String:Any] {
+                    list_of_dicts.append(dict)
+                }else{
+                    return []
+                }
+            }
+            
+            return list_of_dicts
         }else{
             return []
         }
     }
+    
+    static func extractJSONtoDict(_ data: Data) -> [String:Any] {
+        let json: Any?
+        do {
+            json = try JSONSerialization.jsonObject(with: data, options: [])
+        } catch { return [:]}
+        if let dict = json as? [String:Any] {
+            return dict
+        }else{
+            return [:]
+        }
+    }
+    
+    
+    
     
     // TODO: START USING THIS !!!!!!
     // Make requests to server (POST, GET)
@@ -64,8 +89,8 @@ class ServerConnector {
                 return
             }
             
-            let responseString = String(data: data, encoding: .utf8)
-            if verbose{ print("responseString = \(String(describing: responseString))") }
+            let dataString = String(data: data, encoding: .utf8)
+            if verbose{ print("dataString = \(String(describing: dataString))") }
             finished(data, response, nil)
             
         })

@@ -10,8 +10,9 @@ import UIKit
 
 class SummaryViewController: UIViewController, UIPopoverPresentationControllerDelegate {
 
-    var bullpenData: [Any] = []
-    var PitcherData: [String] = []
+    var CurrentBullpen : Bullpen?
+    var CurrentPitcher : Pitcher?
+    
     @IBOutlet weak var navBar: UINavigationBar!
     @IBOutlet weak var StrikeZone: UIImageView!
     @IBOutlet weak var emailStatusLabel: UILabel!
@@ -73,40 +74,40 @@ class SummaryViewController: UIViewController, UIPopoverPresentationControllerDe
         }
         navBar.sizeToFit()
         
-        if !PitcherData.isEmpty{
-            pitcherNameLabel.text = PitcherData[1]
+        if CurrentPitcher != nil{
+            pitcherNameLabel.text = CurrentPitcher!.fullName() ?? "Error loading name"
         }else{
-            //pitcherNameLabel.text = "Error loading pitcher"
-            pitcherNameLabel.text = ""
+            pitcherNameLabel.text = "Error loading name"
         }
         
-        if !bullpenData.isEmpty{
-            bullpenTypeLabel.text = bullpenData[2] as? String
-            let originalDate =  bullpenData[3] as? String
+        
+        if CurrentBullpen != nil{
+            bullpenTypeLabel.text = CurrentBullpen!.penTypeDisplay!
+            let originalDate =  CurrentBullpen!.date
             var date = ""
             if originalDate != nil && originalDate != "" {
                 date = BullpenViewController.formatDate(originalDate: originalDate!, originalFormat: "yyyy-MM-dd", newFormat: "MM/dd/yyyy")
             }
-            
             dateLabel.text = date
+            pitchCountLabel.text = "Loading..."
+            CurrentBullpen!.pitchList = []
             
-            let pc = bullpenData[5] as! Int
-            if pc == 1{
-                pitchCountLabel.text = "1 pitch"
-            }else{
-                pitchCountLabel.text = "\(pc) pitches"
-            }
         }else{
-            bullpenTypeLabel.text = ""
+            bullpenTypeLabel.text = "Error"
         }
-        
-        
-        
-        
         
         DispatchQueue.main.async {
             self.addButtons()
             self.makeGestures()
+        }
+    }
+    
+    func updatePitchCount(){
+        let pc = CurrentBullpen!.pitchList != nil ? CurrentBullpen!.pitchList!.count : 0
+        if pc == 1{
+            pitchCountLabel.text = "1 pitch"
+        }else{
+            pitchCountLabel.text = "\(pc) pitches"
         }
     }
     
@@ -312,6 +313,7 @@ class SummaryViewController: UIViewController, UIPopoverPresentationControllerDe
         DispatchQueue.main.async{
             self.fillStrikeZone()
         }
+        
     }
     
     func fillStrikeZoneOffline(){
@@ -391,15 +393,13 @@ class SummaryViewController: UIViewController, UIPopoverPresentationControllerDe
             fillStrikeZoneOffline()
             return
         }
-        let data = "bullpen_id=\(bullpenData[0] as! Int)"
-        print(data)
+        let data = "bullpen_id=\(CurrentBullpen!.id!)"
         ServerConnector.runScript(scriptName: "GetBullpenPitches.php", data: data){ response in
             if response == nil{
                 print("Could not load pitch data")
                 return
             }
-            print(response!)
-            let pitches = ServerConnector.extractJSON(response!.data(using: .utf8)!)
+            let pitches = ServerConnector.extractJSONtoList(response!.data(using: .utf8)!)
             self.pitch_data = []
             for i in 0 ..< pitches.count {
                 if let pitch = pitches[i] as? NSDictionary {
@@ -427,6 +427,11 @@ class SummaryViewController: UIViewController, UIPopoverPresentationControllerDe
                         if (pr == "LS" || pr == "SS"){
                             flipped = true
                         }
+                        
+                        let pl = PitchLocation(x: px, y: py, catcherView: true)
+                        //TODO: read in at bat ID
+                        let cp = Pitch(pitchType: type, ballStrike: bs, vel: Float(vel), pitchLocation: pl, pitchResult: pr, hardContact: hc_b ? 1 : 0, atBat: nil, uploadedToServer: true)
+                        self.CurrentBullpen?.pitchList?.append(cp)
                         
                         DispatchQueue.main.async {
                             let loc = self.getTranslatedLocation(pitchLocation: CGPoint(x: px, y: py))
@@ -463,13 +468,12 @@ class SummaryViewController: UIViewController, UIPopoverPresentationControllerDe
                     self.view.addSubview(self.pitch_labels[i])
                     
                     
-                    
                 }
             }
             
         }
         
-        
+        updatePitchCount()
     }
     
     @objc func tapPitchOnZone(sender: UIGestureRecognizer){
@@ -576,7 +580,7 @@ class SummaryViewController: UIViewController, UIPopoverPresentationControllerDe
     }
     
     func deleteBullpen(){
-        let data = "bullpen_id=\(bullpenData[0])"
+        let data = "bullpen_id=\(CurrentBullpen!.id!)"
         ServerConnector.runScript(scriptName: "RemoveBullpen.php", data: data)
         DispatchQueue.main.async {
             self.doneButtonPressed(self)
@@ -675,7 +679,7 @@ class SummaryViewController: UIViewController, UIPopoverPresentationControllerDe
     
     func emailBullpen(email: String,completion: @escaping (Bool) -> ()){
         emailStatusLabel.text = "Sending email..."
-        let data = "bullpen_id=\(bullpenData[0])&email=\(email)"
+        let data = "bullpen_id=\(CurrentBullpen!.id!)&email=\(email)"
         ServerConnector.runScript(scriptName: "send_email.php", data: data){ response in
             completion(response != nil)
         }
@@ -683,15 +687,14 @@ class SummaryViewController: UIViewController, UIPopoverPresentationControllerDe
     
     
     @objc func addPitches(){
-        
-        sendToAddPitchesVC(bullpenData: bullpenData, comp: false, PitcherData: PitcherData)
+        sendToAddPitchesVC(CurrentBullpen: CurrentBullpen! ,CurrentPitcher: CurrentPitcher!)
     }
     
-    func sendToAddPitchesVC(bullpenData: [Any], comp: Bool, PitcherData: [String]) {
+    func sendToAddPitchesVC(CurrentBullpen: Bullpen, CurrentPitcher: Pitcher) {
         let storyboard = UIStoryboard(name: "AddPitches", bundle: nil)
         let vc = storyboard.instantiateViewController(withIdentifier: "AddPitches") as! AddPitches
-        vc.bullpenData = bullpenData
-        vc.PitcherData = PitcherData
+        vc.CurrentPitcher = CurrentPitcher
+        vc.CurrentBullpen = CurrentBullpen
         vc.new = false
         DispatchQueue.main.async {
             self.present(vc, animated: true, completion: nil)

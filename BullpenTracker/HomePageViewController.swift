@@ -82,16 +82,20 @@ class HomePageViewController: UIViewController{
     }
     
     @IBAction func clickIndividualStats(_ sender: Any) {
-        let defaults = UserDefaults.standard
-        let pid = defaults.integer(forKey: BTHelper.defaultsKeys.storedLoginPitcherID)
-        if pid == -1 || pid == 0{
+
+        let loggedPitcher = BTHelper.getLoggedInPitcher()
+        
+        print(loggedPitcher)
+       
+        if loggedPitcher == nil{
             let storyboard = UIStoryboard(name: "TeamSelect", bundle: nil)
             let vc = storyboard.instantiateViewController(withIdentifier: "loginVC") as! LoginViewController
             present(vc, animated: true, completion: nil)
         }else{
-            BTHelper.CurrentPitcher = pid
+            //BTHelper.CurrentPitcherID = pid
             let storyboard = UIStoryboard(name: "Bullpens", bundle: nil)
             let vc = storyboard.instantiateViewController(withIdentifier: "BullpensVC") as! BullpenViewController
+            vc.individualMode = true
             present(vc, animated: true, completion: nil)
         }
         

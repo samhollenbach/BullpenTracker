@@ -7,55 +7,71 @@
 //
 
 import Foundation
+import UIKit
 
-class Pitcher{
+struct Pitcher : Codable{
     
+    var id : Int? // LOSE THIS SOON!
     var pitcherToken : String?
-    var name : String?
+    var firstname : String?
+    var lastname : String?
     var number : Int?
     var throwSide : String?
+    
+    func fullName() -> String?{
+        if firstname != nil && lastname != nil{
+            return "\(firstname!) \(lastname!)"
+        }else{
+            return nil
+        }
+    }
     
     //constructor make pls
 }
 
-class Bullpen {
+struct Bullpen {
     
     var pitcher : Pitcher?
     var id : Int?
     var penType : String?
     var compPen : Bool? = false
     var pitchList : [Pitch]?
+    var date : String? = ""
+    var penTypeDisplay : String? = ""
+    var tableViewDisplay : String? = ""
     
-    func Bullpen(pitcher : Pitcher?, id : Int?, penType : String?, pitchList : [Pitch]?){
-        self.pitcher = pitcher
-        self.id = id
-        self.penType = penType
-        if penType == "COMP" || penType == "GAME"{
-            self.compPen = true
-        }
-        self.pitchList = pitchList
-    }
+//    func Bullpen(pitcher : Pitcher?, id : Int?, penType : String?, pitchList : [Pitch]?){
+//        self.pitcher = pitcher
+//        self.id = id
+//        self.penType = penType
+//        if penType == "COMP" || penType == "GAME"{
+//            self.compPen = true
+//        }
+//        self.pitchList = pitchList
+//    }
     
 }
 
-class AtBat {
+struct AtBat {
     var bullpenID : Int? //Maybe token
     var pitcherToken : String?
     var batterSide : String?
 }
 
-class Pitch {
+struct Pitch {
     var pitchType : String?
     var ballStrike : String?
     var vel : Float?
     var pitchLocation : PitchLocation?
+    var pitchResult : String?
+    var hardContact : Int? // maybe change from int?
     var atBat : AtBat?
     var uploadedToServer : Bool = false
     
 }
 
-class PitchLocation {
-    var x : Float?
-    var y : Float?
+struct PitchLocation {
+    var x : CGFloat?
+    var y : CGFloat?
     var catcherView : Bool = true
 }

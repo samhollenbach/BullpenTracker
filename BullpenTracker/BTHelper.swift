@@ -15,6 +15,7 @@ class BTHelper{
         static let savedTeamIDs = "savedTeams"
         static let storedLoginPitcherID = "storedLogin"
         static let storedLoginPitcherEmail = "storedEmail"
+        static let storedPitcher = "storedPitcher"
     }
     
     
@@ -23,8 +24,10 @@ class BTHelper{
     static var LoggedInPitcherEmail : String = ""
     static var LoggedInPitcher : Int = -1
     static var CurrentTeam : Int = -1
-    static var CurrentPitcher : Int = -1
+    static var CurrentPitcherID : Int = -1
     static var CurrentBullpen : Int = -1
+    
+    static var LoggedPitcher : Pitcher?
     
     static let PitchResults = ["N/A":"None", "SM":"Swing and miss", "ST": "Strike taken", "SS": "Swinging strikeout", "LS": "Looking strikeout"]
     
@@ -47,17 +50,31 @@ class BTHelper{
         self.LoggedInPitcherEmail = pitcherEmail
     }
     
+    static func LogPitcher(pitcher: Pitcher){
+        
+        if let encoded = try? JSONEncoder().encode(pitcher) {
+            UserDefaults.standard.set(encoded, forKey: defaultsKeys.storedPitcher)
+        }
+    }
+    
+    static func getLoggedInPitcher() -> Pitcher?{
+        if let encodedPitcher = UserDefaults.standard.data(forKey: defaultsKeys.storedPitcher),
+            let pitcher = try? JSONDecoder().decode(Pitcher.self, from: encodedPitcher) {
+            return pitcher
+        }
+        return nil
+    }
+    
     static func LogOut(){
-        self.LoggedInPitcher = -1
         let defaults = UserDefaults.standard
-        defaults.setValue(-1, forKey: defaultsKeys.storedLoginPitcherID)
+        defaults.set(nil, forKey: defaultsKeys.storedPitcher)
     }
     
     static func ResetTeam(){
         self.CurrentTeam = -1
     }
     static func ResetPitcher(){
-        self.CurrentPitcher = -1
+        self.CurrentPitcherID = -1
     }
     static func ResetBullpen(){
         self.CurrentBullpen = -1

@@ -73,7 +73,7 @@ class TeamSelectViewController: UITableViewController{
                 print("Could not find team")
                 return
             }
-            let teams = ServerConnector.extractJSON(response!.data(using: .utf8)!)
+            let teams = ServerConnector.extractJSONtoList(response!.data(using: .utf8)!)
             //self.TeamData = []
             if teams.count > 1{
                 self.showErrorPopup(errorTitle: "Team Access Error", error:"Internal error (more than one team with access code)")
