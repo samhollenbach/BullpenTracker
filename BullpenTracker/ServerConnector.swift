@@ -14,6 +14,7 @@ class ServerConnector {
     static let publicIP = "http://54.175.185.55/"
     static let debug = true
     
+    
     static func extractJSONtoList(_ data: Data) -> [[String:Any]] {
         let json_list: Any?
         do {
@@ -89,8 +90,8 @@ class ServerConnector {
                 return
             }
             
-            let dataString = String(data: data, encoding: .utf8)
-            if verbose{ print("dataString = \(String(describing: dataString))") }
+            let dataString = String(data: data, encoding: .utf8) ?? "nil"
+            if verbose{ print("dataString = \(dataString)") }
             finished(data, response, nil)
             
         })

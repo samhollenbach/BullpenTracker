@@ -13,19 +13,13 @@ class BTHelper{
     
     struct defaultsKeys {
         static let savedTeamIDs = "savedTeams"
-        static let storedLoginPitcherID = "storedLogin"
-        static let storedLoginPitcherEmail = "storedEmail"
         static let storedPitcher = "storedPitcher"
     }
     
     
     static var offlineMode = false
     
-    static var LoggedInPitcherEmail : String = ""
-    static var LoggedInPitcher : Int = -1
     static var CurrentTeam : Int = -1
-    static var CurrentPitcherID : Int = -1
-    static var CurrentBullpen : Int = -1
     
     static var LoggedPitcher : Pitcher?
     
@@ -42,13 +36,43 @@ class BTHelper{
         self.TeamColorSecondary = secondary
     }
     
-    static func StoreLogin(pitcherID: Int, pitcherEmail: String){
-        let defaults = UserDefaults.standard
-        defaults.setValue(pitcherID, forKey: defaultsKeys.storedLoginPitcherID)
-        defaults.setValue(pitcherEmail, forKey: defaultsKeys.storedLoginPitcherEmail)
-        self.LoggedInPitcher = pitcherID
-        self.LoggedInPitcherEmail = pitcherEmail
+    static func login(loginData: String, sender: UIViewController){
+        ServerConnector.serverRequest(URI: "Login.php", parameters: loginData, finished: {
+            data, response, error in
+            
+            if response == nil{
+                DispatchQueue.main.async {
+                    BTHelper.showErrorPopup(source: sender, errorTitle: "Server Error", error: "Error connecting to server")
+                }
+                return
+            }
+            
+            let loggedPitcherDict = ServerConnector.extractJSONtoDict(data!)
+            
+            
+            if loggedPitcherDict.isEmpty{
+                DispatchQueue.main.async {
+                    BTHelper.showErrorPopup(source: sender, errorTitle: "Login Error", error: "Invalid email or password")
+                }
+                return
+            }
+            let pid = Int((loggedPitcherDict["id"] as! NSString).floatValue)
+            
+            let pnum = Int((loggedPitcherDict["number"] as! NSString).floatValue)
+            
+            let loggedPitcher = Pitcher(id: pid, pitcherToken: "poop", email:loggedPitcherDict["email"] as? String, firstname: loggedPitcherDict["firstname"] as? String, lastname: loggedPitcherDict["lastname"] as? String ,number: pnum, throwSide: loggedPitcherDict["throws"] as? String)
+            
+            BTHelper.LogPitcher(pitcher: loggedPitcher)
+            DispatchQueue.main.async {
+                let storyboard = UIStoryboard(name: "Bullpens", bundle: nil)
+                let vc = storyboard.instantiateViewController(withIdentifier: "BullpensVC") as! BullpenViewController
+                vc.individualMode = true
+                sender.present(vc, animated: true, completion: nil)
+            }
+            
+        })
     }
+    
     
     static func LogPitcher(pitcher: Pitcher){
         
@@ -73,12 +97,6 @@ class BTHelper{
     static func ResetTeam(){
         self.CurrentTeam = -1
     }
-    static func ResetPitcher(){
-        self.CurrentPitcherID = -1
-    }
-    static func ResetBullpen(){
-        self.CurrentBullpen = -1
-    }
     
     
     static func showErrorPopup(source: UIViewController, errorTitle: String, error: String = ""){
@@ -96,8 +114,8 @@ class BTHelper{
             codeErrorPop.addAction(okayAction)
             source.present(codeErrorPop, animated: true, completion: nil)
         }
-       
     }
+    
     
 }
 

@@ -25,8 +25,6 @@ class PitcherViewController: UITableViewController {
         f.origin.y = -20
         self.view.frame = f
         
-        BTHelper.ResetPitcher()
-        
         navBar.sizeToFit()
         refreshController.addTarget(self, action: #selector(refreshTable), for: .valueChanged)
         
@@ -41,16 +39,6 @@ class PitcherViewController: UITableViewController {
         
     }
     
-    
-    
-    static func getCurrentPitcher() -> Int{
-        return BTHelper.CurrentPitcherID
-    }
-    
-    static func setCurrentPitcher(pitcherId : Int){
-        BTHelper.CurrentPitcherID = pitcherId
-    }
-    
     static func getPitcherName(id:Int) -> String{
         for pitcher in PitcherList{
             if pitcher.id != nil && pitcher.id! == id{
@@ -58,14 +46,6 @@ class PitcherViewController: UITableViewController {
             }
         }
         return "Pitcher Not Found"
-    }
-    
-    static func getCurrentBullpen() -> Int{
-        return BTHelper.CurrentBullpen
-    }
-    
-    static func setCurrentBullpen(bullpenId : Int){
-        BTHelper.CurrentBullpen = bullpenId
     }
     
     @IBAction func unwindToPitchers(segue: UIStoryboardSegue) {}
@@ -94,9 +74,6 @@ class PitcherViewController: UITableViewController {
         sendToBullpensVC(pitcherRowID: indexPath.row)
     }
     
-    
-    
-    
     func getPitcherDataStandard(){
         getPitcherDataFromURL("\(ServerConnector.publicIP)GetPitchers.php")
         refreshController.endRefreshing()
@@ -120,16 +97,22 @@ class PitcherViewController: UITableViewController {
         let pitcher_list = ServerConnector.extractJSONtoList(data)
         PitcherViewController.PitcherList.removeAll()
         for i in 0 ..< pitcher_list.count {
-            if let pitcher_obj = pitcher_list[i] as? NSDictionary {
-                if let firstname = pitcher_obj["firstname"] as? String, let lastname = pitcher_obj["lastname"] as? String, let pitcher_id = pitcher_obj["id"] as? String, let pitcher_num = pitcher_obj["number"] as? String{
-                    //TODO: Add throw_side to object
-                    let curPitcher = Pitcher(id: Int(pitcher_id), pitcherToken: "tmp", firstname: firstname, lastname: lastname,  number: Int(pitcher_num), throwSide: "Q")
-                    PitcherViewController.PitcherList.append(curPitcher)
-                }
-            }
+            let pitcher_obj = pitcher_list[i]
+            let firstname = pitcher_obj["firstname"] as? String
+            let lastname = pitcher_obj["lastname"] as? String
+            let pitcher_id = pitcher_obj["id"] as? String
+            let pitcher_num = pitcher_obj["number"] as? String
+            let pitcher_email = pitcher_obj["email"] as? String
+            let throw_side = pitcher_obj["throws"] as? String
+                
+            //TODO: ADD PITCHER TOKEN
+            let curPitcher = Pitcher(id: Int(pitcher_id!), pitcherToken: "tmp", email: pitcher_email, firstname: firstname, lastname: lastname,  number: Int(pitcher_num!), throwSide: throw_side)
+
+            PitcherViewController.PitcherList.append(curPitcher)
+            
+            
         }
         PitcherViewController.PitcherList = PitcherViewController.PitcherList.sorted(by: {$0.number! < $1.number!})
-        
         DispatchQueue.main.async(execute: {self.do_table_refresh()})
     }
     
@@ -155,9 +138,6 @@ class PitcherViewController: UITableViewController {
     
     func sendToBullpensVC(pitcherRowID: Int){
         let curPitcher : Pitcher = PitcherViewController.PitcherList[pitcherRowID]
-        let id = curPitcher.id!
-        
-        PitcherViewController.setCurrentPitcher(pitcherId: id)
         let storyboard = UIStoryboard(name: "Bullpens", bundle: nil)
         let vc = storyboard.instantiateViewController(withIdentifier: "BullpensVC") as! BullpenViewController
         vc.CurrentPitcher = curPitcher

@@ -17,9 +17,11 @@ class HomePageViewController: UIViewController{
     @IBOutlet weak var loginStatusLabel: UILabel!
     @IBOutlet weak var logoutButton: UIButton!
     
-    var loggedEmail = UserDefaults.standard.string(forKey: BTHelper.defaultsKeys.storedLoginPitcherEmail)
+    var loggedPitcher : Pitcher? = BTHelper.getLoggedInPitcher()
+    var loggedEmail : String?
     
     override func viewDidLoad() {
+        
         
         myTeamsButton.titleLabel?.adjustsFontSizeToFitWidth = true
         myTeamsButton.titleLabel?.textAlignment = .center
@@ -36,12 +38,20 @@ class HomePageViewController: UIViewController{
     }
     
     func updateLoggedStatus(){
-        loggedEmail = UserDefaults.standard.string(forKey: BTHelper.defaultsKeys.storedLoginPitcherEmail)
-        if loggedEmail == "" || loggedEmail == nil{
+        loggedPitcher = BTHelper.getLoggedInPitcher()
+
+        // Pitcher stored but not email, log out (should never happen)
+        if loggedPitcher != nil && loggedPitcher!.email == nil{
+            BTHelper.LogOut()
+            loggedPitcher = nil
+        }
+        
+        if loggedPitcher == nil{
             loginStatusLabel.text = "Not Logged In"
             logoutButton.isHidden = true
         }else{
-            loginStatusLabel.text = "Logged in as \(loggedEmail!)"
+            
+            loginStatusLabel.text = "Logged in as \(loggedPitcher!.email!)"
             logoutButton.isHidden = false
         }
     }
@@ -84,8 +94,6 @@ class HomePageViewController: UIViewController{
     @IBAction func clickIndividualStats(_ sender: Any) {
 
         let loggedPitcher = BTHelper.getLoggedInPitcher()
-        
-        print(loggedPitcher)
        
         if loggedPitcher == nil{
             let storyboard = UIStoryboard(name: "TeamSelect", bundle: nil)

@@ -38,7 +38,7 @@ class LoginViewController : UIViewController{
             return
         }
         let data = "email=\(email)&password=\(pass)"
-        login(data: data, email: email)
+        BTHelper.login(loginData: data, sender: self)
     }
     
     func login(data: String, email: String = ""){
@@ -65,7 +65,7 @@ class LoginViewController : UIViewController{
             
             let pnum = Int((loggedPitcherDict["number"] as! NSString).floatValue)
             
-            let loggedPitcher = Pitcher(id: pid, pitcherToken: "poop", firstname: loggedPitcherDict["firstname"] as? String, lastname: loggedPitcherDict["lastname"] as? String ,number: pnum, throwSide: loggedPitcherDict["throws"] as? String)
+            let loggedPitcher = Pitcher(id: pid, pitcherToken: "poop", email: loggedPitcherDict["email"] as? String, firstname: loggedPitcherDict["firstname"] as? String, lastname: loggedPitcherDict["lastname"] as? String ,number: pnum, throwSide: loggedPitcherDict["throws"] as? String)
             
             BTHelper.LogPitcher(pitcher: loggedPitcher)
             DispatchQueue.main.async {

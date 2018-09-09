@@ -13,6 +13,7 @@ struct Pitcher : Codable{
     
     var id : Int? // LOSE THIS SOON!
     var pitcherToken : String?
+    var email : String?
     var firstname : String?
     var lastname : String?
     var number : Int?

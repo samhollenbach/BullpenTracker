@@ -447,7 +447,7 @@
                                     <action selector="clickIndividualStats:" destination="zuS-te-UkO" eventType="touchUpInside" id="5yp-ws-8iW"/>
                                 </connections>
                             </button>
-                            <label opaque="NO" userInteractionEnabled="NO" contentMode="center" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Bullpen Tracker" textAlignment="center" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontForContentSizeCategory="YES" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="umz-pG-6op">
+                            <label opaque="NO" userInteractionEnabled="NO" contentMode="center" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Bullpen Tracker" textAlignment="center" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="umz-pG-6op">
                                 <rect key="frame" x="69" y="35" width="236" height="64"/>
                                 <constraints>
                                     <constraint firstAttribute="height" constant="64" id="tUq-yI-A1q"/>

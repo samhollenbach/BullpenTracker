@@ -402,59 +402,47 @@ class SummaryViewController: UIViewController, UIPopoverPresentationControllerDe
             let pitches = ServerConnector.extractJSONtoList(response!.data(using: .utf8)!)
             self.pitch_data = []
             for i in 0 ..< pitches.count {
-                if let pitch = pitches[i] as? NSDictionary {
-                    if let type = pitch["pitch_type"] as? String, let px_s = pitch["pitchX"] as? String, let py_s = pitch["pitchY"] as? String, let bs = pitch["ball_strike"] as? String, let vel = pitch["vel"] as? String, let hc = pitch["hard_contact"] as? String, let pr = pitch["result"] as? String {
-                        let px = CGFloat((px_s as NSString).floatValue)
-                        let py = CGFloat((py_s as NSString).floatValue)
+                let pitch = pitches[i]
+                if let type = pitch["pitch_type"] as? String, let px_s = pitch["pitchX"] as? String, let py_s = pitch["pitchY"] as? String, let bs = pitch["ball_strike"] as? String, let vel = pitch["vel"] as? String, let hc = pitch["hard_contact"] as? String, let pr = pitch["result"] as? String {
+                    let px = CGFloat((px_s as NSString).floatValue)
+                    let py = CGFloat((py_s as NSString).floatValue)
+                    
+                    var color = UIColor.black
+                    if let c = BTHelper.PitchTypeColors[type]{
+                        color = c
+                    }
+                    let h = (bs == "B" || bs == "N")
+                    let hc_b = (hc == "1") // hard contact 1 = yes
+                    let pr_b = (pr != "N/A") && (pr != "NA") // pitch result exists
+                    let flipped = (pr == "LS" || pr == "SS") // pitch result flip icon
+                    let pl = PitchLocation(x: px, y: py, catcherView: true)
+                    
+                    //TODO: read in at bat ID
+                    let cp = Pitch(pitchType: type, ballStrike: bs, vel: Float(vel), pitchLocation: pl, pitchResult: pr, hardContact: hc_b ? 1 : 0, atBat: nil, uploadedToServer: true)
+                    self.CurrentBullpen?.pitchList?.append(cp)
+                    
+                    DispatchQueue.main.async {
+                        let loc = self.getTranslatedLocation(pitchLocation: CGPoint(x: px, y: py))
+                        let ballImg = self.createPermanentBall(location: loc, color: color, hollow: h, pitchHasResult: pr_b, hardContact: hc_b, flippedTriangle: flipped)
+                        let pData = ["type":type, "bs": bs, "vel":vel, "px":px, "py":py, "hardContact":hc, "pitchResult":pr, "ballImg":ballImg] as [String:Any]
+                        self.pitch_data.append(pData)
                         
-                        var color = UIColor.black
-                        if let c = BTHelper.PitchTypeColors[type]{
-                            color = c
+                        let pLabel = UILabel()
+                        var plframe = ballImg.frame
+                        plframe.origin.x += self.ballSize + 3
+                        pLabel.frame = plframe
+                        if (vel != "0"){
+                            pLabel.text = vel
+                        }else{
+                            pLabel.text = ""
                         }
                         
-                        var h = false
-                        if bs == "B" || bs == "N"{
-                            h = true
-                        }
-                        
-                        var hc_b = false
-                        if hc == "1"{
-                            hc_b = true
-                        }
-                        
-                        let pr_b = (pr != "N/A") && (pr != "NA")
-                        var flipped = false
-                        if (pr == "LS" || pr == "SS"){
-                            flipped = true
-                        }
-                        
-                        let pl = PitchLocation(x: px, y: py, catcherView: true)
-                        //TODO: read in at bat ID
-                        let cp = Pitch(pitchType: type, ballStrike: bs, vel: Float(vel), pitchLocation: pl, pitchResult: pr, hardContact: hc_b ? 1 : 0, atBat: nil, uploadedToServer: true)
-                        self.CurrentBullpen?.pitchList?.append(cp)
-                        
-                        DispatchQueue.main.async {
-                            let loc = self.getTranslatedLocation(pitchLocation: CGPoint(x: px, y: py))
-                            let ballImg = self.createPermanentBall(location: loc, color: color, hollow: h, pitchHasResult: pr_b, hardContact: hc_b, flippedTriangle: flipped)
-                            let pData = ["type":type, "bs": bs, "vel":vel, "px":px, "py":py, "hardContact":hc, "pitchResult":pr, "ballImg":ballImg] as [String:Any]
-                            self.pitch_data.append(pData)
-                            
-                            let pLabel = UILabel()
-                            var plframe = ballImg.frame
-                            plframe.origin.x += self.ballSize + 3
-                            pLabel.frame = plframe
-                            if (vel != "0"){
-                                pLabel.text = vel
-                            }else{
-                                pLabel.text = ""
-                            }
-                            
-                            pLabel.adjustsFontSizeToFitWidth = true
-                            pLabel.isHidden = true
-                            self.pitch_labels.append(pLabel)
-                        }
+                        pLabel.adjustsFontSizeToFitWidth = true
+                        pLabel.isHidden = true
+                        self.pitch_labels.append(pLabel)
                     }
                 }
+        
             }
             DispatchQueue.main.async{
                 for i in 0 ..< self.pitch_data.count{
@@ -590,7 +578,6 @@ class SummaryViewController: UIViewController, UIPopoverPresentationControllerDe
     @IBAction func unwindToSummary(segue: UIStoryboardSegue) {}
     
 
-    
     func downloadImage(url: URL) {
         print("Download Started")
         getDataFromUrl(url: url) { (data, response, error)  in

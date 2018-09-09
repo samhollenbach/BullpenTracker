@@ -69,8 +69,8 @@ class BullpenViewController: UITableViewController {
         let bullpen_list = ServerConnector.extractJSONtoList(data)
         BullpenList = []
         for i in 0 ..< bullpen_list.count {
-            
-            if let bullpen_obj = bullpen_list[i] as? NSDictionary , let id = bullpen_obj["id"] as? String , let pitcher_id = bullpen_obj["pitcher_id"] as? String , let date = bullpen_obj["date"] as? String, let pen_type = bullpen_obj["type"] as? String  {
+            let bullpen_obj = bullpen_list[i]
+            if let id = bullpen_obj["id"] as? String , let pitcher_id = bullpen_obj["pitcher_id"] as? String , let date = bullpen_obj["date"] as? String, let pen_type = bullpen_obj["type"] as? String  {
                 
                 if Int(pitcher_id)! != CurrentPitcher!.id!{
                     continue
@@ -158,28 +158,25 @@ class BullpenViewController: UITableViewController {
         let pitcher_id = CurrentPitcher!.id!
         let data = "pitcher_id=\(pitcher_id)&type=\(type)&team=\(BTHelper.CurrentTeam)"
         
-        ServerConnector.runScript(scriptName: "AddBullpen.php", data: data) { (responseString) in
-            let pitcher = ServerConnector.extractJSONtoDict((responseString?.data(using: .utf8))!)
-            
+        ServerConnector.serverRequest(URI: "AddBullpen.php", parameters: data, finished: { data, response, error in
+            let pitcher = ServerConnector.extractJSONtoList(data!)[0]
+            print(pitcher)
             if pitcher.isEmpty{
                 BTHelper.showErrorPopup(source: self, errorTitle: "Error Connecting to Server")
             }
             
             let idString = pitcher["bid"] as? String
             let id: Int = Int(idString!)!
-            var compPen = false
-            if type == "COMP" || type == "GAME"{
-                compPen = true
-            }else{
-                
-                //TODO: Replace pitcher(id) with pitcherToken
-                self.CurrentBullpen = Bullpen(pitcher: self.CurrentPitcher, id: id, penType: type, compPen: compPen, pitchList: nil, date: "", penTypeDisplay: "", tableViewDisplay: "")
+            let compPen = (type == "COMP" || type == "GAME")
+            
+            //TODO: Replace pitcher(id) with pitcherToken
+            self.CurrentBullpen = Bullpen(pitcher: self.CurrentPitcher, id: id, penType: type, compPen: compPen, pitchList: nil, date: "", penTypeDisplay: "", tableViewDisplay: "")
   
-                DispatchQueue.main.async {
-                    self.sendToAddPitchesVC(currentBullpen : self.CurrentBullpen!, currentPitcher: self.CurrentPitcher!)
-                }
+            DispatchQueue.main.async {
+                self.sendToAddPitchesVC(currentBullpen : self.CurrentBullpen!, currentPitcher: self.CurrentPitcher!)
             }
-        }
+            
+        })
     }
     
     func sendToAddPitchesVC(currentBullpen: Bullpen, currentPitcher: Pitcher) {
