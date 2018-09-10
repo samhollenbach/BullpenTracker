@@ -106,9 +106,7 @@ class AddPitches: UIViewController, UITextFieldDelegate, UIPickerViewDelegate, U
             bullpenID = -5
         }else{
             competitivePen = CurrentBullpen!.compPen!
-            //competitivePen = bullpenData[1] as! Bool
             bullpenID = CurrentBullpen!.id!
-            //bullpenID = bullpenData[0] as! Int
         }
         
         
@@ -130,13 +128,6 @@ class AddPitches: UIViewController, UITextFieldDelegate, UIPickerViewDelegate, U
             }
             
             pitchPicker.frame = CGRect(x: f.origin.x, y: f.origin.y, width: f.width, height: h)
-            
-            
-//            let sf = StrikeZone.frame
-//            if sf.height > 200{
-//
-//                StrikeZone.frame = CGRect(x: sf.origin.x, y: sf.origin.y, width: f.width, height: 200)
-//            }
             
             //Move position of strike zone area if comp pen
             if !self.competitivePen{

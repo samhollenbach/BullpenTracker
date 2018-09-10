@@ -22,6 +22,19 @@ class LoginViewController : UIViewController{
         
         offlineButton.titleLabel?.numberOfLines = 2
         offlineButton.titleLabel?.adjustsFontSizeToFitWidth = true
+        offlineButton.titleLabel?.textAlignment = .center
+        offlineButton.layer.cornerRadius = offlineButton.bounds.width / 4
+        
+        let tap: UITapGestureRecognizer = UITapGestureRecognizer(target: self, action: #selector(LoginViewController.dismissKeyboard))
+        //Uncomment the line below if you want the tap not not interfere and cancel other interactions.
+        //tap.cancelsTouchesInView = false
+        view.addGestureRecognizer(tap)
+        
+    }
+    
+    @objc func dismissKeyboard() {
+        //Causes the view (or one of its embedded text fields) to resign the first responder status.
+        view.endEditing(true)
     }
     
     
