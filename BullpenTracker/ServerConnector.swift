@@ -11,7 +11,7 @@ import Foundation
 
 class ServerConnector {
     
-    static let publicIP = "http://54.175.185.55/"
+    static let publicIP = "http://54.175.185.55"
     static let debug = true
     
     
@@ -59,16 +59,17 @@ class ServerConnector {
     // response: Server response, nil if error
     // error: String describing error, nil if successful
     
-    static func serverRequest(URI: String, parameters: String, httpMethod: String = "POST", verbose: Bool? = nil,
+    static func serverRequest(path: String, query_string: String, serverIP: String = publicIP, httpMethod: String = "POST", verbose: Bool? = nil,
                               finished: @escaping((_ data: Data?, _ response:URLResponse?, _ error: Error?)->Void)){
+        
         // If verbose is not set, set it to debug value
         let verbose = verbose ?? debug
         
         // Make URL request
-        let url: NSURL = NSURL(string: "\(publicIP)\(URI)")!
+        let url: NSURL = NSURL(string: "\(publicIP)/\(path)")!
         let request:NSMutableURLRequest = NSMutableURLRequest(url:url as URL)
         request.httpMethod = httpMethod
-        request.httpBody = parameters.data(using: String.Encoding.utf8);
+        request.httpBody = query_string.data(using: String.Encoding.utf8);
         let task = URLSession.shared.dataTask(with: (request as URLRequest?)!,
                                               completionHandler: { data, response, error in
                                                 
@@ -83,7 +84,7 @@ class ServerConnector {
             if let httpStatus = response as? HTTPURLResponse, httpStatus.statusCode != 200 {
                 // Check for http errors
                 if verbose{
-                    print("HTTP response code is \(httpStatus.statusCode) (should be 200)")
+                    print("Error: HTTP response code is \(httpStatus.statusCode) (should be 200)")
                     
                 }
                 finished(nil, nil, error)
@@ -96,7 +97,7 @@ class ServerConnector {
             
         })
         task.resume()
-        sleep(1)
+        //sleep(1)
     }
     
     // DEPRECATED
@@ -104,7 +105,7 @@ class ServerConnector {
         // If verbose is not set, set it to debug value
         let verbose = verbose ?? debug
         // Make URL request
-        let url: NSURL = NSURL(string: "\(publicIP)\(scriptName)")!
+        let url: NSURL = NSURL(string: "\(publicIP)/\(scriptName)")!
         let request:NSMutableURLRequest = NSMutableURLRequest(url:url as URL)
         request.httpMethod = httpMethod
         request.httpBody = data.data(using: String.Encoding.utf8);

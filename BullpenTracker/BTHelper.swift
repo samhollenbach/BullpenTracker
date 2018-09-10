@@ -37,7 +37,7 @@ class BTHelper{
     }
     
     static func login(loginData: String, sender: UIViewController){
-        ServerConnector.serverRequest(URI: "Login.php", parameters: loginData, finished: {
+        ServerConnector.serverRequest(path: "Login.php", query_string: loginData, finished: {
             data, response, error in
             
             if response == nil{

@@ -48,14 +48,14 @@ class BullpenViewController: UITableViewController {
         if individualMode{
             let data = "pitcher=\(CurrentPitcher!.id!)&team=\(1)"
             
-            ServerConnector.serverRequest(URI: "GetBullpens.php", parameters: data, finished: { data, response, error in
+            ServerConnector.serverRequest(path: "GetBullpens.php", query_string: data, finished: { data, response, error in
                 self.fillBullpenList(data!)
             })
             
         }else{
             
             let data = "pitcher=\(CurrentPitcher!.id!)&team=\(BTHelper.CurrentTeam)"
-            ServerConnector.serverRequest(URI: "GetTeamBullpens.php", parameters: data, finished: { data, response, error in
+            ServerConnector.serverRequest(path: "GetTeamBullpens.php", query_string: data, finished: { data, response, error in
                 self.fillBullpenList(data!)
             })
             
@@ -158,7 +158,7 @@ class BullpenViewController: UITableViewController {
         let pitcher_id = CurrentPitcher!.id!
         let data = "pitcher_id=\(pitcher_id)&type=\(type)&team=\(BTHelper.CurrentTeam)"
         
-        ServerConnector.serverRequest(URI: "AddBullpen.php", parameters: data, finished: { data, response, error in
+        ServerConnector.serverRequest(path: "AddBullpen.php", query_string: data, finished: { data, response, error in
             let pitcher = ServerConnector.extractJSONtoList(data!)[0]
             print(pitcher)
             if pitcher.isEmpty{
