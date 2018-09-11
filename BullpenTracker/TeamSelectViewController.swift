@@ -138,6 +138,8 @@ class TeamSelectViewController: UITableViewController{
             print("teamName  \(teamNameField.text!)")
             if teamNameField.text != "" && teamAccessField.text != ""{
                 self.createNewTeam(teamName: teamNameField.text!, teamInfo: teamInfoField.text!, teamAccess: teamAccessField.text!)
+                //self.pay()
+                
             }else{
                 self.showErrorPopup(errorTitle: "Team Create Error", error: "Please enter a valid team name")
             }
@@ -184,6 +186,7 @@ class TeamSelectViewController: UITableViewController{
         let createTeam = UIAlertAction(title: "Create New", style: .default, handler: {
             (action : UIAlertAction!) -> Void in
             self.tapCreateTeam()
+            
         })
         
         let cancelAction = UIAlertAction(title: "Cancel", style: .destructive, handler: {
@@ -284,7 +287,7 @@ class TeamSelectViewController: UITableViewController{
             }.resume()
     }
     
-    func pay(_ sender: Any) {
+    func pay() {
         let request =  BTDropInRequest()
         let dropIn = BTDropInController(authorization: tokenizationKey, request: request)
         { [unowned self] (controller, result, error) in
