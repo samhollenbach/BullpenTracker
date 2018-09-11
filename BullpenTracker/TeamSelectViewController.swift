@@ -7,11 +7,16 @@
 //
 
 import Foundation
+import Braintree
+import BraintreeDropIn
 import UIKit
 
 class TeamSelectViewController: UITableViewController{
     
     @IBOutlet weak var navBar: CINavigationBar!
+    
+    //NOTICE: CURRENTLY USING SANDBOX TOKENIZATION KEY, BEFORE WE ROLL OUT NEED TO FILL OUT APPLICATION AND OBTAIN REGULAR TOKENIZATION KEY, THIS WILL WORK FOR ANY TESTING HOWEVER..
+    let tokenizationKey = "sandbox_bdft4v5x_qnq4b22h37g3t8sq"
     
     var TeamData: [[String:Any]] = []
     
@@ -255,6 +260,47 @@ class TeamSelectViewController: UITableViewController{
         tableView.deselectRow(at: indexPath, animated: false)
         sendToPitchersVC(teamID: Int(tData["id"] as! String)!)
         
+    }
+    //MARK: -  I AM PUTTING THE CODE FOR BRAINTREE STUFF BELOW. THERE IS ALSO A VARIABLE DECLARED AT THE TOP
+    
+    func sendRequestPaymentToServer(nonce: String, amount: String) {
+        let paymentURL = URL(string: "http://localhost/braintree/pay.php")!
+        var request = URLRequest(url: paymentURL)
+        request.httpBody = "payment_method_nonce=\(nonce)&amount=\(amount)".data(using: String.Encoding.utf8)
+        request.httpMethod = "POST"
+        
+        URLSession.shared.dataTask(with: request) { [weak self] (data, response, error) -> Void in
+            guard let data = data else {
+                print(error!.localizedDescription)
+                return
+            }
+            
+            guard let result = try? JSONSerialization.jsonObject(with: data, options: []) as? [String: Any], let success = result?["success"] as? Bool, success == true else {
+                print("Transaction failed. Please try again.")
+                return
+            }
+            
+            print("Successfully charged. Thanks So Much :)")
+            }.resume()
+    }
+    
+    func pay(_ sender: Any) {
+        let request =  BTDropInRequest()
+        let dropIn = BTDropInController(authorization: tokenizationKey, request: request)
+        { [unowned self] (controller, result, error) in
+            
+            if let error = error {
+                print(error.localizedDescription)
+                
+            } else if (result?.isCancelled == true) {
+                print("Transaction Cancelled")
+                
+            } else if let nonce = result?.paymentMethod?.nonce, let amount = Optional(10) { // **need to fix these lines to do what we want - self.amountTextField.text {
+                self.sendRequestPaymentToServer(nonce: nonce, amount: String(amount))
+            }
+            controller.dismiss(animated: true, completion: nil)
+        }
+        self.present(dropIn!, animated: true, completion: nil)
     }
     
 }

@@ -7,6 +7,7 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		83CA692FAD52010E0908C971 /* Pods_BullpenTracker.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 39DD101576A924746AEB3552 /* Pods_BullpenTracker.framework */; };
 		E9084A3C1EF88C5000EB4514 /* RemovePitcherViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = E9084A3B1EF88C5000EB4514 /* RemovePitcherViewController.swift */; };
 		E90D90391F53710D00EF89C5 /* AddPitches.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = E90D90381F53710D00EF89C5 /* AddPitches.storyboard */; };
 		E90D903B1F54C15F00EF89C5 /* SummaryView.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = E90D903A1F54C15F00EF89C5 /* SummaryView.storyboard */; };
@@ -35,6 +36,9 @@
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
+		39DD101576A924746AEB3552 /* Pods_BullpenTracker.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Pods_BullpenTracker.framework; sourceTree = BUILT_PRODUCTS_DIR; };
+		8927D2F6FD2BE79B4BA2B70C /* Pods-BullpenTracker.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-BullpenTracker.release.xcconfig"; path = "Pods/Target Support Files/Pods-BullpenTracker/Pods-BullpenTracker.release.xcconfig"; sourceTree = "<group>"; };
+		DEAC8CBC248FAD182A1E8E1A /* Pods-BullpenTracker.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-BullpenTracker.debug.xcconfig"; path = "Pods/Target Support Files/Pods-BullpenTracker/Pods-BullpenTracker.debug.xcconfig"; sourceTree = "<group>"; };
 		E9084A3B1EF88C5000EB4514 /* RemovePitcherViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = RemovePitcherViewController.swift; sourceTree = "<group>"; };
 		E90D90381F53710D00EF89C5 /* AddPitches.storyboard */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.storyboard; path = AddPitches.storyboard; sourceTree = "<group>"; };
 		E90D903A1F54C15F00EF89C5 /* SummaryView.storyboard */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.storyboard; path = SummaryView.storyboard; sourceTree = "<group>"; };
@@ -69,17 +73,28 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				83CA692FAD52010E0908C971 /* Pods_BullpenTracker.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
+		C718DB935FA903C096963169 /* Frameworks */ = {
+			isa = PBXGroup;
+			children = (
+				39DD101576A924746AEB3552 /* Pods_BullpenTracker.framework */,
+			);
+			name = Frameworks;
+			sourceTree = "<group>";
+		};
 		E92D26ED1EEE889100075468 = {
 			isa = PBXGroup;
 			children = (
 				E92D26F81EEE889100075468 /* BullpenTracker */,
 				E92D26F71EEE889100075468 /* Products */,
+				FBC93C8A4D2CC6BC1CDD77E8 /* Pods */,
+				C718DB935FA903C096963169 /* Frameworks */,
 			);
 			sourceTree = "<group>";
 		};
@@ -124,6 +139,15 @@
 			path = BullpenTracker;
 			sourceTree = "<group>";
 		};
+		FBC93C8A4D2CC6BC1CDD77E8 /* Pods */ = {
+			isa = PBXGroup;
+			children = (
+				DEAC8CBC248FAD182A1E8E1A /* Pods-BullpenTracker.debug.xcconfig */,
+				8927D2F6FD2BE79B4BA2B70C /* Pods-BullpenTracker.release.xcconfig */,
+			);
+			name = Pods;
+			sourceTree = "<group>";
+		};
 /* End PBXGroup section */
 
 /* Begin PBXNativeTarget section */
@@ -131,9 +155,11 @@
 			isa = PBXNativeTarget;
 			buildConfigurationList = E92D27081EEE889100075468 /* Build configuration list for PBXNativeTarget "BullpenTracker" */;
 			buildPhases = (
+				E79FB0A2C23D638787135FD7 /* [CP] Check Pods Manifest.lock */,
 				E92D26F21EEE889100075468 /* Sources */,
 				E92D26F31EEE889100075468 /* Frameworks */,
 				E92D26F41EEE889100075468 /* Resources */,
+				1E4D1B9E04DC9523999CED9F /* [CP] Embed Pods Frameworks */,
 			);
 			buildRules = (
 			);
@@ -196,6 +222,47 @@
 			runOnlyForDeploymentPostprocessing = 0;
 		};
 /* End PBXResourcesBuildPhase section */
+
+/* Begin PBXShellScriptBuildPhase section */
+		1E4D1B9E04DC9523999CED9F /* [CP] Embed Pods Frameworks */ = {
+			isa = PBXShellScriptBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputPaths = (
+				"${SRCROOT}/Pods/Target Support Files/Pods-BullpenTracker/Pods-BullpenTracker-frameworks.sh",
+				"${BUILT_PRODUCTS_DIR}/Braintree/Braintree.framework",
+				"${BUILT_PRODUCTS_DIR}/BraintreeDropIn/BraintreeDropIn.framework",
+			);
+			name = "[CP] Embed Pods Frameworks";
+			outputPaths = (
+				"${TARGET_BUILD_DIR}/${FRAMEWORKS_FOLDER_PATH}/Braintree.framework",
+				"${TARGET_BUILD_DIR}/${FRAMEWORKS_FOLDER_PATH}/BraintreeDropIn.framework",
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "\"${SRCROOT}/Pods/Target Support Files/Pods-BullpenTracker/Pods-BullpenTracker-frameworks.sh\"\n";
+			showEnvVarsInLog = 0;
+		};
+		E79FB0A2C23D638787135FD7 /* [CP] Check Pods Manifest.lock */ = {
+			isa = PBXShellScriptBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputPaths = (
+				"${PODS_PODFILE_DIR_PATH}/Podfile.lock",
+				"${PODS_ROOT}/Manifest.lock",
+			);
+			name = "[CP] Check Pods Manifest.lock";
+			outputPaths = (
+				"$(DERIVED_FILE_DIR)/Pods-BullpenTracker-checkManifestLockResult.txt",
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "diff \"${PODS_PODFILE_DIR_PATH}/Podfile.lock\" \"${PODS_ROOT}/Manifest.lock\" > /dev/null\nif [ $? != 0 ] ; then\n    # print error to STDERR\n    echo \"error: The sandbox is not in sync with the Podfile.lock. Run 'pod install' or update your CocoaPods installation.\" >&2\n    exit 1\nfi\n# This output is used by Xcode 'outputs' to avoid re-running this script phase.\necho \"SUCCESS\" > \"${SCRIPT_OUTPUT_FILE_0}\"\n";
+			showEnvVarsInLog = 0;
+		};
+/* End PBXShellScriptBuildPhase section */
 
 /* Begin PBXSourcesBuildPhase section */
 		E92D26F21EEE889100075468 /* Sources */ = {
@@ -362,6 +429,7 @@
 		};
 		E92D27091EEE889100075468 /* Debug */ = {
 			isa = XCBuildConfiguration;
+			baseConfigurationReference = DEAC8CBC248FAD182A1E8E1A /* Pods-BullpenTracker.debug.xcconfig */;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				CODE_SIGN_IDENTITY = "iPhone Developer";
@@ -380,6 +448,7 @@
 		};
 		E92D270A1EEE889100075468 /* Release */ = {
 			isa = XCBuildConfiguration;
+			baseConfigurationReference = 8927D2F6FD2BE79B4BA2B70C /* Pods-BullpenTracker.release.xcconfig */;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				CODE_SIGN_IDENTITY = "iPhone Distribution";
