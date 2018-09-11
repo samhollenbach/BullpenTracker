@@ -75,21 +75,21 @@ class PitcherViewController: UITableViewController {
     }
     
     func getPitcherDataStandard(){
-        getPitcherDataFromURL("\(ServerConnector.publicIP)GetPitchers.php")
+        getPitcherDataFromServer("GetPitchers.php")
         refreshController.endRefreshing()
     }
     
     
-    func getPitcherDataFromURL(_ link:String) {
+    func getPitcherDataFromServer(_ path: String) {
         let data = "team_id=\(BTHelper.CurrentTeam)"
-        ServerConnector.getURLData(urlString: link, data: data, httpMethod: "POST") { (success, data, response) in
+        ServerConnector.serverRequest(path: path, query_string: data, finished: { data, response, error in
             if data != nil{
                 self.fillPitcherData(data!)
             }else{
                 print("Something went wrong")
             }
             
-        }
+        })
     }
     
     
@@ -101,12 +101,12 @@ class PitcherViewController: UITableViewController {
             let firstname = pitcher_obj["firstname"] as? String
             let lastname = pitcher_obj["lastname"] as? String
             let pitcher_id = pitcher_obj["id"] as? String
-            let pitcher_num = pitcher_obj["number"] as? String
+            let pitcher_num = (pitcher_obj["team_number"] as? String)
             let pitcher_email = pitcher_obj["email"] as? String
             let throw_side = pitcher_obj["throws"] as? String
                 
             //TODO: ADD PITCHER TOKEN
-            let curPitcher = Pitcher(id: Int(pitcher_id!), pitcherToken: "tmp", email: pitcher_email, firstname: firstname, lastname: lastname,  number: Int(pitcher_num!), throwSide: throw_side)
+            let curPitcher = Pitcher(id: Int(pitcher_id!), pitcherToken: "tmp", email: pitcher_email, firstname: firstname, lastname: lastname,  number: Int(pitcher_num), throwSide: throw_side)
 
             PitcherViewController.PitcherList.append(curPitcher)
             

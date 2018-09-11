@@ -70,15 +70,17 @@ class TeamSelectViewController: UITableViewController{
         defaults.set(TeamData, forKey: BTHelper.defaultsKeys.savedTeamIDs)
     }
     
-    func processTeamCode(code: String){
-        let data = "access_code=\(code)"
+    func processTeamCode(name: String, code: String){
+        let qs = "team_name=\(name)&access_code=\(code)"
         
-        ServerConnector.runScript(scriptName: "GetTeam.php", data: data){ response in
-            if response == nil{
+        ServerConnector.serverRequest(path: "GetTeam.php", query_string: qs, finished: { data, response, error in
+            if response == nil || error != nil{
+                self.showErrorPopup(errorTitle: "Team Access Error", error:"Error connecting to server")
                 print("Could not find team")
                 return
             }
-            let teams = ServerConnector.extractJSONtoList(response!.data(using: .utf8)!)
+            
+            let teams = ServerConnector.extractJSONtoList(data!)
             //self.TeamData = []
             if teams.count > 1{
                 self.showErrorPopup(errorTitle: "Team Access Error", error:"Internal error (more than one team with access code)")
@@ -98,7 +100,7 @@ class TeamSelectViewController: UITableViewController{
                 
                 }
             }
-        }
+        })
     }
     
     func showErrorPopup(errorTitle: String, error: String = ""){
@@ -118,9 +120,12 @@ class TeamSelectViewController: UITableViewController{
     
     func createNewTeam(teamName: String, teamInfo: String, teamAccess: String){
         let data = "team_name=\(teamName)&team_info=\(teamInfo)&team_access=\(teamAccess)"
-        ServerConnector.runScript(scriptName: "AddTeam.php", data: data){response in
-            self.processTeamCode(code: teamAccess)
-        }
+        ServerConnector.serverRequest(path: "AddTeam.php", query_string: data, finished: { data, response, error in
+            if error != nil{
+                self.showErrorPopup(errorTitle: "Error Creating Team", error: "Could not connect to server")
+            }
+            self.processTeamCode(name: teamName, code: teamAccess)
+        })
     }
     
     func tapCreateTeam(){
@@ -171,11 +176,12 @@ class TeamSelectViewController: UITableViewController{
         let saveAction = UIAlertAction(title: "Enter", style: .default, handler: {
             alert -> Void in
             
-            let codeField = addTeamPopup.textFields![0] as UITextField
-            //let secondTextField = addTeamPopup.textFields![1] as UITextField
-            print("teamCode \(codeField.text!)")
-            if codeField.text != ""{
-                self.processTeamCode(code: codeField.text!)
+            let nameField = addTeamPopup.textFields![0] as UITextField
+            let codeField = addTeamPopup.textFields![1] as UITextField
+            
+            
+            if codeField.text != "" && nameField.text != ""{
+                self.processTeamCode(name: nameField.text!, code: codeField.text!)
             }else{
                 self.showErrorPopup(errorTitle: "Team Access Error")
             }
@@ -188,12 +194,15 @@ class TeamSelectViewController: UITableViewController{
         
         let cancelAction = UIAlertAction(title: "Cancel", style: .destructive, handler: {
             (action : UIAlertAction!) -> Void in
-            
         })
         
-        addTeamPopup.addTextField { (textField : UITextField!) -> Void in
-            textField.placeholder = "Enter Team Code"
+        addTeamPopup.addTextField { (nameField : UITextField!) -> Void in
+            nameField.placeholder = "Enter Team Name"
         }
+        addTeamPopup.addTextField { (codeField : UITextField!) -> Void in
+            codeField.placeholder = "Enter Team Code"
+        }
+        
         addTeamPopup.addAction(saveAction)
         addTeamPopup.addAction(createTeam)
         addTeamPopup.addAction(cancelAction)

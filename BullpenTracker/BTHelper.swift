@@ -58,9 +58,9 @@ class BTHelper{
             }
             let pid = Int((loggedPitcherDict["id"] as! NSString).floatValue)
             
-            let pnum = Int((loggedPitcherDict["number"] as! NSString).floatValue)
+            //let pnum = Int((loggedPitcherDict["number"] as! NSString).floatValue)
             
-            let loggedPitcher = Pitcher(id: pid, pitcherToken: "poop", email:loggedPitcherDict["email"] as? String, firstname: loggedPitcherDict["firstname"] as? String, lastname: loggedPitcherDict["lastname"] as? String ,number: pnum, throwSide: loggedPitcherDict["throws"] as? String)
+            let loggedPitcher = Pitcher(id: pid, pitcherToken: "poop", email:loggedPitcherDict["email"] as? String, firstname: loggedPitcherDict["firstname"] as? String, lastname: loggedPitcherDict["lastname"] as? String, number: -1, throwSide: loggedPitcherDict["throws"] as? String)
             
             BTHelper.LogPitcher(pitcher: loggedPitcher)
             DispatchQueue.main.async {

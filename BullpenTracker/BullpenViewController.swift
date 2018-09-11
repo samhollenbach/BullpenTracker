@@ -160,7 +160,6 @@ class BullpenViewController: UITableViewController {
         
         ServerConnector.serverRequest(path: "AddBullpen.php", query_string: data, finished: { data, response, error in
             let pitcher = ServerConnector.extractJSONtoList(data!)[0]
-            print(pitcher)
             if pitcher.isEmpty{
                 BTHelper.showErrorPopup(source: self, errorTitle: "Error Connecting to Server")
             }
