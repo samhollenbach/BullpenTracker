@@ -101,12 +101,12 @@ class PitcherViewController: UITableViewController {
             let firstname = pitcher_obj["firstname"] as? String
             let lastname = pitcher_obj["lastname"] as? String
             let pitcher_id = pitcher_obj["id"] as? String
-            let pitcher_num = (pitcher_obj["team_number"] as? String)
+            let pitcher_num = pitcher_obj["team_number"] as? String
             let pitcher_email = pitcher_obj["email"] as? String
             let throw_side = pitcher_obj["throws"] as? String
                 
             //TODO: ADD PITCHER TOKEN
-            let curPitcher = Pitcher(id: Int(pitcher_id!), pitcherToken: "tmp", email: pitcher_email, firstname: firstname, lastname: lastname,  number: Int(pitcher_num), throwSide: throw_side)
+            let curPitcher = Pitcher(id: Int(pitcher_id!), pitcherToken: "tmp", email: pitcher_email, firstname: firstname, lastname: lastname,  number: Int(pitcher_num!), throwSide: throw_side)
 
             PitcherViewController.PitcherList.append(curPitcher)
             

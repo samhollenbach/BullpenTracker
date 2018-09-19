@@ -57,6 +57,8 @@ struct AtBat {
     var bullpenID : Int? //Maybe token
     var pitcherToken : String?
     var batterSide : String?
+    var batterNumber : String? // maybe int?
+    
 }
 
 struct Pitch {
