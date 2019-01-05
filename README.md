@@ -1,5 +1,9 @@
 # BullpenTracker
 
+## IMPORTANT
+
+The app is currently broken due to changes to API routes. Will be fixed shortly.
+
 ## The Motivation
 
 I began designing this app to replace pen & paper tracking of mine and my teammates [bullpens](https://en.wikipedia.org/wiki/Bullpen).
