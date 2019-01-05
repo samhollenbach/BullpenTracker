@@ -34,7 +34,7 @@ class BullpenViewController: UITableViewController {
             currentPitcherName = CurrentPitcher!.fullName()
         }
         
-        if currentPitcherName == nil || (currentPitcherName == "Pitcher Not Found" &&  BTHelper.CurrentTeam == -1){
+        if currentPitcherName == nil || (currentPitcherName == "Pitcher Not Found" &&  BTHelper.CurrentTeam == nil){
             titleView.title = "My Bullpens"
         }else{
             titleView.title = "\(CurrentPitcher!.firstname!)\'s Bullpens"
@@ -45,23 +45,18 @@ class BullpenViewController: UITableViewController {
     }
     
     func update(){
-        if individualMode{
-            let data = "pitcher=\(CurrentPitcher!.id!)&team=\(1)"
-            
-            ServerConnector.serverRequest(path: "GetBullpens.php", query_string: data, finished: { data, response, error in
-                self.fillBullpenList(data!)
-            })
-            
-        }else{
-            
-            let data = "pitcher=\(CurrentPitcher!.id!)&team=\(BTHelper.CurrentTeam)"
-            ServerConnector.serverRequest(path: "GetTeamBullpens.php", query_string: data, finished: { data, response, error in
-                self.fillBullpenList(data!)
-            })
-            
+        getBullpens()
+    }
+    
+    
+    func getBullpens(){
+        var data = ""
+        if !individualMode{
+             data = "team=\(BTHelper.CurrentTeam?.t_id as! Int)"
         }
-        
-        
+        ServerConnector.serverRequest(path: "/pitcher/bullpens", query_string: data, httpMethod: "GET", finished: { data, response, error in
+                self.fillBullpenList(data!)
+        })
     }
     
     
@@ -70,11 +65,13 @@ class BullpenViewController: UITableViewController {
         BullpenList = []
         for i in 0 ..< bullpen_list.count {
             let bullpen_obj = bullpen_list[i]
-            if let id = bullpen_obj["id"] as? String , let pitcher_id = bullpen_obj["pitcher_id"] as? String , let date = bullpen_obj["date"] as? String, let pen_type = bullpen_obj["type"] as? String  {
+            
+            //TODO: replace dict with bullpen object
+            if let b_token = bullpen_obj["b_token"] as? String, let date = bullpen_obj["date"] as? String, let pen_type = bullpen_obj["type"] as? String  {
                 
-                if Int(pitcher_id)! != CurrentPitcher!.id!{
-                    continue
-                }
+//                if Int(pitcher_id)! != CurrentPitcher!.id!{
+//                    continue
+//                }
                 
                 var compPen = false
                 var pen_type_display = "Bullpen"
@@ -94,12 +91,12 @@ class BullpenViewController: UITableViewController {
                 
                 //TODO: Change how pitch count is read
                 var displayString = ""
-                if let pitch_count = bullpen_obj["pitch_count"] as? String {
+                if let pitch_count = bullpen_obj["pitch_count"] as? Int {
                     displayString = "\(pen_type_display) (\(pitch_count) pitches)"
                 }else{
                     displayString = "\(pen_type_display) (NA)"
                 }
-                let newPen = Bullpen(pitcher: CurrentPitcher, id: Int(id), penType: pen_type, compPen: compPen, pitchList: nil, date: date, penTypeDisplay: pen_type_display, tableViewDisplay: displayString)
+                let newPen = Bullpen(pitcher: CurrentPitcher, b_token: b_token, penType: pen_type, compPen: compPen, pitchList: nil, date: date, penTypeDisplay: pen_type_display, tableViewDisplay: displayString)
                 BullpenList.append(newPen)
                 
                 
@@ -115,7 +112,7 @@ class BullpenViewController: UITableViewController {
     
     
     @IBAction func sendToPitchersVC(_ sender: UIBarButtonItem) {
-        if BTHelper.CurrentTeam == -1{
+        if BTHelper.CurrentTeam == nil{
             self.performSegue(withIdentifier: "unwindToHomePage", sender: self)
         }else{
             self.performSegue(withIdentifier: "unwindToPitchers", sender: self)
@@ -155,21 +152,21 @@ class BullpenViewController: UITableViewController {
     
     
     func createNewBullpen(type: String){
-        let pitcher_id = CurrentPitcher!.id!
-        let data = "pitcher_id=\(pitcher_id)&type=\(type)&team=\(BTHelper.CurrentTeam)"
+        let p_token = CurrentPitcher!.p_token!
+        let data = "tp_token_private=\(BTHelper.CurrentTeam?.tp_token_priv)"
         
-        ServerConnector.serverRequest(path: "AddBullpen.php", query_string: data, finished: { data, response, error in
+        ServerConnector.serverRequest(path: "/////////////", query_string: data, finished: { data, response, error in
             let pitcher = ServerConnector.extractJSONtoList(data!)[0]
             if pitcher.isEmpty{
                 BTHelper.showErrorPopup(source: self, errorTitle: "Error Connecting to Server")
             }
             
-            let idString = pitcher["bid"] as? String
-            let id: Int = Int(idString!)!
+//            let idString = pitcher["bid"] as? String
+//            let id: Int = Int(idString!)!
             let compPen = (type == "COMP" || type == "GAME")
             
             //TODO: Replace pitcher(id) with pitcherToken
-            self.CurrentBullpen = Bullpen(pitcher: self.CurrentPitcher, id: id, penType: type, compPen: compPen, pitchList: nil, date: "", penTypeDisplay: "", tableViewDisplay: "")
+            self.CurrentBullpen = Bullpen(pitcher: self.CurrentPitcher, b_token: nil, penType: type, compPen: compPen, pitchList: nil, date: "", penTypeDisplay: "", tableViewDisplay: "")
   
             DispatchQueue.main.async {
                 self.sendToAddPitchesVC(currentBullpen : self.CurrentBullpen!, currentPitcher: self.CurrentPitcher!)
@@ -221,7 +218,7 @@ class BullpenViewController: UITableViewController {
             let bpen =  BullpenList[indexPath.row]
             cell?.textLabel?.text = bpen.tableViewDisplay
             
-            let dateFormatted = BullpenViewController.formatDate(originalDate: bpen.date!, originalFormat: "yyyy-MM-dd", newFormat: "MMMM dd, yyyy")
+            let dateFormatted = BullpenViewController.formatDate(originalDate: bpen.date!, originalFormat: "EEE, d MMM YYYY HH:mm:ss z", newFormat: "EEE, d MMM YYYY")
             
             cell?.detailTextLabel?.text = dateFormatted
         }else{
@@ -256,11 +253,17 @@ class BullpenViewController: UITableViewController {
     
     
     static func formatDate(originalDate: String, originalFormat: String, newFormat: String) -> String {
-        let formatter = DateFormatter()
-        formatter.dateFormat = originalFormat
-        let yourDate = formatter.date(from: originalDate)
-        formatter.dateFormat = newFormat
-        return formatter.string(from: yourDate!)
+        
+        let dateFormatterGet = DateFormatter()
+        dateFormatterGet.dateFormat = originalFormat
+        if let d = dateFormatterGet.date(from: originalDate) {
+            dateFormatterGet.dateFormat = newFormat
+            return dateFormatterGet.string(from: d)
+        } else {
+            print("Failed to parse date")
+            return ""
+        }
+       
     }
     
     override func didReceiveMemoryWarning() {

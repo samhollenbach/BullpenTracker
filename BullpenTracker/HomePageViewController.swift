@@ -41,7 +41,7 @@ class HomePageViewController: UIViewController{
         loggedPitcher = BTHelper.getLoggedInPitcher()
 
         // Pitcher stored but not email, log out (should never happen)
-        if loggedPitcher != nil && loggedPitcher!.email == nil{
+        if loggedPitcher != nil && (loggedPitcher!.email == nil || loggedPitcher!.p_token == nil) {
             BTHelper.LogOut()
             loggedPitcher = nil
         }
@@ -50,6 +50,15 @@ class HomePageViewController: UIViewController{
             loginStatusLabel.text = "Not Logged In"
             logoutButton.isHidden = true
         }else{
+            
+            let jar = HTTPCookieStorage.shared
+            let p_token : String = (loggedPitcher?.p_token)!
+            let cookieHeaderField = ["Set-Cookie": "p_token=\(p_token)"]
+            
+            let url = URL(string: ServerConnector.publicIP)!
+            let cookies = HTTPCookie.cookies(withResponseHeaderFields: cookieHeaderField, for: url)
+            jar.setCookies(cookies, for: url, mainDocumentURL: url)
+            
             
             loginStatusLabel.text = "Logged in as \(loggedPitcher!.email!)"
             logoutButton.isHidden = false

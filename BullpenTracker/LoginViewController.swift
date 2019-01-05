@@ -50,7 +50,7 @@ class LoginViewController : UIViewController{
             BTHelper.showErrorPopup(source: self, errorTitle: "Password Error", error: "Please enter a password")
             return
         }
-        let data = "email=\(email)&password=\(pass)"
+        let data = "email=\(email)&pass=\(pass)"
         BTHelper.login(loginData: data, sender: self)
     }
     

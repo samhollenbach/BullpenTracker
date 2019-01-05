@@ -19,19 +19,14 @@ class PitcherViewController: UITableViewController {
         if #available(iOS 11.0, *) {
             //self.additionalSafeAreaInsets.top = 0
         }
-        
         self.tableView.rowHeight = 80.0
         var f = self.view.frame
         f.origin.y = -20
         self.view.frame = f
-        
         navBar.sizeToFit()
         refreshController.addTarget(self, action: #selector(refreshTable), for: .valueChanged)
-        
         PitcherViewController.PitcherList = []
-        
         getPitcherDataStandard()
-        
     }
     
     @objc func refreshTable(){
@@ -39,9 +34,9 @@ class PitcherViewController: UITableViewController {
         
     }
     
-    static func getPitcherName(id:Int) -> String{
+    static func getPitcherName(p_token:String) -> String{
         for pitcher in PitcherList{
-            if pitcher.id != nil && pitcher.id! == id{
+            if pitcher.p_token != nil && pitcher.p_token! == p_token{
                 return pitcher.fullName() ?? "Unknown Name (Internal Error)"
             }
         }
@@ -49,7 +44,6 @@ class PitcherViewController: UITableViewController {
     }
     
     @IBAction func unwindToPitchers(segue: UIStoryboardSegue) {}
-    
     
     override func numberOfSections(in tableView: UITableView) -> Int {
         return 1
@@ -59,10 +53,10 @@ class PitcherViewController: UITableViewController {
         return PitcherViewController.PitcherList.count
     }
     
-    
     override func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
         let cell = tableView.dequeueReusableCell(withIdentifier: "cell", for: indexPath)
         cell.textLabel?.font = UIFont(name: "Helvetica Neue", size: 24)
+        
         let ptext = "#\(PitcherViewController.PitcherList[indexPath.row].number!) \(PitcherViewController.PitcherList[indexPath.row].fullName()!)"
         cell.textLabel?.text = ptext
         return cell
@@ -75,41 +69,34 @@ class PitcherViewController: UITableViewController {
     }
     
     func getPitcherDataStandard(){
-        getPitcherDataFromServer("GetPitchers.php")
+        getPitcherDataFromServer()
         refreshController.endRefreshing()
     }
     
     
-    func getPitcherDataFromServer(_ path: String) {
-        let data = "team_id=\(BTHelper.CurrentTeam)"
-        ServerConnector.serverRequest(path: path, query_string: data, finished: { data, response, error in
+    func getPitcherDataFromServer() {
+        let data = "priv_token=\(BTHelper.CurrentTeam?.tp_token_priv as! String)"
+        ServerConnector.serverRequest(path: "/team/pitchers", query_string: data, finished: { data, response, error in
             if data != nil{
                 self.fillPitcherData(data!)
             }else{
                 print("Something went wrong")
             }
-            
         })
     }
-    
     
     func fillPitcherData(_ data: Data) {
         let pitcher_list = ServerConnector.extractJSONtoList(data)
         PitcherViewController.PitcherList.removeAll()
         for i in 0 ..< pitcher_list.count {
             let pitcher_obj = pitcher_list[i]
-            let firstname = pitcher_obj["firstname"] as? String
-            let lastname = pitcher_obj["lastname"] as? String
-            let pitcher_id = pitcher_obj["id"] as? String
-            let pitcher_num = pitcher_obj["team_number"] as? String
-            let pitcher_email = pitcher_obj["email"] as? String
-            let throw_side = pitcher_obj["throws"] as? String
-                
-            //TODO: ADD PITCHER TOKEN
-            let curPitcher = Pitcher(id: Int(pitcher_id!), pitcherToken: "tmp", email: pitcher_email, firstname: firstname, lastname: lastname,  number: Int(pitcher_num!), throwSide: throw_side)
-
-            PitcherViewController.PitcherList.append(curPitcher)
-            
+            var curPitcher = Pitcher(dict: pitcher_obj)
+            if let num = pitcher_obj["team_number"] as? Int{
+                curPitcher?.number = num
+            }
+            if curPitcher != nil{
+                PitcherViewController.PitcherList.append(curPitcher!)
+            }
             
         }
         PitcherViewController.PitcherList = PitcherViewController.PitcherList.sorted(by: {$0.number! < $1.number!})

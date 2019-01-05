@@ -11,8 +11,12 @@ import Foundation
 
 class ServerConnector {
     
-    static let publicIP = "http://54.175.185.55"
+//    static let publicIP = "https://bullpentracker.com/api"
+    static let publicIP = "http://127.0.0.1:5000/api"
     static let debug = true
+    
+    
+    
     
     
     static func extractJSONtoList(_ data: Data) -> [[String:Any]] {
@@ -66,7 +70,7 @@ class ServerConnector {
         let verbose = verbose ?? debug
         
         // Make URL request
-        let url: NSURL = NSURL(string: "\(publicIP)/\(path)")!
+        let url: NSURL = NSURL(string: "\(publicIP)\(path)")!
         let request:NSMutableURLRequest = NSMutableURLRequest(url:url as URL)
         request.httpMethod = httpMethod
         request.httpBody = query_string.data(using: String.Encoding.utf8);
@@ -105,7 +109,7 @@ class ServerConnector {
         // If verbose is not set, set it to debug value
         let verbose = verbose ?? debug
         // Make URL request
-        let url: NSURL = NSURL(string: "\(publicIP)/\(scriptName)")!
+        let url: NSURL = NSURL(string: "\(publicIP)\(scriptName)")!
         let request:NSMutableURLRequest = NSMutableURLRequest(url:url as URL)
         request.httpMethod = httpMethod
         request.httpBody = data.data(using: String.Encoding.utf8);

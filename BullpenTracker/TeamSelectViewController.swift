@@ -7,8 +7,8 @@
 //
 
 import Foundation
-import Braintree
-import BraintreeDropIn
+//import Braintree
+//import BraintreeDropIn
 import UIKit
 
 class TeamSelectViewController: UITableViewController{
@@ -18,7 +18,7 @@ class TeamSelectViewController: UITableViewController{
     //NOTICE: CURRENTLY USING SANDBOX TOKENIZATION KEY, BEFORE WE ROLL OUT NEED TO FILL OUT APPLICATION AND OBTAIN REGULAR TOKENIZATION KEY, THIS WILL WORK FOR ANY TESTING HOWEVER..
     let tokenizationKey = "sandbox_bdft4v5x_qnq4b22h37g3t8sq"
     
-    var TeamData: [[String:Any]] = []
+    var TeamData: [Team] = []
     
     
     override func viewDidLoad() {
@@ -28,39 +28,53 @@ class TeamSelectViewController: UITableViewController{
         // TODO: Setvartle of VC to pitcher name
         //self.parent?.title = currentPitcherName
         //self.tableView.rowHeight = 110.0
-        fillTeamData()
+        load_teams()
     }
     
-    func fillTeamData(){
-        TeamData = []
-        let defaults = UserDefaults.standard
-        let teamsArray = defaults.array(forKey: BTHelper.defaultsKeys.savedTeamIDs) as? [[String:Any]] ?? [[String:Any]]()
-        for team in teamsArray{
-            TeamData.append(team)
-        }
-        DispatchQueue.main.async{
-            self.tableView.reloadData()
-        }
+    func load_teams(){
         
-        
-    }
-    
-    func addTeamToList(teamData : [String: Any]){
-        let tid = teamData["id"] as? String
-        if tid == nil{
-            showErrorPopup(errorTitle: "Team Access Error", error:"Internal error (found null team ID)")
-            print("Team ID null")
-            return
-        }
-        
-        for t_dat in TeamData{
-            if t_dat["id"] as? String == tid{
-                showErrorPopup(errorTitle: "Team Access Error", error:"That team is already in your list")
-                print("Team \(tid!) is already in list")
+        ServerConnector.serverRequest(path: "/pitcher/teams", query_string: "", httpMethod: "GET", finished: { data, response, error in
+            if response == nil || error != nil{
+                self.showErrorPopup(errorTitle: "Team Access Error", error:"Error connecting to server")
+                print("Could not find teams")
                 return
             }
-        }
-        TeamData.append(teamData)
+            
+            let teams = ServerConnector.extractJSONtoList(data!)
+            print(teams)
+            for t in teams{
+            
+                let team = Team(dict: t)
+                if team != nil{
+                    self.TeamData.append(team!)
+                }
+                
+            }
+            
+            DispatchQueue.main.async{
+                self.tableView.reloadData()
+            }
+            
+        })
+    }
+    
+    
+    func addTeamToList(team : Team){
+//        let tid = team.teamID as? String
+//        if tid == nil{
+//            showErrorPopup(errorTitle: "Team Access Error", error:"Internal error (found null team ID)")
+//            print("Team ID null")
+//            return
+//        }
+//
+//        for t_dat in TeamData{
+//            if t_dat["id"] as? String == tid{
+//                showErrorPopup(errorTitle: "Team Access Error", error:"That team is already in your list")
+//                print("Team \(tid!) is already in list")
+//                return
+//            }
+//        }
+        TeamData.append(team)
         
         DispatchQueue.main.async{
             self.tableView.reloadData()
@@ -70,10 +84,10 @@ class TeamSelectViewController: UITableViewController{
         defaults.set(TeamData, forKey: BTHelper.defaultsKeys.savedTeamIDs)
     }
     
-    func processTeamCode(name: String, code: String){
-        let qs = "team_name=\(name)&access_code=\(code)"
+    func processTeamCode(name: String, code: String, teamNumber: Int){
+        let qs = "team_name=\(name)&team_access_code=\(code)&team_number=\(teamNumber)"
         
-        ServerConnector.serverRequest(path: "GetTeam.php", query_string: qs, finished: { data, response, error in
+        ServerConnector.serverRequest(path: "/team/join", query_string: qs, finished: { data, response, error in
             if response == nil || error != nil{
                 self.showErrorPopup(errorTitle: "Team Access Error", error:"Error connecting to server")
                 print("Could not find team")
@@ -92,14 +106,8 @@ class TeamSelectViewController: UITableViewController{
                 return
             }
 
-            for i in 0 ..< teams.count {
-                let team = teams[i]
-                if let teamID = team["id"] as? String, let teamName = team["team_name"] as? String, let teamInfo = team["team_info"] as? String{
-                    let single_team_data = ["id": teamID, "name": teamName, "info": teamInfo]
-                    self.addTeamToList(teamData: single_team_data)
-                
-                }
-            }
+            self.load_teams()
+            
         })
     }
     
@@ -119,12 +127,41 @@ class TeamSelectViewController: UITableViewController{
     }
     
     func createNewTeam(teamName: String, teamInfo: String, teamAccess: String){
-        let data = "team_name=\(teamName)&team_info=\(teamInfo)&team_access=\(teamAccess)"
-        ServerConnector.serverRequest(path: "AddTeam.php", query_string: data, finished: { data, response, error in
+        let data = "team_name=\(teamName)&team_info=\(teamInfo)&team_access_code=\(teamAccess)"
+        ServerConnector.serverRequest(path: "/team/create", query_string: data, finished: { data, response, error in
             if error != nil{
                 self.showErrorPopup(errorTitle: "Error Creating Team", error: "Could not connect to server")
             }
-            self.processTeamCode(name: teamName, code: teamAccess)
+            
+            let finishCreationPopup = UIAlertController(title: "Finish Team Creation", message: "Enter your player number to add yourself to this team. If you do not want to add yourself right now you can join the team manually later.", preferredStyle: .alert)
+            
+            let saveAction = UIAlertAction(title: "Finish", style: .default, handler: {
+                alert -> Void in
+                
+                let myNumberField = finishCreationPopup.textFields![0] as UITextField
+                myNumberField.keyboardType = .numberPad
+                
+                
+                if let num = Int(myNumberField.text!){
+                    self.processTeamCode(name: teamName, code: teamAccess, teamNumber: num )
+                }else{
+                    self.showErrorPopup(errorTitle: "Team Create Error", error: "Invalid player number")
+                }
+            })
+
+            finishCreationPopup.addTextField { (teamAccessField : UITextField!) -> Void in
+                teamAccessField.placeholder = "Access Code"
+            }
+            
+            let cancelAction = UIAlertAction(title: "Cancel", style: .destructive, handler: {
+                (action : UIAlertAction!) -> Void in
+            })
+            
+            finishCreationPopup.addAction(saveAction)
+            finishCreationPopup.addAction(cancelAction)
+            
+            self.present(finishCreationPopup, animated: true, completion: nil)
+           
         })
     }
     
@@ -180,10 +217,11 @@ class TeamSelectViewController: UITableViewController{
             
             let nameField = addTeamPopup.textFields![0] as UITextField
             let codeField = addTeamPopup.textFields![1] as UITextField
+            let myNumberField = addTeamPopup.textFields![2] as UITextField
             
             
-            if codeField.text != "" && nameField.text != ""{
-                self.processTeamCode(name: nameField.text!, code: codeField.text!)
+            if codeField.text != "" && nameField.text != "", let num = Int(myNumberField.text!) {
+                self.processTeamCode(name: nameField.text!, code: codeField.text!, teamNumber: num)
             }else{
                 self.showErrorPopup(errorTitle: "Team Access Error")
             }
@@ -205,11 +243,13 @@ class TeamSelectViewController: UITableViewController{
         addTeamPopup.addTextField { (codeField : UITextField!) -> Void in
             codeField.placeholder = "Enter Team Code"
         }
+        addTeamPopup.addTextField { (codeField : UITextField!) -> Void in
+            codeField.placeholder = "My number on this team"
+        }
         
         addTeamPopup.addAction(saveAction)
         addTeamPopup.addAction(createTeam)
         addTeamPopup.addAction(cancelAction)
-        
         
         
         self.present(addTeamPopup, animated: true, completion: nil)
@@ -236,10 +276,12 @@ class TeamSelectViewController: UITableViewController{
         cell?.textLabel?.textColor = UIColor(red:0.06, green:0.11, blue:0.26, alpha:1.0)
         cell?.textLabel?.adjustsFontSizeToFitWidth = true
         
+        print(TeamData)
+        print("LAEFNOEIGIJOWEG")
         if !TeamData.isEmpty {
             let tdata = TeamData[indexPath.row]
-            cell?.textLabel?.text = tdata["name"] as? String
-            cell?.detailTextLabel?.text = tdata["info"] as? String
+            cell?.textLabel?.text = tdata.team_name
+            cell?.detailTextLabel?.text = tdata.team_info
             
         }else{
             cell?.textLabel?.text = "You have no saved teams"
@@ -255,10 +297,10 @@ class TeamSelectViewController: UITableViewController{
     }
     
     
-    func sendToPitchersVC(teamID : Int){
+    func sendToPitchersVC(team : Team){
         let storyboard = UIStoryboard(name: "Main", bundle: nil)
         let vc = storyboard.instantiateViewController(withIdentifier: "PitchersVC") as! PitcherViewController
-        BTHelper.CurrentTeam = teamID
+        BTHelper.CurrentTeam = team
         present(vc, animated: true, completion: nil)
     }
     
@@ -268,51 +310,53 @@ class TeamSelectViewController: UITableViewController{
             print("Not a valid team")
             return
         }
-        let tData = TeamData[indexPath.row]
+        let team = TeamData[indexPath.row]
         tableView.deselectRow(at: indexPath, animated: false)
-        sendToPitchersVC(teamID: Int(tData["id"] as! String)!)
+        
+        //TODO: Replace with t_token_priv
+        sendToPitchersVC(team: team)
         
     }
     //MARK: -  I AM PUTTING THE CODE FOR BRAINTREE STUFF BELOW. THERE IS ALSO A VARIABLE DECLARED AT THE TOP
     
-    func sendRequestPaymentToServer(nonce: String, amount: String) {
-        let paymentURL = URL(string: "http://localhost/braintree/pay.php")!
-        var request = URLRequest(url: paymentURL)
-        request.httpBody = "payment_method_nonce=\(nonce)&amount=\(amount)".data(using: String.Encoding.utf8)
-        request.httpMethod = "POST"
-        
-        URLSession.shared.dataTask(with: request) { [weak self] (data, response, error) -> Void in
-            guard let data = data else {
-                print(error!.localizedDescription)
-                return
-            }
-            
-            guard let result = try? JSONSerialization.jsonObject(with: data, options: []) as? [String: Any], let success = result?["success"] as? Bool, success == true else {
-                print("Transaction failed. Please try again.")
-                return
-            }
-            
-            print("Successfully charged. Thanks So Much :)")
-            }.resume()
-    }
-    
-    func pay() {
-        let request =  BTDropInRequest()
-        let dropIn = BTDropInController(authorization: tokenizationKey, request: request)
-        { [unowned self] (controller, result, error) in
-            
-            if let error = error {
-                print(error.localizedDescription)
-                
-            } else if (result?.isCancelled == true) {
-                print("Transaction Cancelled")
-                
-            } else if let nonce = result?.paymentMethod?.nonce, let amount = Optional(10) { // **need to fix these lines to do what we want - self.amountTextField.text {
-                self.sendRequestPaymentToServer(nonce: nonce, amount: String(amount))
-            }
-            controller.dismiss(animated: true, completion: nil)
-        }
-        self.present(dropIn!, animated: true, completion: nil)
-    }
+//    func sendRequestPaymentToServer(nonce: String, amount: String) {
+//        let paymentURL = URL(string: "http://localhost/braintree/pay.php")!
+//        var request = URLRequest(url: paymentURL)
+//        request.httpBody = "payment_method_nonce=\(nonce)&amount=\(amount)".data(using: String.Encoding.utf8)
+//        request.httpMethod = "POST"
+//
+//        URLSession.shared.dataTask(with: request) { [weak self] (data, response, error) -> Void in
+//            guard let data = data else {
+//                print(error!.localizedDescription)
+//                return
+//            }
+//
+//            guard let result = try? JSONSerialization.jsonObject(with: data, options: []) as? [String: Any], let success = result?["success"] as? Bool, success == true else {
+//                print("Transaction failed. Please try again.")
+//                return
+//            }
+//
+//            print("Successfully charged. Thanks So Much :)")
+//            }.resume()
+//    }
+//
+//    func pay() {
+//        let request =  BTDropInRequest()
+//        let dropIn = BTDropInController(authorization: tokenizationKey, request: request)
+//        { [unowned self] (controller, result, error) in
+//
+//            if let error = error {
+//                print(error.localizedDescription)
+//
+//            } else if (result?.isCancelled == true) {
+//                print("Transaction Cancelled")
+//
+//            } else if let nonce = result?.paymentMethod?.nonce, let amount = Optional(10) { // **need to fix these lines to do what we want - self.amountTextField.text {
+//                self.sendRequestPaymentToServer(nonce: nonce, amount: String(amount))
+//            }
+//            controller.dismiss(animated: true, completion: nil)
+//        }
+//        self.present(dropIn!, animated: true, completion: nil)
+//    }
     
 }

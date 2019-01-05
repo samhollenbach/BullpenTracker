@@ -19,7 +19,8 @@ class BTHelper{
     
     static var offlineMode = false
     
-    static var CurrentTeam : Int = -1
+    static var CurrentTeam : Team?
+    
     
     static var LoggedPitcher : Pitcher?
     
@@ -37,7 +38,7 @@ class BTHelper{
     }
     
     static func login(loginData: String, sender: UIViewController){
-        ServerConnector.serverRequest(path: "Login.php", query_string: loginData, finished: {
+        ServerConnector.serverRequest(path: "/login", query_string: loginData, finished: {
             data, response, error in
             
             if response == nil{
@@ -56,13 +57,13 @@ class BTHelper{
                 }
                 return
             }
-            let pid = Int((loggedPitcherDict["id"] as! NSString).floatValue)
+//            let pid = Int((loggedPitcherDict["id"] as! NSString).floatValue)
             
             //let pnum = Int((loggedPitcherDict["number"] as! NSString).floatValue)
             
-            let loggedPitcher = Pitcher(id: pid, pitcherToken: "poop", email:loggedPitcherDict["email"] as? String, firstname: loggedPitcherDict["firstname"] as? String, lastname: loggedPitcherDict["lastname"] as? String, number: -1, throwSide: loggedPitcherDict["throws"] as? String)
+            let loggedPitcher = Pitcher(dict: loggedPitcherDict as! [String : String])
             
-            BTHelper.LogPitcher(pitcher: loggedPitcher)
+            BTHelper.LogPitcher(pitcher: loggedPitcher!)
             DispatchQueue.main.async {
                 let storyboard = UIStoryboard(name: "Bullpens", bundle: nil)
                 let vc = storyboard.instantiateViewController(withIdentifier: "BullpensVC") as! BullpenViewController
@@ -95,7 +96,7 @@ class BTHelper{
     }
     
     static func ResetTeam(){
-        self.CurrentTeam = -1
+        self.CurrentTeam = nil
     }
     
     

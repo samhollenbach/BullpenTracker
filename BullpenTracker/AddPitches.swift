@@ -103,10 +103,10 @@ class AddPitches: UIViewController, UITextFieldDelegate, UIPickerViewDelegate, U
         
         if BTHelper.offlineMode{
             competitivePen = true
-            bullpenID = -5
+//            bullpenID = -5
         }else{
             competitivePen = CurrentBullpen!.compPen!
-            bullpenID = CurrentBullpen!.id!
+//            bullpenID = CurrentBullpen!.id!
         }
         
         
@@ -631,10 +631,10 @@ class AddPitches: UIViewController, UITextFieldDelegate, UIPickerViewDelegate, U
     }
     
     func makeData(completion: @escaping (Bool) -> ()){
-        let data = "bullpen_id=\(CurrentBullpen!.id!)"
-        ServerConnector.runScript(scriptName: "get_stats.php", data: data){ response in
-            completion(response != nil)
-        }
+//        let data = "bullpen_id=\(CurrentBullpen!.id!)"
+//        ServerConnector.runScript(scriptName: "get_stats.php", data: data){ response in
+//            completion(response != nil)
+//        }
     }
     
     // The number of columns of data

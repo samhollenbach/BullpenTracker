@@ -393,8 +393,10 @@ class SummaryViewController: UIViewController, UIPopoverPresentationControllerDe
             fillStrikeZoneOffline()
             return
         }
-        let data = "bullpen_id=\(CurrentBullpen!.id!)"
-        ServerConnector.runScript(scriptName: "GetBullpenPitches.php", data: data){ response in
+        
+        //TODO: Convert to serverRequest!
+//        let data = "b_token=\(CurrentBullpen!.b_token!)"
+        ServerConnector.runScript(scriptName: "/bullpen/\(CurrentBullpen!.b_token!)", data: "", httpMethod: "GET"){ response in
             if response == nil{
                 print("Could not load pitch data")
                 return
@@ -568,11 +570,11 @@ class SummaryViewController: UIViewController, UIPopoverPresentationControllerDe
     }
     
     func deleteBullpen(){
-        let data = "bullpen_id=\(CurrentBullpen!.id!)"
-        ServerConnector.runScript(scriptName: "RemoveBullpen.php", data: data)
-        DispatchQueue.main.async {
-            self.doneButtonPressed(self)
-        }
+//        let data = "bullpen_id=\(CurrentBullpen!.id!)"
+//        ServerConnector.runScript(scriptName: "RemoveBullpen.php", data: data)
+//        DispatchQueue.main.async {
+//            self.doneButtonPressed(self)
+//        }
     }
     
     @IBAction func unwindToSummary(segue: UIStoryboardSegue) {}
@@ -665,11 +667,11 @@ class SummaryViewController: UIViewController, UIPopoverPresentationControllerDe
     
     
     func emailBullpen(email: String,completion: @escaping (Bool) -> ()){
-        emailStatusLabel.text = "Sending email..."
-        let data = "bullpen_id=\(CurrentBullpen!.id!)&email=\(email)"
-        ServerConnector.runScript(scriptName: "send_email.php", data: data){ response in
-            completion(response != nil)
-        }
+//        emailStatusLabel.text = "Sending email..."
+//        let data = "bullpen_id=\(CurrentBullpen!.id!)&email=\(email)"
+//        ServerConnector.runScript(scriptName: "send_email.php", data: data){ response in
+//            completion(response != nil)
+//        }
     }
     
     
